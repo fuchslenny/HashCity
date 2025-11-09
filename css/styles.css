@@ -1,0 +1,193 @@
+/* ========================================
+   CITY BUILDER - ANGEPASSTE FARBPALETTE
+   Warme, gemütliche Farben für Stadtplanung
+   ======================================== */
+:root {
+    /* Primary City Colors - Warme Hauptfarben */
+    --brick-red: #D84315;           /* Wohngebäude, Rathaus */
+    --sunset-orange: #FF6D00;       /* Aktionen, Highlights */
+    --golden-yellow: #FFC107;       /* Münzen, Wohlstand */
+    --sandstone-beige: #F5E6D3;     /* Fundamente, Hintergründe */
+    --timber-brown: #8D6E63;        /* Grenzen, Strukturen */
+
+    /* Cozy Base Colors - Gemütliche Grundtöne */
+    --warm-white: #FFF8F3;          /* UI Hintergründe */
+    --cream: #F9F5F0;               /* Sekundäre Hintergründe */
+    --slate-grey: #838083;          /* Sekundärer Text */
+    --charcoal: #424242;            /* Primärer Text */
+    --espresso-brown: #3E2723;      /* Dunkelster Text */
+
+    /* Zone & Building Colors - Zonierungsfarben */
+    --residential-green: #4CAF50;    /* Wohngebiete */
+    --residential-light: #8BC34A;    /* Parks, Erholung */
+    --commercial-blue: #42A5F5;      /* Geschäfte, Büros */
+    --commercial-light: #81D4FA;     /* Dienstleistungen */
+    --industrial-grey: #78909C;      /* Fabriken, Industrie */
+    --industrial-dark: #546E7A;      /* Schwere Industrie */
+
+    /* Infrastructure Colors - Infrastrukturfarben */
+    --road-asphalt: #424242;         /* Straßen */
+    --sidewalk-grey: #BDBDBD;        /* Gehwege */
+    --water-blue: #1976D2;           /* Wasser, Rohre */
+    --power-yellow: #FDD835;         /* Strom, Energie */
+    --park-green: #2E7D32;           /* Parks, Natur */
+    --earth-brown: #6D4C41;          /* Natürlicher Boden */
+
+    /* UI State Colors - Status & Feedback */
+    --success-green: #66BB6A;        /* Erfolg, Wachstum */
+    --warning-amber: #FFA726;        /* Warnung, Aufmerksamkeit */
+    --error-red: #EF5350;           /* Fehler, Probleme */
+    --info-blue: #42A5F5;           /* Information */
+
+    /* Atmospheric Gradients - Stimmungsvolle Verläufe */
+    --warm-gradient: linear-gradient(135deg, var(--sunset-orange) 0%, var(--golden-yellow) 100%);
+    --cozy-gradient: linear-gradient(180deg, var(--warm-white) 0%, var(--cream) 100%);
+    --sky-gradient: linear-gradient(180deg, var(--commercial-light) 0%, var(--commercial-blue) 100%);
+    --earth-gradient: linear-gradient(45deg, var(--earth-brown) 0%, var(--timber-brown) 100%);
+    --residential-gradient: linear-gradient(135deg, var(--residential-light) 0%, var(--residential-green) 100%);
+    --urban-gradient: linear-gradient(45deg, var(--slate-grey) 0%, var(--industrial-grey) 100%);
+
+    /* Zone-Specific Gradients - Zonenspezifische Verläufe */
+    --residential-zone: linear-gradient(135deg, var(--residential-light) 0%, var(--residential-green) 100%);
+    --commercial-zone: linear-gradient(135deg, var(--commercial-light) 0%, var(--commercial-blue) 100%);
+    --industrial-zone: linear-gradient(135deg, var(--industrial-grey) 0%, var(--industrial-dark) 100%);
+    --mixed-zone: linear-gradient(135deg, var(--sandstone-beige) 0%, var(--timber-brown) 100%);
+
+    /* Rest des Designsystems bleibt gleich... */
+    --font-primary: 'Fredoka One', 'Comic Sans MS', cursive;
+    --font-secondary: 'Nunito', 'Arial', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-xxl: 48px;
+
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-round: 50%;
+
+    /* Shadows - Angepasst an erdige Töne */
+    --shadow-soft: 0 2px 8px rgba(141, 110, 99, 0.15);
+    --shadow-medium: 0 4px 16px rgba(141, 110, 99, 0.25);
+    --shadow-strong: 0 8px 24px rgba(141, 110, 99, 0.35);
+    --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    /* Animations */
+    --transition-fast: 0.2s ease-out;
+    --transition-medium: 0.3s ease-out;
+    --transition-slow: 0.5s ease-out;
+    --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ========================================
+   CITY BUILDER SPEZIFISCHE KOMPONENTEN
+   ======================================== */
+
+/* Aktualisierte Gebäude-Typen */
+.building-residential {
+    background: var(--residential-zone);
+    border-color: var(--residential-green);
+}
+
+.building-commercial {
+    background: var(--commercial-zone);
+    border-color: var(--commercial-blue);
+}
+
+.building-industrial {
+    background: var(--industrial-zone);
+    border-color: var(--industrial-dark);
+}
+
+.building-service {
+    background: var(--mixed-zone);
+    border-color: var(--timber-brown);
+}
+
+.building-infrastructure {
+    background: var(--urban-gradient);
+    border-color: var(--road-asphalt);
+}
+
+/* Resource Icons - Angepasst für City Builder */
+.resource-icon.money { background: var(--golden-yellow); }
+.resource-icon.population { background: var(--residential-green); }
+.resource-icon.happiness { background: var(--sunset-orange); }
+.resource-icon.power { background: var(--power-yellow); color: var(--charcoal); }
+.resource-icon.water { background: var(--water-blue); }
+
+/* Zone Indicators */
+.zone-residential {
+    background: var(--residential-green);
+    color: white;
+}
+
+.zone-commercial {
+    background: var(--commercial-blue);
+    color: white;
+}
+
+.zone-industrial {
+    background: var(--industrial-grey);
+    color: white;
+}
+
+.zone-mixed {
+    background: var(--timber-brown);
+    color: white;
+}
+
+/* Infrastructure Elements */
+.road {
+    background: var(--road-asphalt);
+    border-color: var(--sidewalk-grey);
+}
+
+.park {
+    background: var(--park-green);
+    border-color: var(--residential-green);
+}
+
+.water-feature {
+    background: var(--water-blue);
+    border-color: var(--commercial-blue);
+}
+
+/* Updated Typography mit City Theme */
+.city-title {
+    font-family: var(--font-primary);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 400;
+    color: var(--brick-red);
+    text-shadow: 2px 2px 4px rgba(216, 67, 21, 0.3);
+    margin-bottom: var(--space-lg);
+    text-align: center;
+}
+
+/* Status Indicators für City Builder */
+.status-growing {
+    background: var(--success-green);
+    color: white;
+}
+
+.status-stable {
+    background: var(--info-blue);
+    color: white;
+}
+
+.status-declining {
+    background: var(--warning-amber);
+    color: white;
+}
+
+.status-critical {
+    background: var(--error-red);
+    color: white;
+}

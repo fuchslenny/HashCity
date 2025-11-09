@@ -1,0 +1,1100 @@
+<?php
+/**
+ * HashCity - Level 0: Einführung
+ *
+ * Lernziel: Das Problem der linearen Suche demonstrieren
+ * Spielmechanik: Spieler muss linear durch alle Häuser suchen, um Familie Müller zu finden
+ * Familie Müller befindet sich in Haus 16
+ *
+ * Verwendete Assets:
+ * - ./assets/wink_major.png - Major Mike freundlich winkend (Start)
+ * - ./assets/sad_major.png - Major Mike traurig (bei falschem Haus)
+ * - ./assets/card_major.png - Major Mike schaut auf Stadtkarte (während Suche)
+ * - ./assets/empty_house.svg - Leeres Haus (noch nicht überprüft)
+ * - ./assets/filled_house.svg - Haus mit Bewohnern (überprüft)
+ * - ./assets/Strasse.svg - Straße für das Stadtlayout
+ */
+
+// Level 0 - Einführung: Lineares Suchen
+// Familie Müller ist in Haus 16
+
+// Familien für die 20 Häuser
+$familien = [
+    1 => "Schmidt",
+    2 => "Weber",
+    3 => "Wagner",
+    4 => "Becker",
+    5 => "Schulz",
+    6 => "Hoffmann",
+    7 => "Koch",
+    8 => "Richter",
+    9 => "Klein",
+    10 => "Wolf",
+    11 => "Schröder",
+    12 => "Neumann",
+    13 => "Schwarz",
+    14 => "Zimmermann",
+    15 => "Braun",
+    16 => "Müller", // Ziel-Familie
+    17 => "Krüger",
+    18 => "Hofmann",
+    19 => "Hartmann",
+    20 => "Lange"
+];
+?>
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HashCity - Level 0: Einführung</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+            background: #4CAF50;
+        }
+
+        /* Sky and Grass Background */
+        .sky-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(180deg, #87CEEB 0%, #B0D4E3 100%);
+            z-index: 0;
+        }
+
+        .grass-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(180deg, #76B947 0%, #4CAF50 100%);
+            z-index: 0;
+        }
+
+        /* Clouds */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 100px;
+            opacity: 0.8;
+            animation: cloudFloat 40s linear infinite;
+        }
+
+        @keyframes cloudFloat {
+            0% { left: -200px; }
+            100% { left: 110%; }
+        }
+
+        /* Header */
+        .game-header {
+            background: transparent;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #667eea;
+            margin: 0;
+        }
+
+        .header-subtitle {
+            font-size: 1rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .back-btn {
+            padding: 0.7rem 1.3rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(102, 126, 234, 0.5);
+            border-radius: 30px;
+            font-weight: 700;
+            color: #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+
+        .back-btn:hover {
+            background: #667eea;
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        .back-btn::before {
+            content: '← ';
+            margin-right: 5px;
+        }
+
+        /* Game Container */
+        .game-container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Main Game Area */
+        .game-area {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            gap: 2rem;
+            min-height: 70vh;
+        }
+
+        /* Major Mike Section */
+        .major-mike-section {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            border: 4px solid #fff;
+        }
+
+        .major-mike-avatar {
+            width: 100%;
+            height: 240px;
+            background: transparent;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .major-mike-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .major-mike-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .dialogue-box {
+            background: #fff;
+            border: 3px solid #667eea;
+            border-radius: 20px;
+            padding: 1.5rem;
+            min-height: 180px;
+            position: relative;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .dialogue-box::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 15px solid #667eea;
+        }
+
+        .dialogue-text {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .dialogue-continue {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.85rem;
+            color: #667eea;
+            font-style: italic;
+            font-weight: 700;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.5; }
+        }
+
+        /* Houses Grid - ÜBERARBEITET */
+        .houses-grid {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            border: 4px solid #fff;
+            overflow: hidden;
+        }
+
+        .grid-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #2E7D32;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Street Block Container */
+        .street-block {
+            position: relative;
+            margin-bottom: 2.5rem;
+        }
+
+        .street-block:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Houses Row - entlang der Straße */
+        .houses-row {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 0.8rem;
+            margin-bottom: 0.5rem;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Straße */
+        .street {
+            width: 100%;
+            height: 60px;
+            background-image: url('./assets/Strasse.svg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: repeat-x;
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            z-index: 1;
+        }
+
+        /* Fallback wenn SVG nicht lädt */
+        .street::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
+            border-radius: 8px;
+            z-index: -1;
+        }
+
+        /* Weiße Straßenmarkierung */
+        .street::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: repeating-linear-gradient(
+                    90deg,
+                    #fff 0px,
+                    #fff 30px,
+                    transparent 30px,
+                    transparent 50px
+            );
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+
+        .house {
+            aspect-ratio: 1;
+            background: transparent;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 10px;
+            padding: 0.3rem;
+        }
+
+        .house:hover:not(.checked):not(.found) {
+            transform: translateY(-8px) scale(1.08);
+            z-index: 10;
+        }
+
+        .house-icon {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        .house.checked .house-icon {
+            filter: drop-shadow(0 4px 8px rgba(255, 167, 38, 0.5));
+        }
+
+        .house.found .house-icon {
+            animation: pulse 1.5s infinite;
+            filter: drop-shadow(0 8px 16px rgba(255, 215, 0, 0.8));
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .house-number {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+        }
+
+        .house-family {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: white;
+            font-weight: 700;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+            white-space: nowrap;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .house.checked .house-family,
+        .house.found .house-family {
+            opacity: 1;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            border: 4px solid #fff;
+        }
+
+        .info-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 1.2rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .info-item {
+            background: #fff;
+            padding: 1rem;
+
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border: 3px solid #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15);
+        }
+
+        .info-label {
+            font-weight: 700;
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .info-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #2E7D32;
+        }
+
+        .search-target {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA726 100%);
+            padding: 1.2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+            border: 3px solid #fff;
+        }
+
+        .search-target-label {
+            font-size: 0.95rem;
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .search-target-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .progress-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 3px solid #e0e0e0;
+        }
+
+        .progress-bar-container {
+            margin-top: 0.5rem;
+        }
+
+        .progress {
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 3px solid #fff;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            font-weight: 700;
+            font-size: 0.9rem;
+            line-height: 30px;
+            transition: width 0.5s ease;
+        }
+
+        /* Success Modal */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .success-modal {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 650px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: slideUp 0.5s ease;
+            border: 5px solid #4CAF50;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .success-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #4CAF50;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .success-message {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .success-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 15px;
+            border: 3px solid #4CAF50;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: #666;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #2E7D32;
+        }
+
+        .success-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 3px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .game-area {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .major-mike-section,
+            .info-panel {
+                position: static;
+            }
+
+            .houses-row {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 0.6rem;
+            }
+
+            .street {
+                height: 50px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+
+            .houses-grid {
+                padding: 1.5rem 1rem;
+            }
+
+            .houses-row {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 0.4rem;
+                padding: 0 0.5rem;
+            }
+
+            .house-number {
+                font-size: 0.8rem;
+                padding: 0.1rem 0.3rem;
+            }
+
+            .house-family {
+                font-size: 0.6rem;
+                padding: 0.2rem 0.4rem;
+            }
+
+            .street {
+                height: 40px;
+            }
+
+            .street::after {
+                height: 3px;
+            }
+
+            .success-modal {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .success-title {
+                font-size: 2rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            .street-block {
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .houses-row {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .grid-title {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sky Section -->
+<div class="sky-section">
+    <!-- Clouds -->
+    <div class="cloud" style="width: 120px; height: 60px; top: 8%; animation-delay: 0s;"></div>
+    <div class="cloud" style="width: 150px; height: 70px; top: 18%; animation-delay: 10s;"></div>
+    <div class="cloud" style="width: 100px; height: 50px; top: 28%; animation-delay: 20s;"></div>
+    <div class="cloud" style="width: 130px; height: 65px; top: 12%; animation-delay: 30s;"></div>
+</div>
+
+<!-- Grass Section -->
+<div class="grass-section"></div>
+
+<!-- Header -->
+<div class="game-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <a href="level-select.php" class="back-btn">Zurück</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Game Container -->
+<div class="game-container">
+    <div class="game-area">
+
+        <!-- Major Mike Section -->
+        <div class="major-mike-section">
+            <div class="major-mike-avatar">
+                <img src="./assets/wink_major.png" alt="Major Mike" id="majorMikeImage">
+            </div>
+            <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
+            <div class="dialogue-box">
+                <div class="dialogue-text" id="dialogueText">
+                    Willkommen in HashCity! Ich bin Major Mike, der Bürgermeister.
+                    Ich habe leider meinen Stadtplan verloren und brauche deine Hilfe!
+                    Ich muss dringend mit Familie Müller sprechen.
+                    Kannst du mir helfen, sie zu finden?
+                </div>
+                <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
+                    Drücke Enter ↵
+                </div>
+            </div>
+        </div>
+
+        <!-- Houses Grid -->
+        <div class="houses-grid">
+            <h2 class="grid-title">🏘️ HashCity Stadtteil</h2>
+
+            <!-- First Street Block: Houses 1-10 -->
+            <div class="street-block">
+                <div class="houses-row">
+                    <?php for ($i = 1; $i <= 10; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="<?php echo $familien[$i]; ?>">
+                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <div class="house-number"><?php echo $i; ?></div>
+                            <div class="house-family"><?php echo $familien[$i]; ?></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+                <div class="street"></div>
+            </div>
+
+            <!-- Second Street Block: Houses 11-20 -->
+            <div class="street-block">
+                <div class="houses-row">
+                    <?php for ($i = 11; $i <= 20; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="<?php echo $familien[$i]; ?>">
+                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <div class="house-number"><?php echo $i; ?></div>
+                            <div class="house-family"><?php echo $familien[$i]; ?></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+                <div class="street"></div>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel">
+            <h3 class="info-title">📊 Spielinformationen</h3>
+
+            <div class="search-target">
+                <div class="search-target-label">Gesuchte Familie:</div>
+                <div class="search-target-name">Müller</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Überprüfte Häuser:</div>
+                <div class="info-value" id="checkedCount">0 / 20</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Anzahl Versuche:</div>
+                <div class="info-value" id="attemptsCount">0</div>
+            </div>
+
+            <div class="progress-section">
+                <div class="info-label">Fortschritt:</div>
+                <div class="progress-bar-container">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-item" style="background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%); border-color: #2196F3;">
+                <div class="info-label">💡 Spieltipp:</div>
+                <div style="font-size: 0.95rem; color: #333; margin-top: 0.5rem; font-weight: 500; line-height: 1.5;">
+                    Klicke auf die Häuser, um zu sehen, welche Familie dort wohnt. Finde Familie Müller!
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="success-overlay" id="successOverlay">
+    <div class="success-modal">
+        <div class="success-icon">🎉</div>
+        <h2 class="success-title">Familie gefunden!</h2>
+        <p class="success-message" id="successMessage">
+            Gut gemacht! Du hast Familie Müller in Haus 16 gefunden!
+        </p>
+
+        <div class="success-stats">
+            <div class="stat-box">
+                <div class="stat-label">Versuche</div>
+                <div class="stat-value" id="finalAttempts">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Häuser geprüft</div>
+                <div class="stat-value" id="finalChecked">0</div>
+            </div>
+        </div>
+
+        <div class="success-buttons">
+            <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
+            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 1 →</button>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        let checkedHouses = 0;
+        let attempts = 0;
+        let gameStarted = false;
+        let gameCompleted = false;
+
+        const dialogues = [
+            "Hallo! Willkommen in HashCity! Ich bin Major Mike, der Bürgermeister dieser wunderschönen Stadt. Schön, dass du hier bist!",
+            "Ich habe ein kleines Problem... Ich habe meinen Stadtplan verloren und weiß nicht mehr genau, wo welche Familie wohnt. 😅",
+            "Ich muss dringend mit Familie Müller sprechen! Kannst du mir helfen, sie zu finden? Klicke einfach die Häuser an, um zu sehen, wer dort wohnt.",
+            "Perfekt! Dann fangen wir an. Viel Erfolg beim Suchen! 🔍"
+        ];
+
+        let currentDialogue = 0;
+
+        // Show dialogues on Enter key or click
+        function showNextDialogue() {
+            currentDialogue++;
+            if (currentDialogue < dialogues.length) {
+                $('#dialogueText').fadeOut(200, function() {
+                    $(this).text(dialogues[currentDialogue]).fadeIn(200);
+
+                    // Change Major Mike image based on dialogue
+                    if (currentDialogue === 1) {
+                        $('#majorMikeImage').attr('src', './assets/sad_major.png');
+                    } else if (currentDialogue === 2) {
+                        $('#majorMikeImage').attr('src', './assets/card_major.png');
+                    } else if (currentDialogue === 3) {
+                        $('#majorMikeImage').attr('src', './assets/card_major.png');
+                    }
+
+                    if (currentDialogue === dialogues.length - 1) {
+                        $('#dialogueContinue').fadeOut();
+                        gameStarted = true;
+                        $('.house').css('cursor', 'pointer');
+                    }
+                });
+            }
+        }
+
+        // Show continue prompt
+        setTimeout(function() {
+            $('#dialogueContinue').fadeIn();
+        }, 1000);
+
+        // Handle Enter key and Space for dialogue
+        $(document).keydown(function(e) {
+            if ((e.key === 'Enter' || e.key === ' ') && currentDialogue < dialogues.length - 1) {
+                showNextDialogue();
+            }
+        });
+
+        // Click on dialogue box to continue
+        $('.dialogue-box').click(function() {
+            if (currentDialogue < dialogues.length - 1) {
+                showNextDialogue();
+            }
+        });
+
+        // House click handler
+        $('.house').click(function() {
+            if (!gameStarted || gameCompleted) return;
+
+            const $house = $(this);
+
+            // Skip if already checked
+            if ($house.hasClass('checked') || $house.hasClass('found')) {
+                return;
+            }
+
+            attempts++;
+            checkedHouses++;
+
+            const houseNumber = $house.data('house');
+            const family = $house.data('family');
+
+            // Change icon to filled house
+            $house.find('.house-icon').attr('src', './assets/filled_house.svg');
+
+            // Check if this is Familie Müller (house 16)
+            if (family === 'Müller') {
+                $house.addClass('found');
+
+                // Change Major Mike to happy/celebrating
+                $('#majorMikeImage').attr('src', './assets/wink_major.png');
+
+                // Update dialogue
+                $('#dialogueText').html(
+                    '🎉 <strong>Ausgezeichnet!</strong> Du hast Familie Müller gefunden! ' +
+                    'Aber warte mal... du musstest <strong>' + attempts + ' Häuser</strong> durchsuchen. ' +
+                    'Das ist viel zu ineffizient! Es muss eine bessere Methode geben!'
+                );
+
+                gameCompleted = true;
+
+                // Show success modal after short delay
+                setTimeout(function() {
+                    showSuccessModal();
+                }, 1500);
+
+            } else {
+                $house.addClass('checked');
+
+                // Change Major Mike to sad when wrong house
+                $('#majorMikeImage').attr('src', './assets/sad_major.png');
+
+                // Update dialogue for wrong house
+                const responses = [
+                    `Nein, in Haus ${houseNumber} wohnt Familie ${family}. Weiter suchen!`,
+                    `Das ist Familie ${family} in Haus ${houseNumber}. Das sind nicht die Müllers!`,
+                    `Haus ${houseNumber}: Familie ${family}. Falsche Familie, versuch's weiter!`,
+                    `Hmm, Familie ${family}... nicht die Richtigen. Probier ein anderes Haus!`,
+                    `Familie ${family}? Nein, das sind nicht die Müllers. Mach weiter!`
+                ];
+
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                $('#dialogueText').text(randomResponse);
+
+                // Change back to card_major after 2 seconds
+                setTimeout(function() {
+                    if (!gameCompleted) {
+                        $('#majorMikeImage').attr('src', './assets/card_major.png');
+                    }
+                }, 2000);
+            }
+
+            // Update stats
+            updateStats();
+        });
+
+        function updateStats() {
+            $('#checkedCount').text(checkedHouses + ' / 20');
+            $('#attemptsCount').text(attempts);
+
+            const progress = (checkedHouses / 20) * 100;
+            $('#progressBar').css('width', progress + '%').text(Math.round(progress) + '%');
+        }
+
+        function showSuccessModal() {
+            $('#finalAttempts').text(attempts);
+            $('#finalChecked').text(checkedHouses);
+
+            // Personalisierte Nachricht basierend auf Performance
+            let performanceMsg = '';
+            if (attempts <= 5) {
+                performanceMsg = 'Wow, du hattest Glück! Aber ';
+            } else if (attempts <= 10) {
+                performanceMsg = 'Nicht schlecht! Aber ';
+            } else if (attempts <= 16) {
+                performanceMsg = 'Das hat eine Weile gedauert! ';
+            } else {
+                performanceMsg = 'Oh je, das hat wirklich lange gedauert! ';
+            }
+
+            const successMsg = `
+            <strong style="color: #667eea;">Major Mike sagt:</strong><br>
+            "${performanceMsg}Stell dir vor, wir hätten 1000 Häuser in unserer Stadt!
+            Das lineare Durchsuchen ist viel zu langsam. Es <em>muss</em> eine bessere Methode geben!
+            Lass uns im nächsten Level etwas Neues lernen: <strong>Hash-Funktionen!</strong>"
+        `;
+
+            $('#successMessage').html(successMsg);
+            $('#successOverlay').css('display', 'flex');
+        }
+
+        // Global functions for buttons
+        window.restartLevel = function() {
+            location.reload();
+        };
+
+        window.nextLevel = function() {
+            // Fade out
+            $('body').css('transition', 'opacity 0.5s ease');
+            $('body').css('opacity', '0');
+
+            // Redirect to level 1 (or level-select if level 1 doesn't exist yet)
+            setTimeout(function() {
+                window.location.href = 'level-select.php';
+            }, 500);
+        };
+
+        // Add keyboard hint
+        setTimeout(function() {
+            if (!gameStarted) {
+                $('#dialogueContinue').html('Klicke hier oder drücke Enter ↵');
+            }
+        }, 3000);
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+
+RewriteEngine on
+
+RewriteRule ^Start$ index.php [L]
+RewriteRule ^Level-Auswahl$ level-select.php [L]
+RewriteRule ^Einführung$ level0.php [L]
