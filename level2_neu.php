@@ -419,8 +419,7 @@ $prefilled_haeuser = [
             text-overflow: ellipsis;
         }
 
-        /* Name bei vorbelegten Häusern anzeigen */
-        .house.checked .house-family,
+        /* belegte Häuser kenntlich machen */
         .house.found .house-family {
             opacity: 1;
         }
@@ -805,7 +804,10 @@ $prefilled_haeuser = [
         let gameStarted = false;
         let gameCompleted = false;
         let waitingForCollisionConfirm = false;
-        let selectedFamily = null; // Sehr wichtig für diese Logik
+        let selectedFamily = null;
+
+        // --- NEUE SPERR-VARIABLE ---
+        let isFading = false;
 
         // --- Dialoge ---
         const dialogues = [
@@ -824,23 +826,41 @@ $prefilled_haeuser = [
             return (sum % size); // 0-basierter Index (0-4)
         }
 
-        // --- Dialog-Steuerung ---
+        // --- KORRIGIERTE Dialog-Steuerung (mit Sperre) ---
         function showNextDialogue() {
-            $('#dialogueText').fadeOut(200, function() {
-                $(this).text(dialogues[currentDialogue]).fadeIn(200);
-                $('#majorMikeImage').attr('src', './assets/card_major.png');
-            });
-
-            if (currentDialogue === dialogues.length - 1) {
-                $('#dialogueContinue').fadeOut();
-                gameStarted = true;
+            // 1. Prüfen, ob die Funktion schon läuft ODER ob wir fertig sind
+            if (isFading || currentDialogue >= dialogues.length) {
+                return; // Nichts tun
             }
 
-            currentDialogue++;
+            // 2. Funktion sperren
+            isFading = true;
+
+            // 3. Animation starten
+            $('#dialogueText').fadeOut(200, function() {
+
+                // 4. Text setzen und wieder einblenden
+                $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
+                    // 5. Sperre aufheben, SOBALD die Animation FERTIG ist
+                    isFading = false;
+                });
+
+                $('#majorMikeImage').attr('src', './assets/card_major.png');
+
+                // 6. Prüfen, ob es der letzte Dialog war
+                if (currentDialogue === dialogues.length - 1) {
+                    $('#dialogueContinue').fadeOut();
+                    gameStarted = true;
+                }
+
+                // 7. Zähler erhöhen
+                currentDialogue++;
+            });
         }
 
         $(document).keydown(function(e) {
             if (e.key === 'Enter' || e.key === ' ') {
+                // Der Listener prüft nur gameStarted. Die Sperre ist in der Funktion.
                 if (!gameStarted) {
                     showNextDialogue();
                 }
@@ -872,11 +892,10 @@ $prefilled_haeuser = [
             const $item = $(this);
             if ($item.hasClass('list-group-item-success')) return;
 
-            selectedFamily = $item.data('family'); // Speichert "Dieter" in der Variable
+            selectedFamily = $item.data('family');
 
-            // $('#hashInput').val(selectedFamily); // <-- Entfernt
             $('#hashResult').text('-');
-            $('#hashButton').prop('disabled', false); // Button aktivieren
+            $('#hashButton').prop('disabled', false);
             $('.to-do-family').removeClass('active');
             $item.addClass('active');
             $('.house').removeClass('highlight-target');
@@ -888,10 +907,6 @@ $prefilled_haeuser = [
         $('#hashButton').click(function() {
             if (gameCompleted || !gameStarted || !selectedFamily) return;
 
-            // const family = $('#hashInput').val(); // <-- Entfernt
-            // Wir verwenden 'selectedFamily' direkt
-
-            // (Sicherheitsprüfung, falls Name nicht Dieter ist)
             if (selectedFamily.toLowerCase() !== ZIEL_FAMILIE.toLowerCase()) {
                 $('#dialogueText').text("Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen.");
                 $('#hashResult').text('-');
@@ -899,7 +914,7 @@ $prefilled_haeuser = [
                 return;
             }
 
-            const hash = getHash(selectedFamily, HASH_SIZE); // hash wird 0 sein
+            const hash = getHash(selectedFamily, HASH_SIZE);
 
             $('#hashResult').text(hash);
             $('#dialogueText').text(`Perfekt! Laut Rechner gehört Familie ${selectedFamily} in Haus ${hash}. Klicke auf das Haus, um sie einziehen zu lassen.`);
@@ -907,14 +922,13 @@ $prefilled_haeuser = [
             $('.house').removeClass('highlight-target');
             $(`.house[data-house=${hash}]`).addClass('highlight-target');
 
-            $(this).prop('disabled', true); // Button deaktivieren
+            $(this).prop('disabled', true);
         });
 
         // 3. Haus klicken
         $('.house').click(function() {
             if (gameCompleted || !gameStarted || waitingForCollisionConfirm) return;
 
-            // Verhindern, dass geklickt wird, bevor berechnet wurde
             if (!selectedFamily || $('#hashResult').text() === '-') {
                 $('#dialogueText').text(`Du musst erst 'Dieter' aus der Liste wählen und auf 'Berechnen' klicken!`);
                 return;
@@ -922,23 +936,19 @@ $prefilled_haeuser = [
 
             const $house = $(this);
             const houseNumber = $house.data('house');
-            const targetHash = getHash(ZIEL_FAMILIE, HASH_SIZE); // 0
+            const targetHash = getHash(ZIEL_FAMILIE, HASH_SIZE);
 
-            // Szenario 1: Falsches Haus geklickt (Monolog 3)
             if (houseNumber !== targetHash) {
                 $('#dialogueText').text("Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen.");
-                // Reset, damit Spieler neu berechnen muss
                 $('#hashButton').prop('disabled', false);
                 $('#hashResult').text('-');
                 $('.house').removeClass('highlight-target');
                 return;
             }
 
-            // Szenario 2: Richtiges Haus geklickt (targetHash)
-            const currentOccupant = stadt[houseNumber]; // stadt[0] ist "Chris"
+            const currentOccupant = stadt[houseNumber];
 
             if (currentOccupant !== null) {
-                // --- KOLLISION! (MM Monolog 4) ---
                 gameCompleted = true;
                 $house.addClass('found');
                 $('#majorMikeImage').attr('src', './assets/sad_major.png');
@@ -950,7 +960,6 @@ $prefilled_haeuser = [
                 $('#dialogueContinue').fadeIn();
                 waitingForCollisionConfirm = true;
 
-                // Markiere Dieter in der Liste als "fehlgeschlagen"
                 $(`.to-do-family[data-family="${selectedFamily}"]`)
                     .removeClass('active')
                     .addClass('list-group-item-danger')
@@ -983,7 +992,6 @@ $prefilled_haeuser = [
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                // Nutzt deine .htaccess-Regel
                 window.location.href = 'level-select.php?completed=2&next=3';
             }, 500);
         };
