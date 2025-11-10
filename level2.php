@@ -875,73 +875,81 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
     $(document).ready(function() {
         // --- Level 2 Setup ---
         const HASH_SIZE = <?php echo $anzahl_haeuser; ?>;
-        // JS-Array, um den Status der Stadt zu speichern (1-basiert)
         let stadt = new Array(HASH_SIZE + 1).fill(null);
 
         let gameStarted = false;
-        let gameCompleted = false; // Wird bei Kollision auf true gesetzt
+        let gameCompleted = false;
         let selectedFamily = null;
 
+        // --- KORREKTUR: Alle Dialoge sind jetzt im Array ---
         const dialogues = [
-            "Ich gebe einen Namen ein, z.B. 'Müller', und der Rechner sagt mir *sofort* die Hausnummer. [cite: 226] Das ist wie Magie!",
+            "Ich gebe einen Namen ein, z.B. 'Müller', und der Rechner sagt mir *sofort* die Hausnummer. Das ist wie Magie!",
             "Unten rechts siehst du die Liste der Familien, die heute einziehen. Hilf mir, sie zuzuweisen!",
-            "Klicke einfach auf einen Familiennamen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechnen'."
+            "Klicke einfach auf einen Familiennamen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechnen'." // <- Dein Dialog, jetzt als Index 2
         ];
+
         let currentDialogue = 0;
 
-        // --- Hash-Funktion (identisch zur PHP-Logik) ---
+        // --- Hash-Funktion ---
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) {
                 sum += key.charCodeAt(i);
             }
-            return (sum % size) + 1; // +1 für 1-basierte Häuser (1-10)
+            return (sum % size) + 1;
         }
 
-        // --- Dialog-Steuerung (aus Level 0) ---
+        // --- VEREINFACHTE Dialog-Steuerung ---
         function showNextDialogue() {
-            currentDialogue++;
-            if (currentDialogue < dialogues.length) {
-                $('#dialogueText').fadeOut(200, function() {
-                    $(this).text(dialogues[currentDialogue]).fadeIn(200);
+            // 1. Zeige den aktuellen Dialog (0, 1 oder 2)
+            $('#dialogueText').fadeOut(200, function() {
+                $(this).text(dialogues[currentDialogue]).fadeIn(200);
 
-                    if (currentDialogue === 1) {
-                        $('#majorMikeImage').attr('src', './assets/card_major.png');
-                    }
-                });
-            } else {
+                if (currentDialogue === 0) {
+                    $('#majorMikeImage').attr('src', './assets/card_major.png');
+                }
+            });
+
+            // 2. Prüfen, ob das der LETZTE Dialog war (Index 2)
+            if (currentDialogue === dialogues.length - 1) {
+                // Ja, das Spiel jetzt starten
                 $('#dialogueContinue').fadeOut();
                 gameStarted = true;
-                $('#dialogueText').text('Okay, lass uns anfangen! Wähle die erste Familie aus der Liste.');
             }
+
+            // 3. Zähler für den nächsten Klick erhöhen
+            currentDialogue++;
         }
 
+        // --- Listener ---
+        // Dieser Listener funktioniert jetzt korrekt, da 'gameStarted'
+        // zuverlässig auf 'true' gesetzt wird, NACHDEM der letzte Dialog (Index 2) angezeigt wurde.
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
                 showNextDialogue();
             }
         });
+
         $('.dialogue-box').click(function() {
             if (!gameStarted) {
                 showNextDialogue();
             }
         });
 
-        // --- Level 2 Spielmechanik ---
+        // --- Restlicher Code (inkl. letztem Fix) ---
 
         // 1. Familie aus der Liste auswählen
         $('#familienListe .to-do-family').click(function() {
             if (gameCompleted || !gameStarted) return;
 
             const $item = $(this);
-            if ($item.hasClass('list-group-item-success')) return; // Bereits platziert
+            if ($item.hasClass('list-group-item-success')) return;
 
             selectedFamily = $item.data('family');
 
-            // UI aktualisieren
             $('#hashInput').val(selectedFamily);
             $('#hashResult').text('-');
-            $('#hashButton').prop('disabled', false);
+            $('#hashButton').prop('disabled', false); // Button aktivieren
             $('.to-do-family').removeClass('active');
             $item.addClass('active');
             $('.house').removeClass('highlight-target');
@@ -962,11 +970,13 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             const hash = getHash(family, HASH_SIZE);
             $('#hashResult').text(hash);
 
-            $('#dialogueText').text(`Perfekt! Laut Rechner gehört Familie ${family} in Haus ${hash}. Klicke auf das Haus, um sie einziehen zu lassen.`); [cite: 226]
+            $('#dialogueText').text(`Perfekt! Laut Rechner gehört Familie ${family} in Haus ${hash}. Klicke auf das Haus, um sie einziehen zu lassen.`);
 
-            // Ziel-Haus hervorheben
             $('.house').removeClass('highlight-target');
             $(`.house[data-house=${hash}]`).addClass('highlight-target');
+
+            // Button deaktivieren, um doppelte Klicks zu verhindern
+            $(this).prop('disabled', true);
         });
 
         // 3. Haus klicken, um Familie zu platzieren
@@ -980,61 +990,50 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             const houseNumber = $house.data('house');
             const targetHash = getHash(selectedFamily, HASH_SIZE);
 
-            // Überprüfen, ob das richtige Haus geklickt wurde
             if (houseNumber !== targetHash) {
-                $('#dialogueText').text(`Halt! Der Rechner hat Haus ${targetHash} für Familie ${selectedFamily} berechnet, nicht Haus ${houseNumber}.`);
+                $('#dialogueText').text(`Halt! Der Rechner hat Haus ${targetHash} für Familie ${selectedFamily} berechnet, nicht Haus ${number}.`);
                 return;
             }
 
-            // Überprüfen, ob das Haus belegt ist (aus unserem JS-Modell)
             const currentOccupant = stadt[houseNumber];
 
             if (currentOccupant === null) {
                 // --- HAUS IST FREI ---
-
-                // 1. Modell aktualisieren
                 stadt[houseNumber] = selectedFamily;
 
-                // 2. View aktualisieren (Haus)
                 $house.find('.house-icon').attr('src', './assets/filled_house.svg');
                 $house.find('.house-family').text(selectedFamily);
-                $house.addClass('checked'); // 'checked' = belegt
+                $house.addClass('checked');
                 $house.removeClass('highlight-target');
 
-                // 3. View aktualisieren (Liste)
                 $(`.to-do-family[data-family="${selectedFamily}"]`)
                     .removeClass('active')
                     .addClass('list-group-item-success')
                     .off('click');
 
-                // 4. Dialog und Status zurücksetzen
                 $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen. Wen nehmen wir als nächstes?`);
                 selectedFamily = null;
                 $('#hashInput').val('');
                 $('#hashResult').text('-');
-                $('#hashButton').prop('disabled', true);
+                // Button bleibt disabled, bis neue Familie gewählt wird
 
             } else {
-                // --- HAUS IST BELEGT (KOLLISION!) --- [cite: 228]
+                // --- HAUS IST BELEGT (KOLLISION!) ---
                 gameCompleted = true;
-                $house.addClass('found'); // 'found' (Pulsiert rot)
+                $house.addClass('found');
                 $('#majorMikeImage').attr('src', './assets/sad_major.png');
 
-                // Dialog aktualisieren
                 $('#dialogueText').html(
                     `<strong>🚨 ALARM! KOLLISION!</strong><br>` +
                     `Haus ${houseNumber} ist schon von Familie <strong>${currentOccupant}</strong> bewohnt!<br>` +
                     `Aber der Rechner sagt, Familie <strong>${selectedFamily}</strong> soll da auch einziehen! Was machen wir denn jetzt?!`
                 );
 
-                // Kollisions-Modal anzeigen
                 setTimeout(function() {
                     showCollisionModal(currentOccupant, selectedFamily, houseNumber);
                 }, 2000);
             }
         });
-
-        // --- Modal- und Navigationsfunktionen ---
 
         function showCollisionModal(occupant, newcomer, houseNum) {
             const successMsg = `
@@ -1042,7 +1041,7 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
                 "Oh nein! Haus ${houseNum} ist bereits von Familie <strong>${occupant}</strong> bewohnt!
                 Aber der Rechner sagt, Familie <strong>${newcomer}</strong> soll dort auch einziehen. Das ist eine Katastrophe!"
                 <br><br>
-                "Dieses Problem nennt man <strong>Kollision</strong>. [cite: 229] Mein tolles System ist doch nicht perfekt...
+                "Dieses Problem nennt man <strong>Kollision</strong>. Mein tolles System ist doch nicht perfekt...
                 Wir müssen im nächsten Level eine Lösung dafür finden!"
             `;
 
@@ -1050,7 +1049,7 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             $('#successOverlay').css('display', 'flex');
         }
 
-        // Globale Funktionen für Modal-Buttons (aus Level 0)
+        // Globale Funktionen für Modal-Buttons
         window.restartLevel = function() {
             location.reload();
         };
@@ -1059,7 +1058,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                // Ändere dies zu 'level3.php', wenn es existiert
                 window.location.href = 'level-select.php';
             }, 500);
         };
