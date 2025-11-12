@@ -658,7 +658,7 @@
                     Damit das nicht so unübersichtlich wie im vorherigen Stadtteil wird, habe ich mir etwas ganz Besonderes überlegt.
                     Dafür dürfen keine Namen doppelt existieren.
                 </div>
-                <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
+                <div class="dialogue-continue" id="dialogueContinue">
                     Drücke Enter ↵
                 </div>
             </div>
