@@ -1,27 +1,30 @@
 <?php
 /**
- * HashCity - Level 2: Erste Kollisionen
+ * HashCity - Level 4: Anwendung Linear Probing
  *
- * Lernziel: Das Problem "Kollision" in Hashmaps demonstrieren [cite: 227]
- * Spielmechanik: Spieler nutzt einen "Hash-Rechner", um Familien Häusern zuzuweisen. [cite: 224, 225]
- * Eine beabsichtigte Kollision tritt auf, die das Level beendet. [cite: 228]
- *
- * Hash-Funktion (Beispiel): (SUMME(ASCII-Werte) % 10) + 1 (für 1-basierte Häuser)
+ * Lernziel: Spieler wendet Linear Probing selbstständig an, um eine
+ * größere Menge an Daten zu platzieren und anschließend zu durchsuchen.
  */
 
-// Level 2 - Erste Kollision
-$anzahl_haeuser = 10; // Wir verwenden 10 Häuser, um die Modulo-10-Funktion zu vereinfachen
+$anzahl_haeuser = 15; // 0-14
 
-// Familien, die platziert werden müssen.
-// "Maier" und "Braun" werden kollidieren (beide auf Hash 5)
-$familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
+// Familien für die Platzierung
+$familien_liste = [
+    "Sophie", "Dieter", "Emil", "Sammy", "Grit",
+    "Marie", "Nele", "Claudia", "Sara", "Nils"
+];
 
-// Hash-Funktion (nur zur Referenz, die Logik ist in JS)
-// h(Müller) = (625 % 10) + 1 = 6
-// h(Maier) = (494 % 10) + 1 = 5
-// h(Lehmann) = (707 % 10) + 1 = 8
-// h(Schulz) = (633 % 10) + 1 = 4
-// h(Braun) = (504 % 10) + 1 = 5  <- KOLLISION mit Maier
+// Hash-Funktion (Referenz): (SUMME(ASCII) % 15)
+// h(Sophie) = 616 % 15 = 1  -> Haus 1
+// h(Dieter) = 605 % 15 = 5  -> Haus 5
+// h(Emil) = 391 % 15 = 1    -> Kollision (1) -> Haus 2
+// h(Sammy) = 519 % 15 = 9   -> Haus 9
+// h(Grit) = 406 % 15 = 1    -> Kollision (1, 2) -> Haus 3
+// h(Marie) = 502 % 15 = 7   -> Haus 7
+// h(Nele) = 388 % 15 = 13   -> Haus 13
+// h(Claudia) = 701 % 15 = 11 -> Haus 11
+// h(Sara) = 391 % 15 = 1    -> Kollision (1, 2, 3) -> Haus 4
+// h(Nils) = 406 % 15 = 1    -> Kollision (1, 2, 3, 4, 5) -> Haus 6
 ?>
 
 <!DOCTYPE html>
@@ -29,15 +32,13 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HashCity - Level 2: Kollisionen</title>
+    <title>HashCity - Level 4: Linear Probing</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Kompletter CSS-Block aus level0.php kopiert für Konsistenz */
-        /* ... (styles von level0.php hier einfügen) ... */
+        /* Kompletter CSS-Block aus den vorherigen Levels */
         * {
             margin: 0;
             padding: 0;
@@ -52,7 +53,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             background: #4CAF50;
         }
 
-        /* Sky and Grass Background */
         .sky-section {
             position: fixed;
             top: 0;
@@ -73,7 +73,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             z-index: 0;
         }
 
-        /* Clouds */
         .cloud {
             position: absolute;
             background: rgba(255, 255, 255, 0.7);
@@ -87,7 +86,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             100% { left: 110%; }
         }
 
-        /* Header */
         .game-header {
             background: transparent;
             padding: 1rem 2rem;
@@ -96,20 +94,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             top: 0;
             z-index: 1000;
             backdrop-filter: blur(10px);
-        }
-
-        .header-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: #667eea;
-            margin: 0;
-        }
-
-        .header-subtitle {
-            font-size: 1rem;
-            color: #666;
-            font-weight: 600;
         }
 
         .back-btn {
@@ -138,7 +122,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             margin-right: 5px;
         }
 
-        /* Game Container */
         .game-container {
             max-width: 1600px;
             margin: 2rem auto;
@@ -147,7 +130,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             z-index: 1;
         }
 
-        /* Main Game Area */
         .game-area {
             display: grid;
             grid-template-columns: 280px 1fr 320px;
@@ -155,7 +137,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             min-height: 70vh;
         }
 
-        /* Major Mike Section */
         .major-mike-section {
             background: rgba(255, 255, 255, 0.85);
             border-radius: 25px;
@@ -242,7 +223,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             25%, 75% { opacity: 0.5; }
         }
 
-        /* Houses Grid - ÜBERARBEITET */
         .houses-grid {
             background: rgba(255, 255, 255, 0.85);
             border-radius: 25px;
@@ -262,7 +242,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* Street Block Container */
         .street-block {
             position: relative;
             margin-bottom: 2.5rem;
@@ -272,18 +251,17 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             margin-bottom: 0;
         }
 
-        /* Houses Row - entlang der Straße */
+        /* NEU: 15 Häuser, 5 pro Reihe */
         .houses-row {
             display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 0.8rem;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
             margin-bottom: 0.5rem;
             padding: 0 1rem;
             position: relative;
             z-index: 2;
         }
 
-        /* Straße */
         .street {
             width: 100%;
             height: 60px;
@@ -297,36 +275,22 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             z-index: 1;
         }
 
-        /* Fallback wenn SVG nicht lädt */
-        .street::before {
+        .street::before, .street::after {
+            /* (CSS für Straße aus vorherigem Level) */
             content: '';
             position: absolute;
-            top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
-            border-radius: 8px;
-            z-index: -1;
         }
-
-        /* Weiße Straßenmarkierung */
+        .street::before {
+            top: 0; height: 100%;
+            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
+            border-radius: 8px; z-index: -1;
+        }
         .street::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: repeating-linear-gradient(
-                    90deg,
-                    #fff 0px,
-                    #fff 30px,
-                    transparent 30px,
-                    transparent 50px
-            );
-            transform: translateY(-50%);
-            z-index: 2;
+            top: 50%; height: 4px;
+            background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px);
+            transform: translateY(-50%); z-index: 2;
         }
 
         .house {
@@ -349,19 +313,15 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             z-index: 10;
         }
 
-        /* NEU: Visuelles Feedback für das Ziel-Haus */
         .house.highlight-target {
             transform: translateY(-10px) scale(1.15) !important;
             box-shadow: 0 0 35px 12px rgba(255, 215, 0, 0.9);
             z-index: 11;
         }
 
-
         .house-icon {
             width: 100%;
             height: 100%;
-            max-width: 100%;
-            max-height: 100%;
             object-fit: contain;
             transition: all 0.3s ease;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
@@ -371,9 +331,10 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             filter: drop-shadow(0 4px 8px rgba(255, 167, 38, 0.5));
         }
 
+        /* "found" = Erfolgreicher Such-Klick */
         .house.found .house-icon {
             animation: pulse 1.5s infinite;
-            filter: drop-shadow(0 8px 16px rgba(255, 0, 0, 0.8)); /* Geändert zu Rot für Kollision */
+            filter: drop-shadow(0 8px 16px rgba(76, 175, 80, 0.8)); /* Grün für Erfolg */
         }
 
         @keyframes pulse {
@@ -418,7 +379,7 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             text-overflow: ellipsis;
         }
 
-        .house.checked .house-family,
+        /* Name wird sichtbar, wenn gefunden */
         .house.found .house-family {
             opacity: 1;
         }
@@ -461,14 +422,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             margin-bottom: 0.4rem;
         }
 
-        .info-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.6rem;
-            font-weight: 900;
-            color: #2E7D32;
-        }
-
-        /* NEU: Styling für Hash-Rechner und Familien-Liste */
         .hash-calculator {
             background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
             border-color: #2196F3;
@@ -497,10 +450,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             width: 100%;
             margin-top: 0.5rem;
         }
-        .calc-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
         .calc-button:disabled {
             background: #ccc;
             cursor: not-allowed;
@@ -509,15 +458,17 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
         .family-list-container {
             max-height: 250px;
             overflow-y: auto;
+            overflow-x: hidden;
         }
 
+        /* Familien-Liste (angepasst für Level 4) */
         .list-group-item.to-do-family {
-            cursor: pointer;
             font-weight: 700;
-            transition: all 0.2s ease;
             font-size: 1.1rem;
+            background: #f8f9fa;
+            color: #666;
+            cursor: not-allowed; /* Nicht klickbar, Spiel steuert den Fluss */
         }
-        .list-group-item.to-do-family:hover,
         .list-group-item.to-do-family.active {
             background: #667eea;
             color: #fff;
@@ -526,18 +477,11 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
         }
         .list-group-item.list-group-item-success {
             text-decoration: line-through;
-            background: #f0f0f0;
+            background: #e9f5e9;
             color: #999;
-            cursor: default !important;
-        }
-        .list-group-item.list-group-item-success:hover {
-            background: #f0f0f0;
-            color: #999;
-            transform: none;
         }
 
-
-        /* Success Modal (wird für Kollision wiederverwendet) */
+        /* Modal (jetzt für Erfolg) */
         .success-overlay {
             position: fixed;
             top: 0;
@@ -566,7 +510,7 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             text-align: center;
             box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             animation: slideUp 0.5s ease;
-            border: 5px solid #D32F2F; /* Rot für Kollision */
+            border: 5px solid #4CAF50; /* Grün für Erfolg */
         }
 
         @keyframes slideUp {
@@ -589,7 +533,7 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             font-family: 'Orbitron', sans-serif;
             font-size: 2.8rem;
             font-weight: 900;
-            color: #D32F2F; /* Rot für Kollision */
+            color: #4CAF50; /* Grün für Erfolg */
             margin-bottom: 1rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
@@ -602,34 +546,7 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             font-weight: 500;
         }
 
-        .success-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-box {
-            background: #f8f9fa;
-            padding: 1.2rem;
-            border-radius: 15px;
-            border: 3px solid #4CAF50;
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
-        }
-
-        .stat-label {
-            font-size: 0.95rem;
-            color: #666;
-            font-weight: 700;
-            margin-bottom: 0.4rem;
-        }
-
-        .stat-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #2E7D32;
-        }
+        .success-stats { display: none; } /* Nicht benötigt */
 
         .success-buttons {
             display: flex;
@@ -654,7 +571,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
@@ -665,95 +581,27 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             color: #667eea;
             border: 3px solid #667eea;
         }
-
         .btn-secondary:hover {
             background: #667eea;
             color: white;
             transform: translateY(-2px);
         }
 
-        /* Responsive Design */
+        /* Responsive */
         @media (max-width: 1200px) {
             .game-area {
                 grid-template-columns: 1fr;
                 gap: 1.5rem;
             }
-
             .major-mike-section,
             .info-panel {
                 position: static;
             }
-
-            .houses-row {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 0.6rem;
-            }
-
-            .street {
-                height: 50px;
-            }
         }
-
         @media (max-width: 768px) {
-            .game-container {
-                padding: 0 1rem;
-                margin: 1rem auto;
-            }
-
-            .houses-grid {
-                padding: 1.5rem 1rem;
-            }
-
-            .houses-row {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 0.4rem;
-                padding: 0 0.5rem;
-            }
-
-            .house-number {
-                font-size: 0.8rem;
-                padding: 0.1rem 0.3rem;
-            }
-
-            .house-family {
-                font-size: 0.6rem;
-                padding: 0.2rem 0.4rem;
-            }
-
-            .street {
-                height: 40px;
-            }
-
-            .street::after {
-                height: 3px;
-            }
-
-            .success-modal {
-                padding: 2rem;
-                margin: 1rem;
-            }
-
-            .success-title {
-                font-size: 2rem;
-            }
-
-            .stat-value {
-                font-size: 2rem;
-            }
-
-            .street-block {
-                margin-bottom: 2rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .houses-row {
-                grid-template-columns: repeat(4, 1fr);
-            }
-
-            .grid-title {
-                font-size: 1.4rem;
-            }
+            .game-container { padding: 0 1rem; margin: 1rem auto; }
+            .houses-grid { padding: 1.5rem 1rem; }
+            .houses-row { grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
         }
     </style>
 </head>
@@ -762,10 +610,7 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
 <div class="sky-section">
     <div class="cloud" style="width: 120px; height: 60px; top: 8%; animation-delay: 0s;"></div>
     <div class="cloud" style="width: 150px; height: 70px; top: 18%; animation-delay: 10s;"></div>
-    <div class="cloud" style="width: 100px; height: 50px; top: 28%; animation-delay: 20s;"></div>
-    <div class="cloud" style="width: 130px; height: 65px; top: 12%; animation-delay: 30s;"></div>
 </div>
-
 <div class="grass-section"></div>
 
 <div class="game-header">
@@ -788,8 +633,7 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">
-                    Großartig! [cite_start]Dieses neue System mit dem "Hash-Rechner" ist fantastisch! [cite: 228]
-                    Ich muss nicht mehr jedes Haus absuchen. Das spart so viel Zeit!
+                    Das läuft ja schon sehr gut. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür linear probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest.
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue">
                     Drücke Enter ↵
@@ -798,11 +642,37 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
         </div>
 
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ Neubaugebiet (Level 2)</h2>
+            <h2 class="grid-title">🏘️ Stadtteil (Level 4)</h2>
 
             <div class="street-block">
                 <div class="houses-row">
-                    <?php for ($i = 1; $i <= $anzahl_haeuser; $i++): ?>
+                    <?php for ($i = 0; $i < 5; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="">
+                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <div class="house-number"><?php echo $i; ?></div>
+                            <div class="house-family"></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+                <div class="street"></div>
+            </div>
+
+            <div class="street-block">
+                <div class="houses-row">
+                    <?php for ($i = 5; $i < 10; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="">
+                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <div class="house-number"><?php echo $i; ?></div>
+                            <div class="house-family"></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+                <div class="street"></div>
+            </div>
+
+            <div class="street-block">
+                <div class="houses-row">
+                    <?php for ($i = 10; $i < 15; $i++): ?>
                         <div class="house" data-house="<?php echo $i; ?>" data-family="">
                             <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
@@ -819,7 +689,6 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
 
             <div class="info-item hash-calculator">
                 <div class="info-label">Hash-Rechner 3000</div>
-                <input type="text" id="hashInput" class="form-control" placeholder="Familienname..." readonly>
                 <div class="info-label mt-3">Ergebnis (Hash / Haus-Nr.):</div>
                 <div class="hash-result-value" id="hashResult">-</div>
                 <button id="hashButton" class="calc-button" disabled>Berechne Haus-Nr.</button>
@@ -829,8 +698,8 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
                 <div class="info-label">Einziehende Familien:</div>
                 <div class="family-list-container">
                     <ul id="familienListe" class="list-group">
-                        <?php foreach ($familien_liste as $familie): ?>
-                            <li class="list-group-item to-do-family" data-family="<?php echo $familie; ?>">
+                        <?php foreach ($familien_liste as $index => $familie): ?>
+                            <li class="list-group-item to-do-family" data-family-index="<?php echo $index; ?>">
                                 <?php echo $familie; ?>
                             </li>
                         <?php endforeach; ?>
@@ -844,208 +713,295 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
 
 <div class="success-overlay" id="successOverlay">
     <div class="success-modal">
-        <div class="success-icon">💥</div>
-        <h2 class="success-title">🚨 KOLLISION!</h2>
+        <div class="success-icon">🎉</div>
+        <h2 class="success-title">Geschafft!</h2>
         <p class="success-message" id="successMessage">
+            Danke für deine Hilfe!
         </p>
-
-        <div class="success-stats" style="display: none;">
-            <div class="stat-box">
-                <div class="stat-label">Versuche</div>
-                <div class="stat-value" id="finalAttempts">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Häuser geprüft</div>
-                <div class="stat-value" id="finalChecked">0</div>
-            </div>
-        </div>
 
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Level neustarten</button>
-            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 3 →</button>
+            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 5 →</button>
         </div>
     </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     $(document).ready(function() {
-        // --- Level 2 Setup ---
+        // --- Level 4 Setup ---
         const HASH_SIZE = <?php echo $anzahl_haeuser; ?>;
-        let stadt = new Array(HASH_SIZE + 1).fill(null);
+        const familien = <?php echo json_encode($familien_liste); ?>;
 
+        let stadt = new Array(HASH_SIZE).fill(null);
         let gameStarted = false;
-        let gameCompleted = false;
+        let isFading = false;
+
+        // Phasen: placement_calculate, placement_find_spot, search_calculate, search_find
+        let gamePhase = "placement_calculate";
+
+        let currentFamilyIndex = 0;
         let selectedFamily = null;
+        let correctTargetHouse = null;
+        let initialHash = null;
 
-        // --- KORREKTUR: Alle Dialoge sind jetzt im Array ---
-        const dialogues = [
-            "Ich gebe einen Namen ein, z.B. 'Müller', und der Rechner sagt mir *sofort* die Hausnummer. Das ist wie Magie!",
-            "Unten rechts siehst du die Liste der Familien, die heute einziehen. Hilf mir, sie zuzuweisen!",
-            "Klicke einfach auf einen Familiennamen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechnen'." // <- Dein Dialog, jetzt als Index 2
-        ];
+        // --- NEU: Suchziel ist SARA (Kollisionskette) ---
+        const SEARCH_TARGET_NAME = "Sara";
+        let searchInitialHash = null;
+        let searchCorrectHouse = null;
 
-        let currentDialogue = 0;
 
-        // --- Hash-Funktion ---
+        // --- Hash-Funktion (0-indiziert) ---
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) {
                 sum += key.charCodeAt(i);
             }
-            return (sum % size) + 1;
+            return (sum % size);
         }
 
-        // --- VEREINFACHTE Dialog-Steuerung ---
-        function showNextDialogue() {
-            // 1. Zeige den aktuellen Dialog (0, 1 oder 2)
-            $('#dialogueText').fadeOut(200, function() {
-                $(this).text(dialogues[currentDialogue]).fadeIn(200);
-
-                if (currentDialogue === 0) {
-                    $('#majorMikeImage').attr('src', './assets/card_major.png');
-                }
-            });
-
-            // 2. Prüfen, ob das der LETZTE Dialog war (Index 2)
-            if (currentDialogue === dialogues.length - 1) {
-                // Ja, das Spiel jetzt starten
-                $('#dialogueContinue').fadeOut();
-                gameStarted = true;
+        // --- Helper: Berechnet das finale Haus (inkl. Probing) ---
+        function calculateFinalIndex(startHash) {
+            let finalIndex = startHash;
+            let probeCount = 0;
+            while (stadt[finalIndex] !== null) {
+                finalIndex = (finalIndex + 1) % HASH_SIZE;
+                probeCount++;
+                if (probeCount > HASH_SIZE) return -1; // Fehler, Stadt voll
             }
-
-            // 3. Zähler für den nächsten Klick erhöhen
-            currentDialogue++;
+            return finalIndex;
         }
 
-        // --- Listener ---
-        // Dieser Listener funktioniert jetzt korrekt, da 'gameStarted'
-        // zuverlässig auf 'true' gesetzt wird, NACHDEM der letzte Dialog (Index 2) angezeigt wurde.
+        // --- Helper: Findet das Haus einer Familie (inkl. Probing) ---
+        function findFamilyByProbing(startHash, familyName) {
+            let finalIndex = startHash;
+            let probeCount = 0;
+            while (probeCount < HASH_SIZE) {
+                if (stadt[finalIndex] === familyName) {
+                    return finalIndex; // Ja!
+                }
+                if (stadt[finalIndex] === null) {
+                    return -1; // Nein, kann nicht weiter sein.
+                }
+                finalIndex = (finalIndex + 1) % HASH_SIZE;
+                probeCount++;
+            }
+            return -1; // Nicht gefunden
+        }
+
+        // --- Dialog-Steuerung ---
+        function showNextDialogue() {
+            if (isFading || gameStarted) return;
+            isFading = true;
+
+            $('#dialogueText').fadeOut(200, function() {
+                $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
+                    isFading = false;
+                });
+                $('#majorMikeImage').attr('src', './assets/card_major.png');
+
+                if (currentDialogue === dialogues.length - 1) {
+                    $('#dialogueContinue').fadeOut();
+                    gameStarted = true;
+                    selectNextFamily();
+                }
+                currentDialogue++;
+            });
+        }
+
+        const dialogues = [
+            "Das läuft ja schon sehr gut. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür linear probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest."
+        ];
+        let currentDialogue = 0;
+
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
                 showNextDialogue();
             }
         });
-
         $('.dialogue-box').click(function() {
             if (!gameStarted) {
                 showNextDialogue();
             }
         });
 
-        // --- Restlicher Code (inkl. letztem Fix) ---
+        // --- Level 4 Spiellogik (NEU) ---
 
-        // 1. Familie aus der Liste auswählen
-        $('#familienListe .to-do-family').click(function() {
-            if (gameCompleted || !gameStarted) return;
+        // Startet den Zyklus für die nächste Familie
+        function selectNextFamily() {
+            if (currentFamilyIndex >= familien.length) {
+                startSearchPhase(); // Alle platziert
+                return;
+            }
+
+            gamePhase = "placement_calculate"; // Zurücksetzen
+            selectedFamily = familien[currentFamilyIndex];
+            initialHash = null;
+            correctTargetHouse = null;
+
+            $('.to-do-family').removeClass('active');
+            $(`.to-do-family[data-family-index=${currentFamilyIndex}]`).addClass('active');
+
+            $('#hashButton').prop('disabled', false);
+            $('#hashResult').text('-');
+            $('.house').removeClass('highlight-target');
+
+            $('#dialogueText').text(`Platziere jetzt: ${selectedFamily}. Klicke 'Berechnen'.`);
+        }
+
+        // Familienliste für Platzierung UND Suche
+        $('#familienListe').on('click', '.to-do-family', function() {
+            if (gamePhase === "placement_find_spot" || gamePhase === "search_find") return;
 
             const $item = $(this);
-            if ($item.hasClass('list-group-item-success')) return;
 
-            selectedFamily = $item.data('family');
+            if (gamePhase === "placement_calculate") {
+                if (parseInt($item.data('family-index')) !== currentFamilyIndex) {
+                    $('#dialogueText').text("Bitte arbeite die Liste von oben nach unten ab.");
+                    return;
+                }
+                selectedFamily = familien[currentFamilyIndex];
+            }
+            else if (gamePhase === "search_calculate") {
+                selectedFamily = $item.text(); // Holt den Namen (z.B. "Sara")
+            }
 
-            $('#hashInput').val(selectedFamily);
-            $('#hashResult').text('-');
-            $('#hashButton').prop('disabled', false); // Button aktivieren
             $('.to-do-family').removeClass('active');
             $item.addClass('active');
-            $('.house').removeClass('highlight-target');
-
-            $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
+            $('#hashButton').prop('disabled', false);
+            $('#hashResult').text('-');
+            $('#dialogueText').text(`Okay, ${selectedFamily} ausgewählt. Klicke 'Berechnen'.`);
         });
 
-        // 2. Hash-Wert berechnen
+
+        // 1. "Berechne" klicken (funktioniert jetzt in 2 Phasen)
         $('#hashButton').click(function() {
-            if (gameCompleted || !selectedFamily) return;
+            if (!selectedFamily) return;
 
-            const family = $('#hashInput').val();
-            if (family !== selectedFamily) {
-                $('#dialogueText').text(`Bitte wähle erst Familie ${family} aus der Liste aus.`);
-                return;
-            }
-
-            const hash = getHash(family, HASH_SIZE);
-            $('#hashResult').text(hash);
-
-            $('#dialogueText').text(`Perfekt! Laut Rechner gehört Familie ${family} in Haus ${hash}. Klicke auf das Haus, um sie einziehen zu lassen.`);
-
-            $('.house').removeClass('highlight-target');
-            $(`.house[data-house=${hash}]`).addClass('highlight-target');
-
-            // Button deaktivieren, um doppelte Klicks zu verhindern
+            initialHash = getHash(selectedFamily, HASH_SIZE);
+            $('#hashResult').text(initialHash);
             $(this).prop('disabled', true);
+
+            // --- Phase 1: Platzierung ---
+            if (gamePhase === "placement_calculate") {
+                correctTargetHouse = calculateFinalIndex(initialHash);
+
+                $('#dialogueText').text(`Initial-Hash: ${initialHash}. Klicke auf das entsprechende Haus.`);
+                $(`.house[data-house=${initialHash}]`).addClass('highlight-target');
+
+                gamePhase = "placement_find_spot";
+            }
+            // --- Phase 2: Suche ---
+            else if (gamePhase === "search_calculate") {
+                searchInitialHash = initialHash; // Ist 1 (für Sara)
+                searchCorrectHouse = findFamilyByProbing(searchInitialHash, selectedFamily); // Ist 4 (für Sara)
+
+                $('#dialogueText').text(`Okay, der Initial-Hash für ${selectedFamily} ist ${initialHash}. Klick auf Haus ${initialHash}, um nachzusehen.`);
+                $(`.house[data-house=${initialHash}]`).addClass('highlight-target');
+
+                gamePhase = "search_find";
+            }
         });
 
-        // 3. Haus klicken, um Familie zu platzieren
+        // 2. Haus klicken (Platzierung ODER Suche)
         $('.house').click(function() {
-            if (gameCompleted || !gameStarted || !selectedFamily) {
-                if(gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
-                return;
-            }
-
+            if (!gameStarted) return;
             const $house = $(this);
             const houseNumber = $house.data('house');
-            const targetHash = getHash(selectedFamily, HASH_SIZE);
 
-            if (houseNumber !== targetHash) {
-                $('#dialogueText').text(`Halt! Der Rechner hat Haus ${targetHash} für Familie ${selectedFamily} berechnet, nicht Haus ${number}.`);
-                return;
+            // --- PHASE 1: PLATZIERUNG ---
+            if (gamePhase === "placement_find_spot") {
+
+                if (houseNumber === correctTargetHouse) {
+                    placeFamily($house, houseNumber, selectedFamily);
+                    currentFamilyIndex++;
+                    selectNextFamily();
+                }
+                else if (stadt[houseNumber] !== null) {
+                    $('#dialogueText').text("Halt! Dieses Haus ist auch belegt. Nutze Linear Probing und finde das *nächste* freie Haus.");
+                    $house.addClass('checked');
+                    $house.removeClass('highlight-target');
+                }
+                else {
+                    $('#dialogueText').text("Mindestens ein Bewohner ist im falschen Haus. Versuche es erneut und achte dabei auf (...) dem Verfahren bei einer Kollision (linear probing)."); // Monolog 2
+                }
             }
 
-            const currentOccupant = stadt[houseNumber];
+            // --- PHASE 2: SUCHE (nach Sara) ---
+            else if (gamePhase === "search_find") {
+                const clickedFamily = $house.data('family');
 
-            if (currentOccupant === null) {
-                // --- HAUS IST FREI ---
-                stadt[houseNumber] = selectedFamily;
+                // Namen aufdecken (wird bei jedem Klick gemacht)
+                $house.find('.house-family').css('opacity', 1);
 
-                $house.find('.house-icon').attr('src', './assets/filled_house.svg');
-                $house.find('.house-family').text(selectedFamily);
-                $house.addClass('checked');
-                $house.removeClass('highlight-target');
-
-                $(`.to-do-family[data-family="${selectedFamily}"]`)
-                    .removeClass('active')
-                    .addClass('list-group-item-success')
-                    .off('click');
-
-                $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen. Wen nehmen wir als nächstes?`);
-                selectedFamily = null;
-                $('#hashInput').val('');
-                $('#hashResult').text('-');
-                // Button bleibt disabled, bis neue Familie gewählt wird
-
-            } else {
-                // --- HAUS IST BELEGT (KOLLISION!) ---
-                gameCompleted = true;
-                $house.addClass('found');
-                $('#majorMikeImage').attr('src', './assets/sad_major.png');
-
-                $('#dialogueText').html(
-                    `<strong>🚨 ALARM! KOLLISION!</strong><br>` +
-                    `Haus ${houseNumber} ist schon von Familie <strong>${currentOccupant}</strong> bewohnt!<br>` +
-                    `Aber der Rechner sagt, Familie <strong>${selectedFamily}</strong> soll da auch einziehen! Was machen wir denn jetzt?!`
-                );
-
-                setTimeout(function() {
-                    showCollisionModal(currentOccupant, selectedFamily, houseNumber);
-                }, 2000);
+                // A: Spieler klickt auf das korrekte, finale Haus (Haus 4)
+                if (houseNumber === searchCorrectHouse) {
+                    if (clickedFamily === SEARCH_TARGET_NAME) { // Doppelte Prüfung
+                        $('#dialogueText').text("Danke für deine Hilfe!"); // Monolog 6
+                        $house.addClass('found');
+                        gameCompleted = true;
+                        setTimeout(showSuccessModal, 1500);
+                    }
+                }
+                // B: Spieler klickt auf ein Haus in der Probing-Kette (Haus 1, 2, 3)
+                else if (houseNumber >= searchInitialHash && houseNumber < searchCorrectHouse) {
+                    $('#dialogueText').text(`Falsch! Das ist ${clickedFamily}. Da der Initial-Hash ${searchInitialHash} war, müssen wir jetzt linear weitersuchen (Probing). Klick auf das nächste Haus.`); // Monolog 5
+                    $house.removeClass('highlight-target');
+                    $(`.house[data-house=${houseNumber + 1}]`).addClass('highlight-target'); // Zeigt auf das nächste Haus
+                }
+                // C: Spieler klickt auf ein GANZ falsches Haus (z.B. Haus 10)
+                else {
+                    $('#dialogueText').text(`Das ist ${clickedFamily}. Das ist nicht das richtige Haus. Der Initial-Hash war ${searchInitialHash}.`);
+                }
             }
         });
 
-        function showCollisionModal(occupant, newcomer, houseNum) {
-            const successMsg = `
-                <strong style="color: #667eea;">Major Mike sagt:</strong><br>
-                "Oh nein! Haus ${houseNum} ist bereits von Familie <strong>${occupant}</strong> bewohnt!
-                Aber der Rechner sagt, Familie <strong>${newcomer}</strong> soll dort auch einziehen. Das ist eine Katastrophe!"
-                <br><br>
-                "Dieses Problem nennt man <strong>Kollision</strong>. Mein tolles System ist doch nicht perfekt...
-                Wir müssen im nächsten Level eine Lösung dafür finden!"
-            `;
+        // Helper-Funktion zum Platzieren
+        function placeFamily($house, houseNumber, family) {
+            stadt[houseNumber] = family;
 
-            $('#successMessage').html(successMsg);
+            $house.find('.house-icon').attr('src', './assets/filled_house.svg');
+            $house.find('.house-family').text(family); // Wichtig: Text setzen, auch wenn unsichtbar
+            $house.addClass('checked');
+            $house.removeClass('highlight-target');
+            $house.attr('data-family', family);
+
+            $(`.to-do-family[data-family-index=${currentFamilyIndex}]`)
+                .removeClass('active')
+                .addClass('list-group-item-success')
+                .off('click');
+        }
+
+        // Startet die Such-Phase
+        function startSearchPhase() {
+            gamePhase = "search_calculate";
+            selectedFamily = null;
+            correctTargetHouse = null;
+
+            $('#hashButton').prop('disabled', true);
+            $('#hashResult').text('?');
+            $('.house').removeClass('highlight-target');
+
+            // Liste re-aktivieren (CSS und JS)
+            $('.list-group-item.list-group-item-success')
+                .removeClass('list-group-item-success')
+                .addClass('to-do-family');
+
+            // Monolog 3
+            $('#dialogueText').text("Sehr gut! Alle Bewohner sind im richtigen Haus.");
+            $('#majorMikeImage').attr('src', './assets/wink_major.png');
+
+            // Monolog 4 (angepasst auf SARA)
+            setTimeout(function() {
+                $('#dialogueText').text(`Kannst du mir die Hausnummer von ${SEARCH_TARGET_NAME} geben? Nutze die Liste und den Rechner, um ihren Initial-Hash zu finden.`);
+                $('#majorMikeImage').attr('src', './assets/card_major.png');
+            }, 3000);
+        }
+
+        function showSuccessModal() {
+            $('#successMessage').text("Danke für deine Hilfe!"); // Monolog 6
             $('#successOverlay').css('display', 'flex');
         }
 
@@ -1058,7 +1014,7 @@ $familien_liste = ["Müller", "Maier", "Lehmann", "Schulz", "Braun"];
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-select.php';
+                window.location.href = 'level-select.php?completed=4&next=5';
             }, 500);
         };
 
