@@ -317,7 +317,27 @@
             border-radius: 8px;
         }
         .house-family {
-            display: none;
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: white;
+            font-weight: 700;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+            white-space: nowrap;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .house.show-family .house-family {
+            opacity: 1;
         }
         /* Info Panel */
         .info-panel {
@@ -733,15 +753,13 @@
         let attempts = 0;
         let gameStarted = false;
         let gameCompleted = false;
+        let searchMode = false;
         let selectedFamily = null;
         const dialogues = [
             "Guck mal, das ist einer der neuen Stadtteile. Hier ziehen demnächst die neuen Stadtbewohner ein. Damit das nicht so unübersichtlich wie im vorherigen Stadtteil wird, habe ich mir etwas ganz Besonderes überlegt. Dafür dürfen keine Namen doppelt existieren.",
-            "Hier unten rechts befindet sich unser Stadtplaner. Dort siehst du, welche Hausnummer zu welchem Namen gehört. Klicke einfach auf einen Namen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechnen'.",
-            "Beginnen wir mit Lars. Klicke ihn an, um den Rechner zu füllen.",
-            "Super gemacht! Lars ist jetzt in Haus 1 eingezogen. Wen nehmen wir als nächstes?",
-            "Sehr gut gemacht! Das gleiche musst du nun noch für die restlichen Bewohner machen.",
-            "Ich sehe, du hast für alle Bewohner ein Haus gefunden. Ich habe noch einen Termin mit Sophie, kannst du mir helfen sie zu finden? Nutze den Hash-Rechner, um ihre Hausnummer zu berechnen."
+            "Hier unten rechts befindet sich unser Stadtplaner. Dort siehst du, welche Hausnummer zu welchem Namen gehört. Klicke einfach auf einen Namen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechnen'."
         ];
+        const sophieDialogue = "Ich sehe, du hast für alle Bewohner ein Haus gefunden. Ich habe noch einen Termin mit Sophie, kannst du mir helfen sie zu finden? Nutze den Hash-Rechner, um ihre Hausnummer zu berechnen.";
         let currentDialogue = 0;
 
         // --- Hash-Funktion (identisch zur PHP-Logik) ---
@@ -783,7 +801,7 @@
         // --- Level 1 Spielmechanik ---
         // 1. Familie aus der Liste auswählen
         $('#familienListe .to-do-family').click(function() {
-            if (gameCompleted || !gameStarted) return;
+            if (gameCompleted || !gameStarted || searchMode) return;
             const $item = $(this);
             if ($item.hasClass('list-group-item-success')) return;
             selectedFamily = $item.data('family');
@@ -812,72 +830,92 @@
             if (!family) return;
             const hash = getHash(family, HASH_SIZE);
             $('#hashResult').text(hash);
-            $('#dialogueText').text(`Perfekt! Laut Rechner gehört Familie ${family} in Haus ${hash}. Klicke auf das Haus, um sie einziehen zu lassen.`);
-            $('.house').removeClass('highlight-target');
-            $(`.house[data-house=${hash}]`).addClass('highlight-target');
+
+            if (searchMode) {
+                if (family === 'Sophie' && hash === 4) {
+                    $('.house[data-house="4"]').addClass('found show-family');
+                    $('.house[data-house="4"] .house-family').text('Sophie');
+                    $('#successMessage').html(`
+                        <strong style="color: #667eea;">Major Mike sagt:</strong><br>
+                        "Danke für deine Hilfe! So funktioniert alles viel besser!<br>
+                        Lass uns im nächsten Level noch mehr über Hash-Funktionen lernen!"
+                    `);
+                    $('#finalAttempts').text(attempts);
+                    $('#finalOccupied').text(occupiedHouses);
+                    $('#successOverlay').css('display', 'flex');
+                    gameCompleted = true;
+                }
+            } else {
+                $('#dialogueText').text(`Perfekt! Laut Rechner gehört Familie ${family} in Haus ${hash}. Klicke auf das Haus, um sie einziehen zu lassen.`);
+                $('.house').removeClass('highlight-target');
+                $(`.house[data-house=${hash}]`).addClass('highlight-target');
+            }
         });
 
-        // 3. Haus klicken, um Familie zu platzieren
+        // 3. Haus klicken, um Familie zu platzieren oder Bewohner zu suchen
         $('.house').click(function() {
-            if (gameCompleted || !gameStarted) {
-                if(gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
-                return;
-            }
             const $house = $(this);
             const houseNumber = $house.data('house');
-            const targetHash = getHash($('#hashInput').val().trim(), HASH_SIZE);
-            if (houseNumber !== targetHash) {
-                $('#dialogueText').text(`Halt! Der Rechner hat Haus ${targetHash} für Familie ${$('#hashInput').val().trim()} berechnet, nicht Haus ${houseNumber}.`);
-                return;
-            }
-            const currentOccupant = stadt[houseNumber];
-            if (currentOccupant === null) {
-                // --- HAUS IST FREI ---
-                const selectedFamily = $('#hashInput').val().trim();
-                stadt[houseNumber] = selectedFamily;
-                $house.find('.house-icon').attr('src', './assets/filled_house.svg');
-                $house.addClass('checked');
-                $house.removeClass('highlight-target');
-                $(`.to-do-family[data-family="${selectedFamily}"]`)
-                    .removeClass('active')
-                    .addClass('list-group-item-success')
-                    .off('click');
 
-                occupiedHouses++;
-                $('#occupiedCount').text(occupiedHouses + ' / 5');
-
-                if (selectedFamily === 'Lars') {
-                    $('#dialogueText').text(dialogues[3]);
-                } else if (occupiedHouses < 5) {
-                    $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen. Wen nehmen wir als nächstes?`);
-                } else {
-                    $('#dialogueText').text(dialogues[5]);
-                    $('#hashInput').prop('readonly', false).val('');
-                    $('.to-do-family[data-family="Sophie"]').css('cursor', 'pointer');
+            if (searchMode) {
+                const occupant = stadt[houseNumber];
+                if (occupant) {
+                    $house.addClass('show-family');
+                    $house.find('.house-family').text(occupant);
+                    $('#dialogueText').text(`In Haus ${houseNumber} wohnt ${occupant}.`);
+                    if (occupant === 'Sophie') {
+                        $house.addClass('found');
+                        $('#successMessage').html(`
+                            <strong style="color: #667eea;">Major Mike sagt:</strong><br>
+                            "Danke für deine Hilfe! So funktioniert alles viel besser!<br>
+                            Lass uns im nächsten Level noch mehr über Hash-Funktionen lernen!"
+                        `);
+                        $('#finalAttempts').text(attempts);
+                        $('#finalOccupied').text(occupiedHouses);
+                        $('#successOverlay').css('display', 'flex');
+                        gameCompleted = true;
+                    }
+                }
+            } else {
+                if (gameCompleted || !gameStarted || !selectedFamily) {
+                    if(gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
+                    return;
                 }
 
-                $('#hashInput').val('');
-                $('#hashResult').text('-');
-                $('#hashButton').prop('disabled', true);
-            }
-        });
+                const targetHash = getHash(selectedFamily, HASH_SIZE);
+                if (houseNumber !== targetHash) {
+                    $('#dialogueText').text(`Halt! Der Rechner hat Haus ${targetHash} für Familie ${selectedFamily} berechnet, nicht Haus ${houseNumber}.`);
+                    return;
+                }
 
-        // --- Sophie suchen ---
-        $('#hashButton').click(function() {
-            const name = $('#hashInput').val().trim();
-            if (!name) return;
-            const hash = getHash(name, HASH_SIZE);
-            if (name === 'Sophie' && hash === 4 && occupiedHouses === 5) {
-                $('.house[data-house="4"]').addClass('found');
-                $('#successMessage').html(`
-                    <strong style="color: #667eea;">Major Mike sagt:</strong><br>
-                    "Danke für deine Hilfe! So funktioniert alles viel besser!<br>
-                    Lass uns im nächsten Level noch mehr über Hash-Funktionen lernen!"
-                `);
-                $('#finalAttempts').text(attempts);
-                $('#finalOccupied').text(occupiedHouses);
-                $('#successOverlay').css('display', 'flex');
-                gameCompleted = true;
+                const currentOccupant = stadt[houseNumber];
+                if (currentOccupant === null) {
+                    // --- HAUS IST FREI ---
+                    stadt[houseNumber] = selectedFamily;
+                    $house.find('.house-icon').attr('src', './assets/filled_house.svg');
+                    $house.addClass('checked');
+                    $house.removeClass('highlight-target');
+                    $(`.to-do-family[data-family="${selectedFamily}"]`)
+                        .removeClass('active')
+                        .addClass('list-group-item-success')
+                        .off('click');
+
+                    occupiedHouses++;
+                    $('#occupiedCount').text(occupiedHouses + ' / 5');
+
+                    if (occupiedHouses < 5) {
+                        $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen. Wen nehmen wir als nächstes?`);
+                    } else {
+                        $('#dialogueText').text(sophieDialogue);
+                        searchMode = true;
+                        $('#hashInput').prop('readonly', false).val('');
+                    }
+
+                    selectedFamily = null;
+                    $('#hashInput').val('');
+                    $('#hashResult').text('-');
+                    $('#hashButton').prop('disabled', true);
+                }
             }
         });
 
@@ -890,7 +928,7 @@
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-select.php';
+                window.location.href = 'level-select.php?completed=1&next=2';
             }, 500);
         };
 
