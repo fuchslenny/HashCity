@@ -669,7 +669,7 @@
             <!-- Street Block: Houses 1-5 -->
             <div class="street-block">
                 <div class="houses-row">
-                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                    <?php for ($i = 0; $i <= 4; $i++): ?>
                         <div class="house" data-house="<?php echo $i; ?>" data-family="">
                             <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
@@ -768,7 +768,7 @@
             for (let i = 0; i < key.length; i++) {
                 sum += key.charCodeAt(i);
             }
-            return (sum % size) + 1; // +1 für 1-basierte Häuser (1-5)
+            return (sum % size);
         }
 
         // --- Dialog-Steuerung ---
