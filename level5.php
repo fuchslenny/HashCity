@@ -758,7 +758,8 @@
         let gameCompleted = false;
         let searchMode = false;
         let selectedFamily = null;
-        let currentStep = 0;
+        let firstCollisionHandled = false;
+
         const dialogues = [
             "Linear probing erzeugt Cluster, was zu einem großen Suchaufwand führt, wenn man viele Daten speichern möchte. Also entstehen große Nachbarschaften, in denen man sehr lang suchen muss, bis man das richtige Haus gefunden hat.",
             "Trage zunächst erstmal diese Bewohner ein, bevor ich meine neue Idee vorstelle."
@@ -784,13 +785,16 @@
         // --- Quadratic Probing ---
         function quadraticProbing(key, size, stadt) {
             let hash = getHash(key, size);
-            let i = 0;
+            let i = 1;
+            let steps = [hash]; // Speichert alle durchlaufenen Indizes
             let position = hash;
             while (stadt[position] !== null) {
                 position = (hash + Math.pow(i, 2)) % size;
+                steps.push(position); // Füge den neuen Index hinzu
                 i++;
             }
-            return position;
+
+            return { finalIndex: position, steps: steps };
         }
 
         // --- Dialog-Steuerung ---
@@ -850,28 +854,50 @@
             if (gameCompleted) return;
             const family = $('#hashInput').val().trim();
             if (!family) return;
-            const hash = getHash(family, HASH_SIZE);
-            $('#hashResult').text(hash);
+
+            const anzeige = getHash(family, HASH_SIZE);
+            const result = quadraticProbing(family, HASH_SIZE, stadt);
+            const hashSteps = result.steps;
+            const finalIndex = result.finalIndex;
+
+            $('#hashResult').text(anzeige);
 
             if (searchMode) {
-                if (family === 'Thomas' && hash === 0) {
-                    const thomasHouse = quadraticProbing('Thomas', HASH_SIZE, stadt);
-                    $('.house[data-house="' + thomasHouse + '"]').addClass('found show-family');
-                    $('.house[data-house="' + thomasHouse + '"] .house-family').text('Thomas');
-                    $('#successMessage').html(`
-                        <strong style="color: #667eea;">Major Mike sagt:</strong><br>
-                        "${successDialogue}"
-                    `);
-                    $('#finalAttempts').text(attempts);
-                    $('#finalOccupied').text(occupiedHouses);
-                    $('#successOverlay').css('display', 'flex');
-                    gameCompleted = true;
+                if (family === 'Thomas') {
+                    $('#dialogueText').text(`Laut Rechner wohnt Thomas in Haus ${anzeige}. Doch durch das Probing könnte sich der Index verschoben haben. Vollziehe die Schritte von vorher nach!`);
                 }
             } else {
-                const targetHash = quadraticProbing(family, HASH_SIZE, stadt);
-                $('#dialogueText').text(`Perfekt! Laut Rechner gehört Familie ${family} in Haus ${targetHash}. Klicke auf das Haus, um sie einziehen zu lassen.`);
                 $('.house').removeClass('highlight-target quadratic-target');
-                $(`.house[data-house=${targetHash}]`).addClass('highlight-target');
+
+                if (!firstCollisionHandled && hashSteps.length > 2) {
+                    // Belegte Häuser rot markieren
+                    hashSteps.slice(0, -1).forEach(step => {
+                        $(`.house[data-house=${step}]`).addClass('quadratic-target');
+                    });
+
+                    // Freies Haus gelb markieren
+                    $(`.house[data-house=${finalIndex}]`).addClass('highlight-target');
+
+                    let stepsText = hashSteps.map((step, index) => {
+                        if (index === 0) {
+                            return `Initial-Hash: ${step}`;
+                        } else if (index < hashSteps.length - 1) {
+                            return `Haus ${step} (belegt)`;
+                        } else {
+                            return `Haus ${step} (frei)`;
+                        }
+                    }).join(" → ");
+
+                    $('#dialogueText').html(
+                        `Kollision! Der Platzierungsprozess war: <strong>${stepsText}</strong>. Klicke auf das freie Haus.`
+                    );
+
+                    firstCollisionHandled = true;
+                } else {
+                    $('#dialogueText').text(
+                        `Laut Rechner gehört Familie ${family} in Haus ${anzeige}. Klicke auf das Haus, um sie einziehen zu lassen.`
+                    );
+                }
             }
         });
 
@@ -881,23 +907,41 @@
             const houseNumber = parseInt($house.data('house'));
 
             if (searchMode) {
+
                 const occupant = stadt[houseNumber];
                 if (occupant) {
                     $house.addClass('show-family');
                     $house.find('.house-family').text(occupant);
-                    $('#dialogueText').text(`In Haus ${houseNumber} wohnt ${occupant}.`);
+
+                    const result = quadraticProbing('Thomas', HASH_SIZE, stadt);
+                    const steps = result.steps;
+
+                    if (steps.includes(houseNumber)) {
+                        $('#dialogueText').text("Du bist auf dem richtigen Weg!");
+                    } else {
+                        $('#dialogueText').text("Dieses Haus kommt nicht in Frage.");
+                    }
+
                     if (occupant === 'Thomas') {
-                        $('#dialogueText').text(thomasSearchDialogue);
+                        $('#successMessage').html(
+                            `<strong style="color: #667eea;">Major Mike sagt:</strong><br>
+                "${successDialogue}"`
+                        );
+                        $('#finalAttempts').text(attempts);
+                        $('#finalOccupied').text(occupiedHouses);
+                        $('#successOverlay').css('display', 'flex');
+                        gameCompleted = true;
                     }
                 }
             } else {
                 if (gameCompleted || !gameStarted || !selectedFamily) {
-                    if(gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
+                    if (gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
                     return;
                 }
 
-                const targetHash = quadraticProbing(selectedFamily, HASH_SIZE, stadt);
-                if (houseNumber !== targetHash) {
+                const finalIndex = quadraticProbing(selectedFamily, HASH_SIZE, stadt).finalIndex;
+
+                if (houseNumber !== finalIndex) {
                     $('#dialogueText').text(errorDialogue);
                     return;
                 }
@@ -908,8 +952,9 @@
                     stadt[houseNumber] = selectedFamily;
                     $house.find('.house-icon').attr('src', './assets/filled_house.svg');
                     $house.addClass('checked');
-                    $house.removeClass('highlight-target');
+                    $house.removeClass('highlight-target quadratic-target');
                     $house.find('.house-family').text(selectedFamily);
+
                     $(`.to-do-family[data-family="${selectedFamily}"]`)
                         .removeClass('active')
                         .addClass('list-group-item-success')
@@ -917,18 +962,6 @@
 
                     occupiedHouses++;
                     $('#occupiedCount').text(occupiedHouses + ' / 5');
-
-                    if (selectedFamily === 'Levi') {
-                        $('#dialogueText').text(correctDialogue);
-                    } else if (selectedFamily === 'Emil') {
-                        $('#dialogueText').text(correctDialogue);
-                    } else if (selectedFamily === 'Lars') {
-                        $('#dialogueText').text(correctDialogue);
-                    } else if (selectedFamily === 'Thomas') {
-                        $('#dialogueText').text(thomasDialogue);
-                    } else if (selectedFamily === 'Noah') {
-                        $('#dialogueText').text(noahDialogue);
-                    }
 
                     if (occupiedHouses < 5) {
                         $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen. Wen nehmen wir als nächstes?`);
@@ -967,5 +1000,7 @@
         }, 3000);
     });
 </script>
+
+
 </body>
 </html>
