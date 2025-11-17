@@ -988,7 +988,7 @@
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-select.php';
+                window.location.href = 'level-auswahl.php?completed=5&next=6';
             }, 500);
         };
 
