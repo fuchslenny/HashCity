@@ -26,84 +26,100 @@
             font-family: 'Rajdhani', sans-serif;
             overflow: hidden;
             height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             position: relative;
         }
 
-        .splash-container {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            z-index: 2;
-        }
-
-        /* Animated City Background */
-        .city-background {
-            position: absolute;
-            bottom: 0;
+        /* Background Image */
+        .background-container {
+            position: fixed;
+            top: 0;
             left: 0;
             width: 100%;
-            height: 40%;
-            z-index: 1;
+            height: 100%;
+            z-index: 0;
             overflow: hidden;
         }
 
-        .building {
-            position: absolute;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px 4px 0 0;
-            animation: buildingPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes buildingPulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-
-        .window {
-            position: absolute;
-            background: rgba(255, 255, 0, 0.8);
-            width: 8px;
-            height: 8px;
-            border-radius: 1px;
-            animation: windowBlink 2s ease-in-out infinite;
-        }
-
-        @keyframes windowBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* Grid Pattern Overlay */
-        .grid-overlay {
+        .background-container::before {
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image:
-                    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: 0;
-            animation: gridMove 20s linear infinite;
+            background-image: url('./assets/background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            animation: slowZoom 20s ease-in-out infinite alternate;
         }
 
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
+        @keyframes slowZoom {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.05);
+            }
         }
 
-        /* Logo and Title */
-        .logo-container {
+        /* Overlay for better text readability */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom,
+            rgba(0, 0, 0, 0.3) 0%,
+            rgba(0, 0, 0, 0.1) 50%,
+            rgba(0, 0, 0, 0.4) 100%);
+            z-index: 1;
+        }
+
+        /* Main Container */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            margin-bottom: 3rem;
-            animation: fadeInDown 1s ease-out;
+        }
+
+        /* Logo Title */
+        .logo-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 8rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow:
+                    0 0 30px rgba(255, 255, 255, 0.8),
+                    0 0 60px rgba(255, 165, 0, 0.6),
+                    0 0 90px rgba(255, 140, 0, 0.4),
+                    0 5px 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 1rem;
+            letter-spacing: 8px;
+            animation: titleGlow 3s ease-in-out infinite, fadeInDown 1s ease-out;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% {
+                text-shadow:
+                        0 0 30px rgba(255, 255, 255, 0.8),
+                        0 0 60px rgba(255, 165, 0, 0.6),
+                        0 0 90px rgba(255, 140, 0, 0.4),
+                        0 5px 20px rgba(0, 0, 0, 0.5);
+            }
+            50% {
+                text-shadow:
+                        0 0 40px rgba(255, 255, 255, 1),
+                        0 0 80px rgba(255, 165, 0, 0.8),
+                        0 0 120px rgba(255, 140, 0, 0.6),
+                        0 5px 20px rgba(0, 0, 0, 0.5);
+            }
         }
 
         @keyframes fadeInDown {
@@ -117,42 +133,22 @@
             }
         }
 
-        .logo-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 5rem;
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
-            0 0 40px rgba(102, 126, 234, 0.8),
-            0 0 60px rgba(118, 75, 162, 0.6);
-            margin-bottom: 0.5rem;
-            letter-spacing: 4px;
-        }
-
+        /* Subtitle */
         .logo-subtitle {
-            font-size: 1.5rem;
-            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.95);
             font-weight: 500;
-            letter-spacing: 2px;
-        }
-
-        /* Info Box */
-        .info-box {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            padding: 2rem 3rem;
-            max-width: 700px;
-            margin: 0 2rem 3rem 2rem;
+            letter-spacing: 4px;
+            margin-bottom: 4rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
             animation: fadeInUp 1s ease-out 0.3s both;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(50px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -160,55 +156,48 @@
             }
         }
 
-        .info-title {
-            font-size: 1.8rem;
-            color: #fff;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .info-description {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.95);
-            text-align: center;
-            line-height: 1.6;
-        }
-
         /* Start Button */
         .start-button {
             position: relative;
-            padding: 1.5rem 4rem;
-            font-size: 1.8rem;
+            padding: 1.8rem 5rem;
+            font-size: 2.2rem;
             font-weight: 700;
             font-family: 'Orbitron', sans-serif;
-            color: #667eea;
-            background: #fff;
-            border: none;
-            border-radius: 50px;
+            color: #fff;
+            background: linear-gradient(135deg, #FF8C00 0%, #FF6347 100%);
+            border: 4px solid #fff;
+            border-radius: 60px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            animation: fadeInUp 1s ease-out 0.6s both, pulse 2s ease-in-out infinite;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            opacity: 1 !important;
+            visibility: visible !important;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 1s ease-out 0.6s forwards, buttonPulse 2s ease-in-out 1.6s infinite;
+            box-shadow:
+                    0 10px 40px rgba(0, 0, 0, 0.4),
+                    0 0 40px rgba(255, 140, 0, 0.5),
+                    inset 0 -3px 10px rgba(0, 0, 0, 0.2);
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 4px;
+            overflow: hidden;
+            display: inline-block;
         }
 
-        @keyframes pulse {
+        @keyframes buttonPulse {
             0%, 100% {
-                transform: scale(1);
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                transform: scale(1) translateY(0);
             }
             50% {
-                transform: scale(1.05);
-                box-shadow: 0 15px 60px rgba(255, 255, 255, 0.4);
+                transform: scale(1.05) translateY(0);
             }
         }
 
         .start-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 15px 60px rgba(255, 255, 255, 0.5);
-            animation: none;
+            transform: scale(1.1) translateY(0);
+            box-shadow:
+                    0 20px 80px rgba(0, 0, 0, 0.6),
+                    0 0 80px rgba(255, 140, 0, 1),
+                    inset 0 -3px 10px rgba(0, 0, 0, 0.2);
+            animation: none !important;
         }
 
         .start-button:active {
@@ -216,75 +205,102 @@
         }
 
         .start-button::before {
-            content: '▶';
-            margin-right: 10px;
-            font-size: 1.5rem;
-        }
-
-        /* Hash Particles */
-        .hash-particle {
+            content: '';
             position: absolute;
-            color: rgba(255, 255, 255, 0.3);
-            font-family: 'Courier New', monospace;
-            font-size: 1.2rem;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+            z-index: 0;
             pointer-events: none;
-            animation: floatUp 8s linear infinite;
         }
 
-        @keyframes floatUp {
-            0% {
+        .start-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .start-button span {
+            position: relative;
+            z-index: 2;
+            display: inline-block;
+        }
+
+        .start-button::after {
+            content: '▶';
+            position: relative;
+            z-index: 2;
+            margin-left: 15px;
+            font-size: 1.8rem;
+            display: inline-block;
+            animation: arrowBounce 1s ease-in-out infinite;
+        }
+
+        @keyframes arrowBounce {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(10px);
+            }
+        }
+
+        /* Hash Symbol Decoration */
+        .hash-decoration {
+            position: absolute;
+            font-family: 'Orbitron', sans-serif;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 4rem;
+            font-weight: 900;
+            pointer-events: none;
+            animation: floatRotate 10s ease-in-out infinite;
+        }
+
+        @keyframes floatRotate {
+            0%, 100% {
                 transform: translateY(0) rotate(0deg);
-                opacity: 0;
             }
-            10% {
-                opacity: 0.6;
-            }
-            90% {
-                opacity: 0.6;
-            }
-            100% {
-                transform: translateY(-100vh) rotate(360deg);
-                opacity: 0;
+            50% {
+                transform: translateY(-20px) rotate(180deg);
             }
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .logo-title {
-                font-size: 3rem;
-            }
-
-            .logo-subtitle {
-                font-size: 1rem;
-            }
-
-            .info-box {
-                padding: 1.5rem 2rem;
-                margin: 0 1rem 2rem 1rem;
-            }
-
-            .info-title {
-                font-size: 1.4rem;
-            }
-
-            .info-description {
-                font-size: 1rem;
-            }
-
-            .start-button {
-                padding: 1.2rem 3rem;
-                font-size: 1.4rem;
-            }
+        .hash-decoration:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
         }
 
-        /* Loading Animation */
+        .hash-decoration:nth-child(2) {
+            top: 20%;
+            right: 15%;
+            animation-delay: 1s;
+        }
+
+        .hash-decoration:nth-child(3) {
+            bottom: 15%;
+            left: 15%;
+            animation-delay: 2s;
+        }
+
+        .hash-decoration:nth-child(4) {
+            bottom: 20%;
+            right: 10%;
+            animation-delay: 1.5s;
+        }
+
+        /* Loading Overlay */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #4FC3F7;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -299,48 +315,89 @@
 
         .loading-text {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: #fff;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
             animation: loadingPulse 1.5s ease-in-out infinite;
         }
 
         @keyframes loadingPulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(0.95);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .logo-title {
+                font-size: 4rem;
+                letter-spacing: 4px;
+            }
+
+            .logo-subtitle {
+                font-size: 1.2rem;
+                margin-bottom: 3rem;
+            }
+
+            .start-button {
+                padding: 1.2rem 3rem;
+                font-size: 1.6rem;
+                letter-spacing: 2px;
+            }
+
+            .hash-decoration {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-title {
+                font-size: 3rem;
+            }
+
+            .logo-subtitle {
+                font-size: 1rem;
+            }
+
+            .start-button {
+                padding: 1rem 2.5rem;
+                font-size: 1.3rem;
+            }
         }
     </style>
 </head>
 <body>
-<!-- Grid Overlay -->
-<div class="grid-overlay"></div>
-
 <!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-text">HashCity wird geladen...</div>
 </div>
 
-<!-- City Background -->
-<div class="city-background" id="cityBackground"></div>
+<!-- Background -->
+<div class="background-container"></div>
+<div class="overlay"></div>
 
-<!-- Main Splash Container -->
-<div class="splash-container">
+<!-- Hash Decorations -->
+<div class="hash-decoration">#</div>
+<div class="hash-decoration">#</div>
+<div class="hash-decoration">#</div>
+<div class="hash-decoration">#</div>
+
+<!-- Main Container -->
+<div class="main-container">
     <!-- Logo -->
-    <div class="logo-container">
-        <h1 class="logo-title">#CITY</h1>
-        <p class="logo-subtitle">HashCity</p>
-    </div>
-
-    <!-- Info Box -->
-    <div class="info-box">
-        <h2 class="info-title">Lerne Hash Maps durch interaktives Stadtbauen</h2>
-        <p class="info-description">
-            Entdecke die Welt der Hash-Funktionen, Kollisionen und Optimierungsstrategien
-            in einer spielerischen 3D-Stadt-Simulation.
-        </p>
-    </div>
+    <h1 class="logo-title">HASHCITY</h1>
+    <p class="logo-subtitle">Lerne Hash Maps spielerisch</p>
 
     <!-- Start Button -->
-    <button class="start-button" id="startButton">Spiel Starten</button>
+    <button class="start-button" id="startButton">
+        <span>Start</span>
+    </button>
 </div>
 
 <!-- jQuery -->
@@ -354,80 +411,28 @@
         // Hide loading overlay after page load
         setTimeout(function() {
             $('#loadingOverlay').addClass('hide');
-        }, 1000);
-
-        // Generate random city buildings
-        function generateCity() {
-            const cityBackground = $('#cityBackground');
-            const buildingCount = 20;
-
-            for (let i = 0; i < buildingCount; i++) {
-                const building = $('<div class="building"></div>');
-                const width = Math.random() * 60 + 40; // 40-100px
-                const height = Math.random() * 150 + 100; // 100-250px
-                const left = (100 / buildingCount) * i + Math.random() * 3;
-                const delay = Math.random() * 3;
-
-                building.css({
-                    width: width + 'px',
-                    height: height + 'px',
-                    left: left + '%',
-                    animationDelay: delay + 's'
-                });
-
-                // Add windows to building
-                const windowRows = Math.floor(height / 20);
-                const windowCols = Math.floor(width / 15);
-
-                for (let row = 0; row < windowRows; row++) {
-                    for (let col = 0; col < windowCols; col++) {
-                        if (Math.random() > 0.3) { // 70% chance of window
-                            const window = $('<div class="window"></div>');
-                            window.css({
-                                left: (col * 15 + 4) + 'px',
-                                bottom: (row * 20 + 6) + 'px',
-                                animationDelay: (Math.random() * 2) + 's'
-                            });
-                            building.append(window);
-                        }
-                    }
-                }
-
-                cityBackground.append(building);
-            }
-        }
-
-        // Generate floating hash particles
-        function createHashParticle() {
-            const particles = ['#', '{ }', '[ ]', '0x', '→', '⚡', '🏗️', '🏢', '📊'];
-            const particle = $('<div class="hash-particle"></div>');
-            particle.text(particles[Math.floor(Math.random() * particles.length)]);
-            particle.css({
-                left: Math.random() * 100 + '%',
-                top: '100%',
-                animationDuration: (Math.random() * 4 + 6) + 's',
-                animationDelay: Math.random() * 2 + 's'
-            });
-
-            $('body').append(particle);
-
-            setTimeout(function() {
-                particle.remove();
-            }, 10000);
-        }
+        }, 800);
 
         // Start button click handler
         $('#startButton').click(function() {
-            $(this).text('Wird geladen...');
-            $(this).prop('disabled', true);
+            const button = $(this);
+            button.find('span').text('Wird geladen...');
+            button.prop('disabled', true);
+            button.css({
+                'opacity': '0.7',
+                'cursor': 'not-allowed'
+            });
 
             // Add screen transition effect
-            $('body').css('transition', 'all 0.8s ease-out');
+            $('.main-container').css('transition', 'all 0.8s ease-out');
+            $('.background-container').css('transition', 'all 0.8s ease-out');
+
             setTimeout(function() {
-                $('body').css({
+                $('.main-container').css({
                     'opacity': '0',
-                    'transform': 'scale(1.1)'
+                    'transform': 'scale(0.95)'
                 });
+                $('.overlay').css('opacity', '1');
             }, 100);
 
             // Redirect to level select
@@ -436,28 +441,21 @@
             }, 1000);
         });
 
-        // Initialize
-        generateCity();
-
-        // Create particles periodically
-        setInterval(createHashParticle, 1500);
-
-        // Add hover effect to buildings
-        $(document).on('mouseenter', '.building', function() {
-            $(this).css('background', 'rgba(255, 255, 255, 0.2)');
-        });
-
-        $(document).on('mouseleave', '.building', function() {
-            $(this).css('background', 'rgba(255, 255, 255, 0.1)');
-        });
-
-        // Add keyboard shortcut
+        // Add keyboard shortcuts
         $(document).keypress(function(e) {
             if (e.which === 13 || e.which === 32) { // Enter or Space
+                e.preventDefault();
                 $('#startButton').click();
             }
+        });
+
+        // Add touch support for mobile
+        $('#startButton').on('touchstart', function(e) {
+            e.preventDefault();
+            $(this).click();
         });
     });
 </script>
 </body>
 </html>
+
