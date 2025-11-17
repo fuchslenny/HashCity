@@ -10,21 +10,22 @@ $anzahl_haeuser = 15; // 0-14
 
 // Familien für die Platzierung
 $familien_liste = [
-    "Sophie", "Dieter", "Emil", "Sammy", "Grit",
-    "Marie", "Nele", "Claudia", "Sara", "Nils"
+        "Sophie", "Emil", "Grit", "Sara",
+        "Dieter", "Marie", "Nele", "Claudia", "Nils", "Sammy"
 ];
 
 // Hash-Funktion (Referenz): (SUMME(ASCII) % 15)
-// h(Sophie) = 616 % 15 = 1  -> Haus 1
-// h(Dieter) = 605 % 15 = 5  -> Haus 5
-// h(Emil) = 391 % 15 = 1    -> Kollision (1) -> Haus 2
-// h(Sammy) = 519 % 15 = 9   -> Haus 9
-// h(Grit) = 406 % 15 = 1    -> Kollision (1, 2) -> Haus 3
-// h(Marie) = 502 % 15 = 7   -> Haus 7
-// h(Nele) = 388 % 15 = 13   -> Haus 13
-// h(Claudia) = 701 % 15 = 11 -> Haus 11
-// h(Sara) = 391 % 15 = 1    -> Kollision (1, 2, 3) -> Haus 4
-// h(Nils) = 406 % 15 = 1    -> Kollision (1, 2, 3, 4, 5) -> Haus 6
+// h(Sophie)  = 616 % 15 = 1   -> Haus 1
+// h(Emil)    = 391 % 15 = 1   -> Kollision (1) -> Haus 2
+// h(Grit)    = 406 % 15 = 1   -> Kollision (1,2) -> Haus 3
+// h(Sara)    = 391 % 15 = 1   -> Kollision (1,2,3) -> Haus 4
+// h(Dieter)  = 605 % 15 = 5   -> Haus 5
+// h(Marie)   = 494 % 15 = 14  -> Haus 14
+// h(Nele)    = 388 % 15 = 13  -> Haus 13
+// h(Claudia) = 691 % 15 = 1   -> Kollision (1,2,3,4,5) -> Haus 6
+// h(Nils)    = 406 % 15 = 1   -> Kollision (...) -> Haus 7
+// h(Sammy)   = 519 % 15 = 9   -> Haus 9
+
 ?>
 
 <!DOCTYPE html>
@@ -731,29 +732,30 @@ $familien_liste = [
 
 <script>
     $(document).ready(function() {
-        // --- Level 4 Setup ---
+
         const HASH_SIZE = <?php echo $anzahl_haeuser; ?>;
         const familien = <?php echo json_encode($familien_liste); ?>;
 
         let stadt = new Array(HASH_SIZE).fill(null);
+
         let gameStarted = false;
         let isFading = false;
 
-        // Phasen: placement_calculate, placement_find_spot, search_calculate, search_find
+        // Spielphasen: placement_calculate, placement_find_spot, search_calculate, search_find
         let gamePhase = "placement_calculate";
 
         let currentFamilyIndex = 0;
         let selectedFamily = null;
-        let correctTargetHouse = null;
         let initialHash = null;
+        let correctTargetHouse = null;
 
-        // --- NEU: Suchziel ist SARA (Kollisionskette) ---
+        // Suchziel: fest verdrahtet
         const SEARCH_TARGET_NAME = "Sara";
+        const SEARCH_CORRECT_HOUSE = 4; // hart verdrahtet wie gewünscht
         let searchInitialHash = null;
-        let searchCorrectHouse = null;
+        let gameCompleted = false;
 
-
-        // --- Hash-Funktion (0-indiziert) ---
+        // Hashfunktion
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) {
@@ -762,36 +764,25 @@ $familien_liste = [
             return (sum % size);
         }
 
-        // --- Helper: Berechnet das finale Haus (inkl. Probing) ---
+        // Freies Haus finden (Linear Probing)
         function calculateFinalIndex(startHash) {
             let finalIndex = startHash;
             let probeCount = 0;
+
             while (stadt[finalIndex] !== null) {
                 finalIndex = (finalIndex + 1) % HASH_SIZE;
                 probeCount++;
-                if (probeCount > HASH_SIZE) return -1; // Fehler, Stadt voll
+                if (probeCount > HASH_SIZE) return -1;
             }
             return finalIndex;
         }
 
-        // --- Helper: Findet das Haus einer Familie (inkl. Probing) ---
-        function findFamilyByProbing(startHash, familyName) {
-            let finalIndex = startHash;
-            let probeCount = 0;
-            while (probeCount < HASH_SIZE) {
-                if (stadt[finalIndex] === familyName) {
-                    return finalIndex; // Ja!
-                }
-                if (stadt[finalIndex] === null) {
-                    return -1; // Nein, kann nicht weiter sein.
-                }
-                finalIndex = (finalIndex + 1) % HASH_SIZE;
-                probeCount++;
-            }
-            return -1; // Nicht gefunden
-        }
-
         // --- Dialog-Steuerung ---
+        const dialogues = [
+            "Das läuft ja schon sehr gut. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür linear probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest."
+        ];
+        let currentDialogue = 0;
+
         function showNextDialogue() {
             if (isFading || gameStarted) return;
             isFading = true;
@@ -800,6 +791,7 @@ $familien_liste = [
                 $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
                     isFading = false;
                 });
+
                 $('#majorMikeImage').attr('src', './assets/card_major.png');
 
                 if (currentDialogue === dialogues.length - 1) {
@@ -807,14 +799,10 @@ $familien_liste = [
                     gameStarted = true;
                     selectNextFamily();
                 }
+
                 currentDialogue++;
             });
         }
-
-        const dialogues = [
-            "Das läuft ja schon sehr gut. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür linear probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest."
-        ];
-        let currentDialogue = 0;
 
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
@@ -822,21 +810,18 @@ $familien_liste = [
             }
         });
         $('.dialogue-box').click(function() {
-            if (!gameStarted) {
-                showNextDialogue();
-            }
+            if (!gameStarted) showNextDialogue();
         });
 
-        // --- Level 4 Spiellogik (NEU) ---
+        // -------- Platzierungslogik --------
 
-        // Startet den Zyklus für die nächste Familie
         function selectNextFamily() {
             if (currentFamilyIndex >= familien.length) {
-                startSearchPhase(); // Alle platziert
+                startSearchPhase();
                 return;
             }
 
-            gamePhase = "placement_calculate"; // Zurücksetzen
+            gamePhase = "placement_calculate";
             selectedFamily = familien[currentFamilyIndex];
             initialHash = null;
             correctTargetHouse = null;
@@ -851,130 +836,157 @@ $familien_liste = [
             $('#dialogueText').text(`Platziere jetzt: ${selectedFamily}. Klicke 'Berechnen'.`);
         }
 
-        // Familienliste für Platzierung UND Suche
+        // Klick auf Familienliste
         $('#familienListe').on('click', '.to-do-family', function() {
-            if (gamePhase === "placement_find_spot" || gamePhase === "search_find") return;
 
-            const $item = $(this);
-
+            // Nur in der Platzierungsphase darf gewechselt werden
             if (gamePhase === "placement_calculate") {
-                if (parseInt($item.data('family-index')) !== currentFamilyIndex) {
+                if (parseInt($(this).data('family-index')) !== currentFamilyIndex) {
                     $('#dialogueText').text("Bitte arbeite die Liste von oben nach unten ab.");
                     return;
                 }
+
                 selectedFamily = familien[currentFamilyIndex];
-            }
-            else if (gamePhase === "search_calculate") {
-                selectedFamily = $item.text(); // Holt den Namen (z.B. "Sara")
+                $('.to-do-family').removeClass('active');
+                $(this).addClass('active');
+                $('#hashButton').prop('disabled', false);
+                $('#hashResult').text('-');
+                $('#dialogueText').text(`Okay, ${selectedFamily} ausgewählt. Klicke 'Berechnen'.`);
+                return;
             }
 
-            $('.to-do-family').removeClass('active');
-            $item.addClass('active');
-            $('#hashButton').prop('disabled', false);
-            $('#hashResult').text('-');
-            $('#dialogueText').text(`Okay, ${selectedFamily} ausgewählt. Klicke 'Berechnen'.`);
+            // In der Suchphase keine freie Auswahl
+            if (gamePhase === "search_calculate" || gamePhase === "search_find") {
+                $('#dialogueText').text(`In diesem Level suchen wir nur nach ${SEARCH_TARGET_NAME}.`);
+                return;
+            }
         });
 
-
-        // 1. "Berechne" klicken (funktioniert jetzt in 2 Phasen)
+        // Hash berechnen
         $('#hashButton').click(function() {
-            if (!selectedFamily) return;
 
-            initialHash = getHash(selectedFamily, HASH_SIZE);
+            let keyName;
+
+            if (gamePhase === "search_calculate") {
+                keyName = SEARCH_TARGET_NAME;
+            } else {
+                if (!selectedFamily) return;
+                keyName = selectedFamily;
+            }
+
+            initialHash = getHash(keyName, HASH_SIZE);
             $('#hashResult').text(initialHash);
             $(this).prop('disabled', true);
 
-            // --- Phase 1: Platzierung ---
+            // Platzierung
             if (gamePhase === "placement_calculate") {
                 correctTargetHouse = calculateFinalIndex(initialHash);
 
                 $('#dialogueText').text(`Initial-Hash: ${initialHash}. Klicke auf das entsprechende Haus.`);
+                $('.house').removeClass('highlight-target');
                 $(`.house[data-house=${initialHash}]`).addClass('highlight-target');
 
                 gamePhase = "placement_find_spot";
             }
-            // --- Phase 2: Suche ---
-            else if (gamePhase === "search_calculate") {
-                searchInitialHash = initialHash; // Ist 1 (für Sara)
-                searchCorrectHouse = findFamilyByProbing(searchInitialHash, selectedFamily); // Ist 4 (für Sara)
 
-                $('#dialogueText').text(`Okay, der Initial-Hash für ${selectedFamily} ist ${initialHash}. Klick auf Haus ${initialHash}, um nachzusehen.`);
+            // Suche
+            else if (gamePhase === "search_calculate") {
+                searchInitialHash = initialHash; // z.B. 1
+                $('#dialogueText').text(`Der Initial-Hash für ${SEARCH_TARGET_NAME} ist ${initialHash}. Fang bei Haus ${initialHash} an und arbeite dich weiter vor!`);
+                $('.house').removeClass('highlight-target');
                 $(`.house[data-house=${initialHash}]`).addClass('highlight-target');
 
                 gamePhase = "search_find";
             }
         });
 
-        // 2. Haus klicken (Platzierung ODER Suche)
+        // Haus-Klick
         $('.house').click(function() {
+
             if (!gameStarted) return;
+
             const $house = $(this);
             const houseNumber = $house.data('house');
 
-            // --- PHASE 1: PLATZIERUNG ---
+            // WICHTIG: Namen aus jQuery-.data lesen (wird bei Platzierung gesetzt)
+            const clickedFamily = $house.data('family') || "";
+
+            // -------- Platzierungsphase --------
             if (gamePhase === "placement_find_spot") {
 
                 if (houseNumber === correctTargetHouse) {
-                    placeFamily($house, houseNumber, selectedFamily);
+
+                    // Bewohner speichern
+                    stadt[houseNumber] = selectedFamily;
+
+                    // UI aktualisieren
+                    $house.find('.house-icon').attr('src', './assets/filled_house.svg');
+                    $house.find('.house-family').text(selectedFamily);
+                    $house.attr('data-family', selectedFamily);
+                    $house.data('family', selectedFamily); // DAMIT .data(...) später funktioniert
+                    $house.addClass('checked');
+                    $house.removeClass('highlight-target');
+
+                    $(`.to-do-family[data-family-index=${currentFamilyIndex}]`)
+                        .removeClass('active')
+                        .addClass('list-group-item-success')
+                        .off('click');
+
                     currentFamilyIndex++;
                     selectNextFamily();
                 }
                 else if (stadt[houseNumber] !== null) {
-                    $('#dialogueText').text("Halt! Dieses Haus ist auch belegt. Nutze Linear Probing und finde das *nächste* freie Haus.");
+                    $('#dialogueText').text("Halt! Dieses Haus ist auch belegt. Nutze linear probing und suche das nächste freie Haus.");
                     $house.addClass('checked');
                     $house.removeClass('highlight-target');
                 }
                 else {
-                    $('#dialogueText').text("Mindestens ein Bewohner ist im falschen Haus. Versuche es erneut und achte dabei auf (...) dem Verfahren bei einer Kollision (linear probing)."); // Monolog 2
+                    $('#dialogueText').text("Das ist nicht das richtige Haus. Denk an das Probing-Verfahren.");
                 }
             }
 
-            // --- PHASE 2: SUCHE (nach Sara) ---
+            // -------- Suchphase --------
             else if (gamePhase === "search_find") {
-                const clickedFamily = $house.data('family');
 
-                // Namen aufdecken (wird bei jedem Klick gemacht)
+                // Namen sichtbar machen
+                if (clickedFamily) {
+                    $house.find('.house-family').text(clickedFamily);
+                }
                 $house.find('.house-family').css('opacity', 1);
 
-                // A: Spieler klickt auf das korrekte, finale Haus (Haus 4)
-                if (houseNumber === searchCorrectHouse) {
-                    if (clickedFamily === SEARCH_TARGET_NAME) { // Doppelte Prüfung
-                        $('#dialogueText').text("Danke für deine Hilfe!"); // Monolog 6
-                        $house.addClass('found');
-                        gameCompleted = true;
-                        setTimeout(showSuccessModal, 1500);
-                    }
+                // 1) HARDCODE: Haus 4 = Erfolg
+                if (houseNumber === SEARCH_CORRECT_HOUSE) {
+                    const nameToShow = clickedFamily || SEARCH_TARGET_NAME;
+                    $('#dialogueText').text(`Richtig! ${nameToShow} wohnt hier. Du musstest dafür linear ab Haus ${searchInitialHash} weitergehen.`);
+                    $house.addClass('found');
+                    gameCompleted = true;
+                    $('.house').removeClass('highlight-target');
+                    setTimeout(showSuccessModal, 1500);
+                    return;
                 }
-                // B: Spieler klickt auf ein Haus in der Probing-Kette (Haus 1, 2, 3)
-                else if (houseNumber >= searchInitialHash && houseNumber < searchCorrectHouse) {
-                    $('#dialogueText').text(`Falsch! Das ist ${clickedFamily}. Da der Initial-Hash ${searchInitialHash} war, müssen wir jetzt linear weitersuchen (Probing). Klick auf das nächste Haus.`); // Monolog 5
-                    $house.removeClass('highlight-target');
-                    $(`.house[data-house=${houseNumber + 1}]`).addClass('highlight-target'); // Zeigt auf das nächste Haus
+
+                // 2) Haus liegt auf dem Weg (z.B. 1, 2, 3) → Hinweis geben
+                if (
+                    searchInitialHash !== null &&
+                    houseNumber >= searchInitialHash &&
+                    houseNumber < SEARCH_CORRECT_HOUSE
+                ) {
+                    const nameToShow = clickedFamily || "jemand";
+                    $('#dialogueText').text(`Hier wohnt ${nameToShow}. Da der Initial-Hash ${searchInitialHash} war und dieses Haus belegt ist, musst du linear zum nächsten Haus weitergehen.`);
+                    $('.house').removeClass('highlight-target');
+                    $(`.house[data-house=${houseNumber + 1}]`).addClass('highlight-target');
+                    return;
                 }
-                // C: Spieler klickt auf ein GANZ falsches Haus (z.B. Haus 10)
-                else {
-                    $('#dialogueText').text(`Das ist ${clickedFamily}. Das ist nicht das richtige Haus. Der Initial-Hash war ${searchInitialHash}.`);
-                }
+
+                // 3) Komplett falsches Haus
+                const nameOrNiemand = clickedFamily || "niemand";
+                $('#dialogueText').text(`Hier wohnt ${nameOrNiemand}. Das passt nicht zur Probing-Kette. Start war Haus ${searchInitialHash}.`);
+                $('.house').removeClass('highlight-target');
+                $(`.house[data-house=${searchInitialHash}]`).addClass('highlight-target');
             }
         });
 
-        // Helper-Funktion zum Platzieren
-        function placeFamily($house, houseNumber, family) {
-            stadt[houseNumber] = family;
-
-            $house.find('.house-icon').attr('src', './assets/filled_house.svg');
-            $house.find('.house-family').text(family); // Wichtig: Text setzen, auch wenn unsichtbar
-            $house.addClass('checked');
-            $house.removeClass('highlight-target');
-            $house.attr('data-family', family);
-
-            $(`.to-do-family[data-family-index=${currentFamilyIndex}]`)
-                .removeClass('active')
-                .addClass('list-group-item-success')
-                .off('click');
-        }
-
-        // Startet die Such-Phase
+        // Start der Suchphase
         function startSearchPhase() {
             gamePhase = "search_calculate";
             selectedFamily = null;
@@ -984,28 +996,25 @@ $familien_liste = [
             $('#hashResult').text('?');
             $('.house').removeClass('highlight-target');
 
-            // Liste re-aktivieren (CSS und JS)
-            $('.list-group-item.list-group-item-success')
-                .removeClass('list-group-item-success')
-                .addClass('to-do-family');
-
-            // Monolog 3
             $('#dialogueText').text("Sehr gut! Alle Bewohner sind im richtigen Haus.");
             $('#majorMikeImage').attr('src', './assets/wink_major.png');
 
-            // Monolog 4 (angepasst auf SARA)
             setTimeout(function() {
-                $('#dialogueText').text(`Kannst du mir die Hausnummer von ${SEARCH_TARGET_NAME} geben? Nutze die Liste und den Rechner, um ihren Initial-Hash zu finden.`);
+                $('#dialogueText').text(`Kannst du mir die Hausnummer von ${SEARCH_TARGET_NAME} geben? Benutze den Rechner, um ihren Initial-Hash zu finden, und suche sie dann mit linear probing.`);
                 $('#majorMikeImage').attr('src', './assets/card_major.png');
+
+                $('#hashButton').prop('disabled', false);
+                $('#hashResult').text('-');
             }, 3000);
         }
 
+        // Erfolg
         function showSuccessModal() {
-            $('#successMessage').text("Danke für deine Hilfe!"); // Monolog 6
+            $('#successMessage').text("Danke für deine Hilfe!");
             $('#successOverlay').css('display', 'flex');
         }
 
-        // Globale Funktionen für Modal-Buttons
+        // Buttons
         window.restartLevel = function() {
             location.reload();
         };
@@ -1020,6 +1029,8 @@ $familien_liste = [
 
     });
 </script>
+
+
 
 </body>
 </html>
