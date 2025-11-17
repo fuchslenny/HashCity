@@ -704,7 +704,7 @@
                         <li class="list-group-item to-do-family" data-family="Levi">Levi</li>
                         <li class="list-group-item to-do-family" data-family="Sammy">Sammy</li>
                         <li class="list-group-item to-do-family" data-family="Nele">Nele</li>
-                        <li class="list-group-item to-do-family" data-family="Lea">Lea</li>
+                        <li class="list-group-item to-do-family" data-family="Georg">Georg</li>
                         <li class="list-group-item to-do-family" data-family="Emma">Emma</li>
                     </ul>
                 </div>
@@ -771,7 +771,7 @@
         const correctDialogue = "Sehr gut! Alle Bewohner sind im richtigen Haus.";
         const leviSearchDialogue = "Kannst du mir die Hausnummer von Levi geben? Ich habe noch etwas mit ihm zu besprechen.";
         const chrisSearchDialogue = "Chris ist ein sehr guter Mathematiker und er wollte noch etwas mit mir besprechen. Kannst du für mich seine Hausnummer suchen?";
-        const searchErrorDialogue = "Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen.";
+        const searchErrorDialogue = "Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen und vergewissere, dass du Quadratic Probing richtig angewendet hast.";
         let currentDialogue = 0;
 
         // --- Hash-Funktion (zero-based) ---
@@ -787,13 +787,13 @@
         function quadraticProbing(key, size, stadt) {
             let hash = getHash(key, size);
             let i = 1;
-
-            while (stadt[hash] !== null) {
-                hash = (hash + Math.pow(i, 2)) % size;
+            let position = hash;
+            while (stadt[position] !== null) {
+                position = (hash + Math.pow(i, 2)) % size;
                 i++;
             }
 
-            return hash;
+            return position;
         }
 
         // --- Dialog-Steuerung ---
@@ -853,17 +853,17 @@
             const family = $('#hashInput').val().trim();
             if (!family) return;
 
-            const finalIndex = quadraticProbing(family, HASH_SIZE, stadt);
-            $('#hashResult').text(finalIndex);
+            const anzeige = getHash(family, HASH_SIZE);
+            $('#hashResult').text(anzeige);
 
             if (searchMode) {
                 if (family === 'Levi') {
-                    $('#dialogueText').text(`Laut Rechner wohnt Levi in Haus ${finalIndex}. Klicke auf das Haus, um ihn zu finden.`);
+                    $('#dialogueText').text(`Laut Rechner wohnt Levi in Haus ${anzeige}. Doch durch das Probing könnte sich der Index verschoben haben. Vollziehe die Schritte von vorher nach!`);
                 } else if (family === 'Chris') {
-                    $('#dialogueText').text(`Laut Rechner wohnt Chris in Haus ${finalIndex}. Klicke auf das Haus, um ihn zu finden.`);
+                    $('#dialogueText').text(`Laut Rechner wohnt Thomas in Haus ${anzeige}. Doch durch das Probing könnte sich der Index verschoben haben. Vollziehe die Schritte von vorher nach!`);
                 }
             } else {
-                $('#dialogueText').text(`Laut Rechner gehört Familie ${family} in Haus ${finalIndex}. Klicke auf das Haus, um sie einziehen zu lassen.`);
+                $('#dialogueText').text(`Laut Rechner gehört Familie ${family} in Haus ${anzeige}. Lasse sie nach dem Prinzip des Quadratic Probing einziehen!`);
             }
         });
 
@@ -891,16 +891,16 @@
                         $('#successOverlay').css('display', 'flex');
                         gameCompleted = true;
                     } else {
-                        const result = quadraticProbing(searchTarget, HASH_SIZE, stadt);
                         const steps = [];
                         let hash = getHash(searchTarget, HASH_SIZE);
+                        let postion = hash;
                         let i = 1;
-                        while (stadt[hash] !== null && stadt[hash] !== searchTarget) {
-                            steps.push(hash);
-                            hash = (hash + Math.pow(i, 2)) % HASH_SIZE;
+                        while (stadt[postion] !== null && stadt[postion] !== searchTarget) {
+                            steps.push(postion);
+                            postion = (hash + Math.pow(i, 2)) % HASH_SIZE;
                             i++;
                         }
-                        steps.push(hash);
+                        steps.push(postion);
 
                         if (steps.includes(houseNumber)) {
                             $('#dialogueText').text("Du bist auf dem richtigen Weg!");
