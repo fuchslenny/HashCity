@@ -762,9 +762,12 @@
         let searchMode = false;
         let selectedFamily = null;
         let searchTarget = null;
+        let currentFamilyIndex = 0;
+
+        const families = ["Thomas", "Hans", "Dieter", "Lennard", "Chris", "Luise", "Jana", "Marie", "Hannah", "Sophie", "Levi", "Sammy", "Nele", "Georg", "Emma"];
 
         const dialogues = [
-            "Das sieht ja schon richtig gut aus. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür quadratic probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest."
+            "Das sieht ja schon richtig gut aus. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür quadratic probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Bearbeite sie von oben nach unten."
         ];
         const successDialogue = "Danke für deine Hilfe!";
         const errorDialogue = "Mindestens ein Bewohner ist im falschen Haus. Versuche es erneut und achte dabei auf die Rechtschreibung des Namens und dem Verfahren bei einer Kollision (quadratic probing).";
@@ -792,7 +795,6 @@
                 position = (hash + Math.pow(i, 2)) % size;
                 i++;
             }
-
             return position;
         }
 
@@ -801,13 +803,35 @@
             if (currentDialogue >= dialogues.length) {
                 $('#dialogueContinue').fadeOut();
                 gameStarted = true;
-                $('#dialogueText').text('Okay, lass uns anfangen! Wähle die erste Familie aus der Liste.');
+                initFamilyList();
                 return;
             }
             $('#dialogueText').fadeOut(200, function() {
                 $(this).text(dialogues[currentDialogue]).fadeIn(200);
             });
             currentDialogue++;
+        }
+
+        // Familienliste initialisieren
+        function initFamilyList() {
+            $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
+            $(`.to-do-family[data-family="${families[currentFamilyIndex]}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick);
+            selectedFamily = families[currentFamilyIndex];
+            $('#hashInput').val(selectedFamily);
+            $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
+        }
+
+        // Familie anklicken
+        function handleFamilyClick() {
+            const $item = $(this);
+            if ($item.hasClass('disabled') || $item.hasClass('list-group-item-success')) return;
+            selectedFamily = $item.data('family');
+            $('#hashInput').val(selectedFamily);
+            $('#hashResult').text('-');
+            $('#hashButton').prop('disabled', false);
+            $('.to-do-family').removeClass('active');
+            $item.addClass('active');
+            $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
         }
 
         // --- Listener für Dialoge ---
@@ -824,29 +848,6 @@
         });
 
         // --- Level 6 Spielmechanik ---
-        // 1. Familie aus der Liste auswählen
-        $('#familienListe .to-do-family').click(function() {
-            if (gameCompleted || !gameStarted || searchMode) return;
-            const $item = $(this);
-            if ($item.hasClass('list-group-item-success')) return;
-            selectedFamily = $item.data('family');
-            $('#hashInput').val(selectedFamily);
-            $('#hashResult').text('-');
-            $('#hashButton').prop('disabled', false);
-            $('.to-do-family').removeClass('active');
-            $item.addClass('active');
-            $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
-        });
-
-        // Aktivieren des Buttons, sobald etwas eingegeben ist
-        $('#hashInput').on('input', function() {
-            if ($(this).val().trim() !== '') {
-                $('#hashButton').prop('disabled', false);
-            } else {
-                $('#hashButton').prop('disabled', true);
-            }
-        });
-
         // 2. Hash-Wert berechnen
         $('#hashButton').click(function() {
             if (gameCompleted) return;
@@ -858,9 +859,9 @@
 
             if (searchMode) {
                 if (family === 'Levi') {
-                    $('#dialogueText').text(`Laut Rechner wohnt Levi in Haus ${anzeige}. Doch durch das Probing könnte sich der Index verschoben haben. Vollziehe die Schritte von vorher nach!`);
+                    $('#dialogueText').text(`Laut Rechner wohnt Levi in Haus ${anzeige}. Vollziehe die Schritte von vorher nach!`);
                 } else if (family === 'Chris') {
-                    $('#dialogueText').text(`Laut Rechner wohnt Thomas in Haus ${anzeige}. Doch durch das Probing könnte sich der Index verschoben haben. Vollziehe die Schritte von vorher nach!`);
+                    $('#dialogueText').text(`Laut Rechner wohnt Chris in Haus ${anzeige}. Vollziehe die Schritte von vorher nach!`);
                 }
             } else {
                 $('#dialogueText').text(`Laut Rechner gehört Familie ${family} in Haus ${anzeige}. Lasse sie nach dem Prinzip des Quadratic Probing einziehen!`);
@@ -879,9 +880,13 @@
                     $house.find('.house-family').text(occupant);
 
                     if (searchTarget === 'Levi' && occupant === 'Levi') {
+                        attempts++;
                         $('#dialogueText').text(chrisSearchDialogue);
                         searchTarget = 'Chris';
+                        $('#hashInput').val('Chris');
+                        $('#hashButton').prop('disabled', false);
                     } else if (searchTarget === 'Chris' && occupant === 'Chris') {
+                        attempts++;
                         $('#successMessage').html(
                             `<strong style="color: #667eea;">Major Mike sagt:</strong><br>
                             "${successDialogue}"`
@@ -891,16 +896,17 @@
                         $('#successOverlay').css('display', 'flex');
                         gameCompleted = true;
                     } else {
+                        attempts++;
                         const steps = [];
                         let hash = getHash(searchTarget, HASH_SIZE);
-                        let postion = hash;
+                        let position = hash;
                         let i = 1;
-                        while (stadt[postion] !== null && stadt[postion] !== searchTarget) {
-                            steps.push(postion);
-                            postion = (hash + Math.pow(i, 2)) % HASH_SIZE;
+                        while (stadt[position] !== null && stadt[position] !== searchTarget) {
+                            steps.push(position);
+                            position = (hash + Math.pow(i, 2)) % HASH_SIZE;
                             i++;
                         }
-                        steps.push(postion);
+                        steps.push(position);
 
                         if (steps.includes(houseNumber)) {
                             $('#dialogueText').text("Du bist auf dem richtigen Weg!");
@@ -933,24 +939,28 @@
                     $(`.to-do-family[data-family="${selectedFamily}"]`)
                         .removeClass('active')
                         .addClass('list-group-item-success')
-                        .off('click');
+                        .css('opacity', '1');
 
                     occupiedHouses++;
                     $('#occupiedCount').text(occupiedHouses + ' / 15');
 
-                    if (occupiedHouses < 15) {
-                        $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen. Wen nehmen wir als nächstes?`);
+                    currentFamilyIndex++;
+                    if (currentFamilyIndex < families.length) {
+                        $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen.`);
+                        $(`.to-do-family[data-family="${families[currentFamilyIndex]}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick);
+                        selectedFamily = families[currentFamilyIndex];
+                        $('#hashInput').val(selectedFamily);
+                        $('.to-do-family').removeClass('active');
+                        $(`.to-do-family[data-family="${selectedFamily}"]`).addClass('active');
                     } else {
                         $('#dialogueText').text(leviSearchDialogue);
                         searchMode = true;
                         searchTarget = 'Levi';
-                        $('#hashInput').prop('readonly', false).val('');
+                        $('#hashInput').prop('readonly', false).val('Levi');
                     }
 
-                    selectedFamily = null;
-                    $('#hashInput').val('');
                     $('#hashResult').text('-');
-                    $('#hashButton').prop('disabled', true);
+                    $('#hashButton').prop('disabled', false);
                 }
             }
         });
@@ -976,5 +986,6 @@
         }, 3000);
     });
 </script>
+
 </body>
 </html>
