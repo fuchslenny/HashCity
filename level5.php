@@ -759,6 +759,9 @@
         let searchMode = false;
         let selectedFamily = null;
         let firstCollisionHandled = false;
+        let currentFamilyIndex = 0;
+
+        const families = ["Levi", "Emil", "Lars", "Thomas", "Noah"];
 
         const dialogues = [
             "Linear probing erzeugt Cluster, was zu einem großen Suchaufwand führt, wenn man viele Daten speichern möchte. Also entstehen große Nachbarschaften, in denen man sehr lang suchen muss, bis man das richtige Haus gefunden hat.",
@@ -786,15 +789,23 @@
         function quadraticProbing(key, size, stadt) {
             let hash = getHash(key, size);
             let i = 1;
-            let steps = [hash]; // Speichert alle durchlaufenen Indizes
+            let steps = [hash];
             let position = hash;
             while (stadt[position] !== null) {
                 position = (hash + Math.pow(i, 2)) % size;
-                steps.push(position); // Füge den neuen Index hinzu
+                steps.push(position);
                 i++;
             }
-
             return { finalIndex: position, steps: steps };
+        }
+
+        // Familienliste initial ausgrauen
+        function initFamilyListUI() {
+            $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
+            const currentFamily = families[currentFamilyIndex];
+            $(`.to-do-family[data-family="${currentFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick);
+            selectedFamily = currentFamily;
+            $('#hashInput').val(selectedFamily);
         }
 
         // --- Dialog-Steuerung ---
@@ -811,6 +822,20 @@
             currentDialogue++;
         }
 
+        // Familie anklicken
+        function handleFamilyClick() {
+            const $item = $(this);
+            if ($item.hasClass('disabled') || $item.hasClass('list-group-item-success')) return;
+            selectedFamily = $item.data('family');
+            $('#hashInput').val(selectedFamily);
+            $('#hashResult').text('-');
+            $('#hashButton').prop('disabled', false);
+            $('.to-do-family').removeClass('active');
+            $item.addClass('active');
+            $('.house').removeClass('highlight-target quadratic-target');
+            $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
+        }
+
         // --- Listener für Dialoge ---
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
@@ -825,21 +850,6 @@
         });
 
         // --- Level 5 Spielmechanik ---
-        // 1. Familie aus der Liste auswählen
-        $('#familienListe .to-do-family').click(function() {
-            if (gameCompleted || !gameStarted || searchMode) return;
-            const $item = $(this);
-            if ($item.hasClass('list-group-item-success')) return;
-            selectedFamily = $item.data('family');
-            $('#hashInput').val(selectedFamily);
-            $('#hashResult').text('-');
-            $('#hashButton').prop('disabled', false);
-            $('.to-do-family').removeClass('active');
-            $item.addClass('active');
-            $('.house').removeClass('highlight-target quadratic-target');
-            $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
-        });
-
         // Aktivieren des Buttons, sobald etwas eingegeben ist
         $('#hashInput').on('input', function() {
             if ($(this).val().trim() !== '') {
@@ -848,6 +858,9 @@
                 $('#hashButton').prop('disabled', true);
             }
         });
+
+        // Familienliste direkt beim Laden ausgrauen
+        initFamilyListUI();
 
         // 2. Hash-Wert berechnen
         $('#hashButton').click(function() {
@@ -859,7 +872,6 @@
             const result = quadraticProbing(family, HASH_SIZE, stadt);
             const hashSteps = result.steps;
             const finalIndex = result.finalIndex;
-
             $('#hashResult').text(anzeige);
 
             if (searchMode) {
@@ -868,16 +880,13 @@
                 }
             } else {
                 $('.house').removeClass('highlight-target quadratic-target');
-
-                if (!firstCollisionHandled && hashSteps.length > 2) {
+                if (!firstCollisionHandled && hashSteps.length > 1) {
                     // Belegte Häuser rot markieren
                     hashSteps.slice(0, -1).forEach(step => {
                         $(`.house[data-house=${step}]`).addClass('quadratic-target');
                     });
-
                     // Freies Haus gelb markieren
                     $(`.house[data-house=${finalIndex}]`).addClass('highlight-target');
-
                     let stepsText = hashSteps.map((step, index) => {
                         if (index === 0) {
                             return `Initial-Hash: ${step}`;
@@ -887,11 +896,9 @@
                             return `Haus ${step} (frei)`;
                         }
                     }).join(" → ");
-
                     $('#dialogueText').html(
                         `Kollision! Der Platzierungsprozess war: <strong>${stepsText}</strong>. Klicke auf das freie Haus.`
                     );
-
                     firstCollisionHandled = true;
                 } else {
                     $('#dialogueText').text(
@@ -907,25 +914,21 @@
             const houseNumber = parseInt($house.data('house'));
 
             if (searchMode) {
-
                 const occupant = stadt[houseNumber];
                 if (occupant) {
                     $house.addClass('show-family');
                     $house.find('.house-family').text(occupant);
-
                     const result = quadraticProbing('Thomas', HASH_SIZE, stadt);
                     const steps = result.steps;
-
                     if (steps.includes(houseNumber)) {
                         $('#dialogueText').text("Du bist auf dem richtigen Weg!");
                     } else {
                         $('#dialogueText').text("Dieses Haus kommt nicht in Frage.");
                     }
-
                     if (occupant === 'Thomas') {
                         $('#successMessage').html(
                             `<strong style="color: #667eea;">Major Mike sagt:</strong><br>
-                "${successDialogue}"`
+                            "${successDialogue}"`
                         );
                         $('#finalAttempts').text(attempts);
                         $('#finalOccupied').text(occupiedHouses);
@@ -958,23 +961,27 @@
                     $(`.to-do-family[data-family="${selectedFamily}"]`)
                         .removeClass('active')
                         .addClass('list-group-item-success')
-                        .off('click');
+                        .css('opacity', '1');
 
                     occupiedHouses++;
                     $('#occupiedCount').text(occupiedHouses + ' / 5');
 
-                    if (occupiedHouses < 5) {
-                        $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen. Wen nehmen wir als nächstes?`);
+                    currentFamilyIndex++;
+                    if (currentFamilyIndex < families.length) {
+                        $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen.`);
+                        const nextFamily = families[currentFamilyIndex];
+                        $('.to-do-family').removeClass('active');
+                        $(`.to-do-family[data-family="${nextFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick).addClass('active');
+                        selectedFamily = nextFamily;
+                        $('#hashInput').val(selectedFamily);
+                        $('#hashButton').prop('disabled', false);
                     } else {
                         $('#dialogueText').text(thomasSearchDialogue);
                         searchMode = true;
                         $('#hashInput').prop('readonly', false).val('');
                     }
 
-                    selectedFamily = null;
-                    $('#hashInput').val('');
                     $('#hashResult').text('-');
-                    $('#hashButton').prop('disabled', true);
                 }
             }
         });
@@ -1000,7 +1007,6 @@
         }, 3000);
     });
 </script>
-
 
 </body>
 </html>
