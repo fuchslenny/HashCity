@@ -1,68 +1,19 @@
-<?php
-/**
- * HashCity - Level 0: Einführung
- *
- * Lernziel: Das Problem der linearen Suche demonstrieren
- * Spielmechanik: Spieler muss linear durch alle Häuser suchen, um Familie Müller zu finden
- * Familie Müller befindet sich in Haus 16
- *
- * Verwendete Assets:
- * - ./assets/wink_major.png - Major Mike freundlich winkend (Start)
- * - ./assets/sad_major.png - Major Mike traurig (bei falschem Haus)
- * - ./assets/card_major.png - Major Mike schaut auf Stadtkarte (während Suche)
- * - ./assets/empty_house.svg - Leeres Haus (noch nicht überprüft)
- * - ./assets/filled_house.svg - Haus mit Bewohnern (überprüft)
- * - ./assets/Strasse.svg - Straße für das Stadtlayout
- */
-
-// Level 0 - Einführung: Lineares Suchen
-// Familie Müller ist in Haus 16
-
-// Familien für die 20 Häuser
-$familien = [
-    1 => "Schmidt",
-    2 => "Weber",
-    3 => "Wagner",
-    4 => "Becker",
-    5 => "Schulz",
-    6 => "Hoffmann",
-    7 => "Koch",
-    8 => "Richter",
-    9 => "Klein",
-    10 => "Wolf",
-    11 => "Schröder",
-    12 => "Neumann",
-    13 => "Schwarz",
-    14 => "Zimmermann",
-    15 => "Braun",
-    16 => "Müller", // Ziel-Familie
-    17 => "Krüger",
-    18 => "Hofmann",
-    19 => "Hartmann",
-    20 => "Lange"
-];
-?>
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HashCity - Level 0: Einführung</title>
-
+    <title>HashCity - Level 10: Load-Faktor</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
-
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Rajdhani', sans-serif;
             overflow-x: hidden;
@@ -70,7 +21,6 @@ $familien = [
             position: relative;
             background: #4CAF50;
         }
-
         /* Sky and Grass Background */
         .sky-section {
             position: fixed;
@@ -81,7 +31,6 @@ $familien = [
             background: linear-gradient(180deg, #87CEEB 0%, #B0D4E3 100%);
             z-index: 0;
         }
-
         .grass-section {
             position: fixed;
             bottom: 0;
@@ -91,7 +40,6 @@ $familien = [
             background: linear-gradient(180deg, #76B947 0%, #4CAF50 100%);
             z-index: 0;
         }
-
         /* Clouds */
         .cloud {
             position: absolute;
@@ -100,12 +48,10 @@ $familien = [
             opacity: 0.8;
             animation: cloudFloat 40s linear infinite;
         }
-
         @keyframes cloudFloat {
             0% { left: -200px; }
             100% { left: 110%; }
         }
-
         /* Header */
         .game-header {
             background: transparent;
@@ -116,21 +62,6 @@ $familien = [
             z-index: 1000;
             backdrop-filter: blur(10px);
         }
-
-        .header-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: #667eea;
-            margin: 0;
-        }
-
-        .header-subtitle {
-            font-size: 1rem;
-            color: #666;
-            font-weight: 600;
-        }
-
         .back-btn {
             padding: 0.7rem 1.3rem;
             background: rgba(255, 255, 255, 0.9);
@@ -145,18 +76,15 @@ $familien = [
             display: inline-block;
             font-size: 0.9rem;
         }
-
         .back-btn:hover {
             background: #667eea;
             color: #fff;
             transform: scale(1.05);
         }
-
         .back-btn::before {
             content: '← ';
             margin-right: 5px;
         }
-
         /* Game Container */
         .game-container {
             max-width: 1600px;
@@ -165,7 +93,6 @@ $familien = [
             position: relative;
             z-index: 1;
         }
-
         /* Main Game Area */
         .game-area {
             display: grid;
@@ -173,7 +100,6 @@ $familien = [
             gap: 2rem;
             min-height: 70vh;
         }
-
         /* Major Mike Section */
         .major-mike-section {
             background: rgba(255, 255, 255, 0.85);
@@ -185,7 +111,6 @@ $familien = [
             top: 100px;
             border: 4px solid #fff;
         }
-
         .major-mike-avatar {
             width: 100%;
             height: 240px;
@@ -198,13 +123,11 @@ $familien = [
             overflow: hidden;
             position: relative;
         }
-
         .major-mike-avatar img {
             width: 100%;
             height: 100%;
             object-fit: contain;
         }
-
         .major-mike-name {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.4rem;
@@ -214,7 +137,6 @@ $familien = [
             margin-bottom: 1rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-
         .dialogue-box {
             background: #fff;
             border: 3px solid #667eea;
@@ -224,7 +146,6 @@ $familien = [
             position: relative;
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
         }
-
         .dialogue-box::before {
             content: '';
             position: absolute;
@@ -237,14 +158,12 @@ $familien = [
             border-right: 15px solid transparent;
             border-bottom: 15px solid #667eea;
         }
-
         .dialogue-text {
             font-size: 1.05rem;
             line-height: 1.7;
             color: #333;
             font-weight: 500;
         }
-
         .dialogue-continue {
             position: absolute;
             bottom: 10px;
@@ -255,13 +174,11 @@ $familien = [
             font-weight: 700;
             animation: blink 1.5s infinite;
         }
-
         @keyframes blink {
             0%, 50%, 100% { opacity: 1; }
             25%, 75% { opacity: 0.5; }
         }
-
-        /* Houses Grid - ÜBERARBEITET */
+        /* Houses Grid */
         .houses-grid {
             background: rgba(255, 255, 255, 0.85);
             border-radius: 25px;
@@ -270,7 +187,6 @@ $familien = [
             border: 4px solid #fff;
             overflow: hidden;
         }
-
         .grid-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.8rem;
@@ -280,34 +196,27 @@ $familien = [
             margin-bottom: 2rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-
         /* Street Block Container */
         .street-block {
             position: relative;
             margin-bottom: 2.5rem;
         }
-
-        .street-block:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Houses Row - entlang der Straße */
+        /* Houses Row */
         .houses-row {
             display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 0.8rem;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
             margin-bottom: 0.5rem;
             padding: 0 1rem;
             position: relative;
             z-index: 2;
         }
-
         /* Straße */
         .street {
             width: 100%;
             height: 60px;
             background-image: url('./assets/Strasse.svg');
-            background-size: cover;
+            Background-size: cover;
             background-position: center;
             background-repeat: repeat-x;
             position: relative;
@@ -315,8 +224,6 @@ $familien = [
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
             z-index: 1;
         }
-
-        /* Fallback wenn SVG nicht lädt */
         .street::before {
             content: '';
             position: absolute;
@@ -328,8 +235,6 @@ $familien = [
             border-radius: 8px;
             z-index: -1;
         }
-
-        /* Weiße Straßenmarkierung */
         .street::after {
             content: '';
             position: absolute;
@@ -347,7 +252,6 @@ $familien = [
             transform: translateY(-50%);
             z-index: 2;
         }
-
         .house {
             aspect-ratio: 1;
             background: transparent;
@@ -362,36 +266,38 @@ $familien = [
             border-radius: 10px;
             padding: 0.3rem;
         }
-
         .house:hover:not(.checked):not(.found) {
             transform: translateY(-8px) scale(1.08);
             z-index: 10;
         }
-
+        .house.highlight-target {
+            transform: translateY(-10px) scale(1.15) !important;
+            box-shadow: 0 0 35px 12px rgba(255, 215, 0, 0.9);
+            z-index: 11;
+        }
+        .house.quadratic-target {
+            transform: translateY(-10px) scale(1.15) !important;
+            box-shadow: 0 0 35px 12px rgba(255, 0, 0, 0.9);
+            z-index: 11;
+        }
         .house-icon {
             width: 100%;
             height: 100%;
-            max-width: 100%;
-            max-height: 100%;
             object-fit: contain;
             transition: all 0.3s ease;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         }
-
         .house.checked .house-icon {
             filter: drop-shadow(0 4px 8px rgba(255, 167, 38, 0.5));
         }
-
         .house.found .house-icon {
             animation: pulse 1.5s infinite;
             filter: drop-shadow(0 8px 16px rgba(255, 215, 0, 0.8));
         }
-
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.08); }
         }
-
         .house-number {
             position: absolute;
             top: 25%;
@@ -407,7 +313,6 @@ $familien = [
             padding: 0.2rem 0.5rem;
             border-radius: 8px;
         }
-
         .house-family {
             position: absolute;
             bottom: 10%;
@@ -428,12 +333,9 @@ $familien = [
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        .house.checked .house-family,
-        .house.found .house-family {
+        .house.show-family .house-family {
             opacity: 1;
         }
-
         /* Info Panel */
         .info-panel {
             background: rgba(255, 255, 255, 0.85);
@@ -445,7 +347,6 @@ $familien = [
             top: 100px;
             border: 4px solid #fff;
         }
-
         .info-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.4rem;
@@ -455,83 +356,124 @@ $familien = [
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-
         .info-item {
             background: #fff;
             padding: 1rem;
-
             border-radius: 15px;
             margin-bottom: 1rem;
             border: 3px solid #4CAF50;
             box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15);
         }
-
         .info-label {
             font-weight: 700;
             color: #666;
             font-size: 0.95rem;
             margin-bottom: 0.4rem;
         }
-
         .info-value {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.6rem;
             font-weight: 900;
             color: #2E7D32;
         }
-
-        .search-target {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA726 100%);
-            padding: 1.2rem;
-            border-radius: 20px;
-            text-align: center;
-            margin-bottom: 1.2rem;
-            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
-            border: 3px solid #fff;
+        .hash-calculator {
+            background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
+            border-color: #2196F3;
         }
-
-        .search-target-label {
-            font-size: 0.95rem;
-            color: #333;
-            font-weight: 700;
-            margin-bottom: 0.4rem;
-        }
-
-        .search-target-name {
+        .hash-result-value {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
+            font-size: 2.8rem;
             font-weight: 900;
-            color: #fff;
-            text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+            color: #667eea;
+            text-align: center;
         }
-
-        .progress-section {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 3px solid #e0e0e0;
-        }
-
-        .progress-bar-container {
+        .calc-button {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
             margin-top: 0.5rem;
         }
-
-        .progress {
-            height: 30px;
-            background: #e0e0e0;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 3px solid #fff;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        .calc-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
-
-        .progress-bar {
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+        .calc-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .family-list-container {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .list-group-item.to-do-family {
+            cursor: pointer;
             font-weight: 700;
-            font-size: 0.9rem;
-            line-height: 30px;
-            transition: width 0.5s ease;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
         }
-
+        .list-group-item.to-do-family:hover,
+        .list-group-item.to-do-family.active {
+            background: #667eea;
+            color: #fff;
+            transform: scale(1.03);
+            z-index: 10;
+        }
+        .list-group-item.list-group-item-success {
+            text-decoration: line-through;
+            background: #f0f0f0;
+            color: #999;
+            cursor: default !important;
+        }
+        .list-group-item.list-group-item-success:hover {
+            background: #f0f0f0;
+            color: #999;
+            transform: none;
+        }
+        /* Load Factor Display */
+        .load-factor-box {
+            text-align: center;
+            padding: 0.5rem;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 2px solid #ccc;
+            transition: all 0.5s ease;
+        }
+        .lf-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .lf-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        /* Ampel-Farben für Load Factor */
+        .lf-good {
+            color: #4CAF50;
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        } /* <= 0.5 */
+        .lf-medium {
+            color: #FF9800;
+            border-color: #FF9800;
+            background: #fff3e0;
+        } /* 0.5 - 0.75 */
+        .lf-bad {
+            color: #D32F2F;
+            border-color: #D32F2F;
+            background: #FFEBEE;
+        } /* > 0.75 */
         /* Success Modal */
         .success-overlay {
             position: fixed;
@@ -547,12 +489,10 @@ $familien = [
             animation: fadeIn 0.3s ease;
             backdrop-filter: blur(5px);
         }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
         .success-modal {
             background: white;
             border-radius: 30px;
@@ -563,23 +503,19 @@ $familien = [
             animation: slideUp 0.5s ease;
             border: 5px solid #4CAF50;
         }
-
         @keyframes slideUp {
             from { transform: translateY(100px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-
         .success-icon {
             font-size: 5rem;
             margin-bottom: 1rem;
             animation: bounce 1s infinite;
         }
-
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
-
         .success-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 2.8rem;
@@ -588,7 +524,6 @@ $familien = [
             margin-bottom: 1rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-
         .success-message {
             font-size: 1.2rem;
             color: #666;
@@ -596,14 +531,12 @@ $familien = [
             margin-bottom: 2rem;
             font-weight: 500;
         }
-
         .success-stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
             margin-bottom: 2rem;
         }
-
         .stat-box {
             background: #f8f9fa;
             padding: 1.2rem;
@@ -611,28 +544,24 @@ $familien = [
             border: 3px solid #4CAF50;
             box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
         }
-
         .stat-label {
             font-size: 0.95rem;
             color: #666;
             font-weight: 700;
             margin-bottom: 0.4rem;
         }
-
         .stat-value {
             font-family: 'Orbitron', sans-serif;
             font-size: 2.5rem;
             font-weight: 900;
             color: #2E7D32;
         }
-
         .success-buttons {
             display: flex;
             gap: 1rem;
             justify-content: center;
             flex-wrap: wrap;
         }
-
         .btn-primary, .btn-secondary {
             padding: 1rem 2.5rem;
             border: none;
@@ -644,143 +573,73 @@ $familien = [
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
-
         .btn-secondary {
             background: white;
             color: #667eea;
             border: 3px solid #667eea;
         }
-
         .btn-secondary:hover {
             background: #667eea;
             color: white;
             transform: translateY(-2px);
         }
-
         /* Responsive Design */
         @media (max-width: 1200px) {
             .game-area {
                 grid-template-columns: 1fr;
                 gap: 1.5rem;
             }
-
             .major-mike-section,
             .info-panel {
                 position: static;
             }
-
-            .houses-row {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 0.6rem;
-            }
-
-            .street {
-                height: 50px;
-            }
         }
-
         @media (max-width: 768px) {
             .game-container {
                 padding: 0 1rem;
                 margin: 1rem auto;
             }
-
             .houses-grid {
                 padding: 1.5rem 1rem;
             }
-
             .houses-row {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 0.4rem;
-                padding: 0 0.5rem;
-            }
-
-            .house-number {
-                font-size: 0.8rem;
-                padding: 0.1rem 0.3rem;
-            }
-
-            .house-family {
-                font-size: 0.6rem;
-                padding: 0.2rem 0.4rem;
-            }
-
-            .street {
-                height: 40px;
-            }
-
-            .street::after {
-                height: 3px;
-            }
-
-            .success-modal {
-                padding: 2rem;
-                margin: 1rem;
-            }
-
-            .success-title {
-                font-size: 2rem;
-            }
-
-            .stat-value {
-                font-size: 2rem;
-            }
-
-            .street-block {
-                margin-bottom: 2rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .houses-row {
-                grid-template-columns: repeat(4, 1fr);
-            }
-
-            .grid-title {
-                font-size: 1.4rem;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.6rem;
             }
         }
     </style>
 </head>
 <body>
-
 <!-- Sky Section -->
 <div class="sky-section">
-    <!-- Clouds -->
     <div class="cloud" style="width: 120px; height: 60px; top: 8%; animation-delay: 0s;"></div>
     <div class="cloud" style="width: 150px; height: 70px; top: 18%; animation-delay: 10s;"></div>
     <div class="cloud" style="width: 100px; height: 50px; top: 28%; animation-delay: 20s;"></div>
     <div class="cloud" style="width: 130px; height: 65px; top: 12%; animation-delay: 30s;"></div>
 </div>
-
 <!-- Grass Section -->
 <div class="grass-section"></div>
-
 <!-- Header -->
 <div class="game-header">
     <div class="container-fluid">
         <div class="row align-items-center">
             <div class="col-auto">
-                <a href="Level-Auswahl" class="back-btn">Zurück</a>
+                <a href="level-select.php" class="back-btn">Zurück</a>
             </div>
         </div>
     </div>
 </div>
-
 <!-- Game Container -->
 <div class="game-container">
     <div class="game-area">
-
         <!-- Major Mike Section -->
         <div class="major-mike-section">
             <div class="major-mike-avatar">
@@ -789,312 +648,341 @@ $familien = [
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">
-                    Willkommen in HashCity! Ich bin Major Mike, der Bürgermeister.
-                    Ich habe leider meinen Stadtplan verloren und brauche deine Hilfe!
-                    Ich muss dringend mit Familie Müller sprechen.
-                    Kannst du mir helfen, sie zu finden?
+                    Separate Chaining erzeugt bei vielen Daten lange Listen, die die Such Performance beeinträchtigen. Außerdem können einige Speicherbereiche ungenutzt bleiben. Also entstehen sehr große Mehrfamilienhäuser, in denen man dann auch keine Bewohner schnell findet. Zudem können Häuser so auch leer stehen bleiben.
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
                     Drücke Enter ↵
                 </div>
             </div>
         </div>
-
         <!-- Houses Grid -->
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ HashCity Stadtteil</h2>
-
-            <!-- First Street Block: Houses 1-10 -->
+            <h2 class="grid-title">🏘️ HashCity Neuer Stadtteil</h2>
+            <!-- 4 Straßen mit je 5 Häusern -->
+            <?php
+            // Paare der neuen Assets
+            $housePairs = [
+                    ["empty" => "WohnhauBlauBraunLeerNeu.svg", "filled" => "WohnhauBlauBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauBlauGrauLeerNeu.svg", "filled" => "WohnhauBlauGrauBesetztNeu.svg"],
+                    ["empty" => "WohnhauBlauRotLeerNeu.svg", "filled" => "WohnhauBlauRotBesetztNeu.svg"],
+                    ["empty" => "WohnhauGelbBraunLeerNeu.svg", "filled" => "WohnhauGelbBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGelbRotLeerNeu.svg", "filled" => "WohnhauGelbRotBesetztNeu.svg"],
+                    ["empty" => "WohnhauGrauBraunLeerNeu.svg", "filled" => "WohnhauGrauBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenBraunLeerNeu.svg", "filled" => "WohnhauGruenBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenGrauLeerNeu.svg", "filled" => "WohnhauGruenGrauBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenBraunLeerNeu.svg", "filled" => "WohnhauGruenBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenGrauLeerNeu.svg", "filled" => "WohnhauGruenGrauBesetztNeu.svg"],
+                    ["empty" => "WohnhauRotRotLeerNeu.svg", "filled" => "WohnhauRotRotBesetztNeu.svg"]
+            ];
+            // Zufällige Zuordnung der Asset-Paare zu den Häusern
+            $houseAssets = [];
+            for ($i = 0; $i < 20; $i++) {
+                $houseAssets[$i] = $housePairs[array_rand($housePairs)];
+            }
+            ?>
             <div class="street-block">
                 <div class="houses-row">
-                    <?php for ($i = 1; $i <= 10; $i++): ?>
-                        <div class="house" data-house="<?php echo $i; ?>" data-family="<?php echo $familien[$i]; ?>">
-                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                    <?php for ($i = 0; $i < 5; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
-                            <div class="house-family"><?php echo $familien[$i]; ?></div>
+                            <div class="house-family"></div>
                         </div>
                     <?php endfor; ?>
                 </div>
                 <div class="street"></div>
             </div>
-
-            <!-- Second Street Block: Houses 11-20 -->
             <div class="street-block">
                 <div class="houses-row">
-                    <?php for ($i = 11; $i <= 20; $i++): ?>
-                        <div class="house" data-house="<?php echo $i; ?>" data-family="<?php echo $familien[$i]; ?>">
-                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                    <?php for ($i = 5; $i < 10; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
-                            <div class="house-family"><?php echo $familien[$i]; ?></div>
+                            <div class="house-family"></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+                <div class="street"></div>
+            </div>
+            <div class="street-block">
+                <div class="houses-row">
+                    <?php for ($i = 10; $i < 15; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <div class="house-number"><?php echo $i; ?></div>
+                            <div class="house-family"></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+                <div class="street"></div>
+            </div>
+            <div class="street-block">
+                <div class="houses-row">
+                    <?php for ($i = 15; $i < 20; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <div class="house-number"><?php echo $i; ?></div>
+                            <div class="house-family"></div>
                         </div>
                     <?php endfor; ?>
                 </div>
                 <div class="street"></div>
             </div>
         </div>
-
         <!-- Info Panel -->
         <div class="info-panel">
-            <h3 class="info-title">📊 Spielinformationen</h3>
-
-            <div class="search-target">
-                <div class="search-target-label">Gesuchte Familie:</div>
-                <div class="search-target-name">Müller</div>
-            </div>
-
+            <!-- Load Factor Display -->
             <div class="info-item">
-                <div class="info-label">Überprüfte Häuser:</div>
-                <div class="info-value" id="checkedCount">0 / 20</div>
-            </div>
-
-            <div class="info-item">
-                <div class="info-label">Anzahl Versuche:</div>
-                <div class="info-value" id="attemptsCount">0</div>
-            </div>
-
-            <div class="progress-section">
-                <div class="info-label">Fortschritt:</div>
-                <div class="progress-bar-container">
-                    <div class="progress">
-                        <div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%">0%</div>
-                    </div>
+                <div class="info-label">Load-Faktor</div>
+                <div class="load-factor-box lf-bad" id="loadFactorBox">
+                    <div class="lf-value" id="loadFactorValue">0.95</div>
+                    <div class="lf-label">19/20 Häuser belegt</div>
                 </div>
             </div>
-
-            <div class="info-item" style="background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%); border-color: #2196F3;">
-                <div class="info-label">💡 Spieltipp:</div>
-                <div style="font-size: 0.95rem; color: #333; margin-top: 0.5rem; font-weight: 500; line-height: 1.5;">
-                    Klicke auf die Häuser, um zu sehen, welche Familie dort wohnt. Finde Familie Müller!
+            <!-- Stadtplaner (Hash-Rechner) -->
+            <div class="info-item hash-calculator">
+                <div class="info-label">Hash-Rechner 3000</div>
+                <input type="text" id="hashInput" class="form-control" placeholder="Familienname...">
+                <div class="info-label mt-3">Ergebnis (Hash / Haus-Nr.):</div>
+                <div class="hash-result-value" id="hashResult">-</div>
+                <button id="hashButton" class="calc-button" disabled>Berechne Haus-Nr.</button>
+            </div>
+            <!-- Bewerber-Liste -->
+            <div class="info-item">
+                <div class="info-label">Einziehende Familien:</div>
+                <div class="family-list-container">
+                    <ul id="familienListe" class="list-group">
+                        <li class="list-group-item to-do-family" data-family="Levi">Levi</li>
+                    </ul>
                 </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Eingetragene Familien:</div>
+                <div class="info-value" id="occupiedCount">19 / 20</div>
             </div>
         </div>
-
     </div>
 </div>
-
 <!-- Success Modal -->
 <div class="success-overlay" id="successOverlay">
     <div class="success-modal">
         <div class="success-icon">🎉</div>
-        <h2 class="success-title">Familie gefunden!</h2>
+        <h2 class="success-title">Stadterweiterung!</h2>
         <p class="success-message" id="successMessage">
-            Gut gemacht! Du hast Familie Müller in Haus 16 gefunden!
+            Thomas und ich haben besprochen, dass man in so einem Fall eine Stadtteilerweiterung machen sollte. Mehr Häuser, mehr Platz, bessere Verteilung, weniger Kollisionen.
         </p>
-
-        <div class="success-stats">
-            <div class="stat-box">
-                <div class="stat-label">Versuche</div>
-                <div class="stat-value" id="finalAttempts">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Häuser geprüft</div>
-                <div class="stat-value" id="finalChecked">0</div>
-            </div>
-        </div>
-
         <div class="success-buttons">
-            <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
-            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 1 →</button>
+            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 11 →</button>
         </div>
     </div>
 </div>
-
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
 <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
     $(document).ready(function() {
-        let checkedHouses = 0;
-        let attempts = 0;
-        let gameStarted = false;
+        // --- Level 10 Setup ---
+        const HASH_SIZE = 20;
+        let stadt = new Array(HASH_SIZE).fill(null);
+        let occupiedHouses = 19;
         let gameCompleted = false;
+        let currentDialogueStep = 0;
+        let probingActive = false;
+        let maxProbes = 6;
+        let canSkipDialogue = true;
+        let houseAssets = [];
 
-        const dialogues = [
-            "Hallo! Willkommen in HashCity! Ich bin Major Mike, der Bürgermeister dieser wunderschönen Stadt. Schön, dass du hier bist!",
-            "Ich habe ein kleines Problem... Ich habe meinen Stadtplan verloren und weiß nicht mehr genau, wo welche Familie wohnt. 😅",
-            "Ich muss dringend mit Familie Müller sprechen! Kannst du mir helfen, sie zu finden? Klicke einfach die Häuser an, um zu sehen, wer dort wohnt.",
-            "Perfekt! Dann fangen wir an. Viel Erfolg beim Suchen! 🔍"
+        // Paare der neuen Assets (für JavaScript)
+        const housePairs = [
+            { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
+            { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
+            { empty: "WohnhauBlauRotLeerNeu.svg", filled: "WohnhauBlauRotBesetztNeu.svg" },
+            { empty: "WohnhauGelbBraunLeerNeu.svg", filled: "WohnhauGelbBraunBesetztNeu.svg" },
+            { empty: "WohnhauGelbRotLeerNeu.svg", filled: "WohnhauGelbRotBesetztNeu.svg" },
+            { empty: "WohnhauGrauBraunLeerNeu.svg", filled: "WohnhauGrauBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
+            { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
+            { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
         ];
 
-        let currentDialogue = 0;
+        // Funktion zum Setzen des Haus-Assets
+        function setHouseAsset(houseElement, isFilled) {
+            const houseIndex = parseInt(houseElement.data('house'));
+            const asset = isFilled ? housePairs[houseIndex % housePairs.length].filled : housePairs[houseIndex % housePairs.length].empty;
+            houseElement.find('.house-icon').attr('src', `./assets/${asset}`);
+        }
 
-        // Show dialogues on Enter key or click
-        function showNextDialogue() {
-            currentDialogue++;
-            if (currentDialogue < dialogues.length) {
-                $('#dialogueText').fadeOut(200, function() {
-                    $(this).text(dialogues[currentDialogue]).fadeIn(200);
+        // Initialisierung der Stadt
+        function initCity() {
+            const initialResidents = [
+                {name: "Thomas", house: 0}, {name: "Laura", house: 1}, {name: "Paul", house: 2},
+                {name: "Clara", house: 3}, {name: "Emma", house: 4}, {name: "Elena", house: 5},
+                {name: "Mueller", house: 6}, {name: "Jonas", house: 7}, {name: "David", house: 8},
+                {name: "Stefan", house: 9}, {name: "Tobias", house: 10}, {name: "Bernd", house: 11},
+                {name: "Anton", house: 12}, {name: "Legat", house: 13}, {name: "Lea", house: 14},
+                {name: "Thorsten", house: 15}, {name: "Sophie", house: 16}, {name: "Katrin", house: 17},
+                {name: "Leon", house: 18}
+            ];
+            initialResidents.forEach(resident => {
+                stadt[resident.house] = resident.name;
+                const houseElement = $(`.house[data-house="${resident.house}"]`);
+                setHouseAsset(houseElement, true);
+                houseElement.addClass('checked');
+            });
+            $('#occupiedCount').text(occupiedHouses + ' / 20');
+            updateLoadFactor();
+        }
 
-                    // Change Major Mike image based on dialogue
-                    if (currentDialogue === 1) {
-                        $('#majorMikeImage').attr('src', './assets/sad_major.png');
-                    } else if (currentDialogue === 2) {
-                        $('#majorMikeImage').attr('src', './assets/card_major.png');
-                    } else if (currentDialogue === 3) {
-                        $('#majorMikeImage').attr('src', './assets/card_major.png');
-                    }
+        // Alle Dialoge in einer Liste
+        const dialogueSequence = [
+            "Separate Chaining erzeugt bei vielen Daten lange Listen, die die Such Performance beeinträchtigen. Außerdem können einige Speicherbereiche ungenutzt bleiben. Also entstehen sehr große Mehrfamilienhäuser, in denen man dann auch keine Bewohner schnell findet. Zudem können Häuser so auch leer stehen bleiben.",
+            "Ich habe hier mal etwas vorbereitet. 19 Bewohner sind bereits eingezogen, somit sind die Häuser 0 bis 18 belegt.",
+            "Nun trage Levi in diesen Stadtteil ein und benutze linear probing.",
+            "Levi soll die Hausnummer 0 haben, leider ist sie belegt, aber nach dem Prinzip des Linear Probings können wir ja einfach das nächstfreie Haus nehmen. Das sollte kein Problem sein, oder?",
+            "Der Computer sieht nicht, welche Stelle im Speicher belegt ist oder nicht. Er muss jedes Haus einzeln prüfen. Das sollst du nun auch nachvollziehen, indem du jedes Haus der Reihe nach durchgehst!",
+            "Ganz schön viel Aufwand was? Die Stadt ist einfach zu voll, das könnte mit Hashmaps genauso passieren.",
+            "Schauen wir uns diesen Stadtteil nochmal genauer an. 19 von 20 Häusern sind belegt, die Anzahl der belegten Häuser durch die Anzahl der Häuser insgesamt ist der Load-Factor.",
+            "Dieser ist ein aussagekräftiges Mittel, um zu bestimmen, wie voll eine Hashmap bzw. der Stadtteil ist. Wenn dieser über 0,75 liegt, entstehen riesige Suchketten und die Verfahren verlieren an Effizienz.",
+            "Glücklicherweise haben wir dir eine Hilfe bereitgestellt, welcher immer die Übersicht bewahrt. Dieser zeigt gerade 0.95. Das ist viel zu hoch für eine effiziente Stadt, also sollten wir trotz der hohen Kosten eine Stadterweiterung durchführen."
+        ];
 
-                    if (currentDialogue === dialogues.length - 1) {
-                        $('#dialogueContinue').fadeOut();
-                        gameStarted = true;
-                        $('.house').css('cursor', 'pointer');
-                    }
-                });
+        // Funktion zum Aktualisieren des Load-Factors
+        function updateLoadFactor() {
+            const loadFactor = occupiedHouses / HASH_SIZE;
+            $('#loadFactorValue').text(loadFactor.toFixed(2));
+            $('#loadFactorBox').removeClass('lf-good lf-medium lf-bad');
+            if (loadFactor <= 0.5) {
+                $('#loadFactorBox').addClass('lf-good');
+            } else if (loadFactor <= 0.75) {
+                $('#loadFactorBox').addClass('lf-medium');
+            } else {
+                $('#loadFactorBox').addClass('lf-bad');
             }
         }
 
-        // Show continue prompt
-        setTimeout(function() {
-            $('#dialogueContinue').fadeIn();
-        }, 1000);
+        // Funktion zum Anzeigen eines bestimmten Dialogs
+        function showDialogue(step) {
+            $('#dialogueText').fadeOut(200, function() {
+                $(this).text(dialogueSequence[step]).fadeIn(200);
+                if (step === 2) {
+                    $('#hashInput').val('Levi');
+                    $('#hashButton').prop('disabled', false);
+                }
+                if (step === 3) {
+                    probingActive = true;
+                    const startHash = parseInt($('#hashResult').text());
+                    currentProbeIndex = startHash;
+                    $(`.house[data-house="${currentProbeIndex}"]`).addClass('highlight-target');
+                }
+                if (step === 6) {
+                    gameCompleted = true;
+                    $('#successOverlay').css('display', 'flex');
+                }
+            });
+        }
 
-        // Handle Enter key and Space for dialogue
+        // --- Listener für Dialoge ---
         $(document).keydown(function(e) {
-            if ((e.key === 'Enter' || e.key === ' ') && currentDialogue < dialogues.length - 1) {
-                showNextDialogue();
+            if ((e.key === 'Enter' || e.key === ' ') && !gameCompleted && canSkipDialogue) {
+                if (currentDialogueStep < 2 || (currentDialogueStep > 3 && currentDialogueStep < 6)) {
+                    currentDialogueStep++;
+                    showDialogue(currentDialogueStep);
+                }
             }
         });
 
-        // Click on dialogue box to continue
         $('.dialogue-box').click(function() {
-            if (currentDialogue < dialogues.length - 1) {
-                showNextDialogue();
+            if (!gameCompleted && canSkipDialogue) {
+                if (currentDialogueStep < 2 || (currentDialogueStep > 3 && currentDialogueStep < 6)) {
+                    currentDialogueStep++;
+                    showDialogue(currentDialogueStep);
+                }
             }
         });
 
-        // House click handler
-        $('.house').click(function() {
-            if (!gameStarted || gameCompleted) return;
+        // --- Level 10 Spielmechanik ---
+        // 1. Familie aus der Liste auswählen
+        $('#familienListe .to-do-family').click(function() {
+            if (gameCompleted || currentDialogueStep < 2) return;
+            const $item = $(this);
+            const family = $item.data('family');
+            $('#hashInput').val(family);
+            $('#hashButton').prop('disabled', false);
+            $('.to-do-family').removeClass('active');
+            $item.addClass('active');
+        });
 
-            const $house = $(this);
-
-            // Skip if already checked
-            if ($house.hasClass('checked') || $house.hasClass('found')) {
+        // Aktivieren des Buttons, sobald etwas eingegeben ist
+        $('#hashInput').on('input', function() {
+            if (currentDialogueStep < 2) {
+                $(this).val('');
+                $('#hashButton').prop('disabled', true);
                 return;
             }
-
-            attempts++;
-            checkedHouses++;
-
-            const houseNumber = $house.data('house');
-            const family = $house.data('family');
-
-            // Change icon to filled house
-            $house.find('.house-icon').attr('src', './assets/filled_house.svg');
-
-            // Check if this is Familie Müller (house 16)
-            if (family === 'Müller') {
-                $house.addClass('found');
-
-                // Change Major Mike to happy/celebrating
-                $('#majorMikeImage').attr('src', './assets/wink_major.png');
-
-                // Update dialogue
-                $('#dialogueText').html(
-                    '🎉 <strong>Ausgezeichnet!</strong> Du hast Familie Müller gefunden! ' +
-                    'Aber warte mal... du musstest <strong>' + attempts + ' Häuser</strong> durchsuchen. ' +
-                    'Das ist viel zu ineffizient! Es muss eine bessere Methode geben!'
-                );
-
-                gameCompleted = true;
-
-                // Show success modal after short delay
-                setTimeout(function() {
-                    showSuccessModal();
-                }, 1500);
-
+            if ($(this).val().trim() !== '') {
+                $('#hashButton').prop('disabled', false);
             } else {
-                $house.addClass('checked');
-
-                // Change Major Mike to sad when wrong house
-                $('#majorMikeImage').attr('src', './assets/sad_major.png');
-
-                // Update dialogue for wrong house
-                const responses = [
-                    `Nein, in Haus ${houseNumber} wohnt Familie ${family}. Weiter suchen!`,
-                    `Das ist Familie ${family} in Haus ${houseNumber}. Das sind nicht die Müllers!`,
-                    `Haus ${houseNumber}: Familie ${family}. Falsche Familie, versuch's weiter!`,
-                    `Hmm, Familie ${family}... nicht die Richtigen. Probier ein anderes Haus!`,
-                    `Familie ${family}? Nein, das sind nicht die Müllers. Mach weiter!`
-                ];
-
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                $('#dialogueText').text(randomResponse);
-
-                // Change back to card_major after 2 seconds
-                setTimeout(function() {
-                    if (!gameCompleted) {
-                        $('#majorMikeImage').attr('src', './assets/card_major.png');
-                    }
-                }, 2000);
+                $('#hashButton').prop('disabled', true);
             }
-
-            // Update stats
-            updateStats();
         });
 
-        function updateStats() {
-            $('#checkedCount').text(checkedHouses + ' / 20');
-            $('#attemptsCount').text(attempts);
+        // 2. Hash-Wert berechnen (ereignisgebunden)
+        $('#hashButton').click(function() {
+            if (gameCompleted) return;
+            const family = $('#hashInput').val().trim();
+            if (!family) return;
+            const startHash = getHash(family, HASH_SIZE);
+            $('#hashResult').text(startHash);
+            currentDialogueStep = 3;
+            showDialogue(currentDialogueStep);
+        });
 
-            const progress = (checkedHouses / 20) * 100;
-            $('#progressBar').css('width', progress + '%').text(Math.round(progress) + '%');
-        }
-
-        function showSuccessModal() {
-            $('#finalAttempts').text(attempts);
-            $('#finalChecked').text(checkedHouses);
-
-            // Personalisierte Nachricht basierend auf Performance
-            let performanceMsg = '';
-            if (attempts <= 5) {
-                performanceMsg = 'Wow, du hattest Glück! Aber ';
-            } else if (attempts <= 10) {
-                performanceMsg = 'Nicht schlecht! Aber ';
-            } else if (attempts <= 16) {
-                performanceMsg = 'Das hat eine Weile gedauert! ';
-            } else {
-                performanceMsg = 'Oh je, das hat wirklich lange gedauert! ';
+        // 3. Haus klicken, um zum nächsten Haus zu gehen
+        $('.house').click(function() {
+            if (!probingActive || gameCompleted) return;
+            const $house = $(this);
+            const houseNumber = parseInt($house.data('house'));
+            if (houseNumber === currentProbeIndex) {
+                $(`.house[data-house="${currentProbeIndex}"]`).removeClass('highlight-target');
+                currentProbeIndex = (currentProbeIndex + 1) % HASH_SIZE;
+                if (currentProbeIndex > maxProbes) {
+                    probingActive = false;
+                    currentDialogueStep = 4;
+                    showDialogue(currentDialogueStep);
+                    return;
+                }
+                $(`.house[data-house="${currentProbeIndex}"]`).addClass('highlight-target');
             }
+        });
 
-            const successMsg = `
-            <strong style="color: #667eea;">Major Mike sagt:</strong><br>
-            "${performanceMsg}Stell dir vor, wir hätten 1000 Häuser in unserer Stadt!
-            Das lineare Durchsuchen ist viel zu langsam. Es <em>muss</em> eine bessere Methode geben!
-            Lass uns im nächsten Level etwas Neues lernen: <strong>Hash-Funktionen!</strong>"
-        `;
-
-            $('#successMessage').html(successMsg);
-            $('#successOverlay').css('display', 'flex');
+        // --- Hash-Funktion (zero-based) ---
+        function getHash(key, size) {
+            let sum = 0;
+            for (let i = 0; i < key.length; i++) {
+                sum += key.charCodeAt(i);
+            }
+            return sum % size;
         }
 
-        // Global functions for buttons
+        // --- Global functions for buttons ---
         window.restartLevel = function() {
             location.reload();
         };
 
         window.nextLevel = function() {
-            // Fade out
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
-
-            // Redirect to level 1 (or level-select if level 1 doesn't exist yet)
             setTimeout(function() {
-                window.location.href = 'Level-Auswahl?page=1&completed=0&level=1';
+                window.location.href = 'level-select.php';
             }, 500);
         };
 
-        // Add keyboard hint
-        setTimeout(function() {
-            if (!gameStarted) {
-                $('#dialogueContinue').html('Klicke hier oder drücke Enter ↵');
-            }
-        }, 3000);
+        // Stadt initialisieren
+        initCity();
     });
 </script>
-
 </body>
 </html>

@@ -38,6 +38,14 @@ if (isset($_REQUEST["level"]) && $_REQUEST["level"] !== "") {
 // Levels aus Session holen
 $levelsDone = $_SESSION['levels_done'];
 
+$lastLevel = end($levelsDone);
+if ($lastLevel !== 7 && $_REQUEST["page"] === "2") {
+    $currentUrl = $_SERVER['REQUEST_URI'];
+    $newUrl = str_replace('page=2', 'page=1', $currentUrl);
+    header("Location: " . $newUrl);
+    exit;
+}
+
 // Alle verfügbaren Levels definieren
 $allLevels = [
     ['title' => 'Einführung', 'description' => 'Lerne die Grundlagen von HashCity kennen'],
@@ -83,7 +91,8 @@ $hasNextPage = $currentPage < $totalPages;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HashCity - Level Auswahl</title>
-
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/icons8-hash-scribby-32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="./assets/icons8-hash-scribby-96.png">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -300,6 +309,7 @@ $hasNextPage = $currentPage < $totalPages;
         }
 
         /* Level Nodes */
+        /*
         .level-node {
             position: relative;
             width: 130px;
@@ -324,7 +334,6 @@ $hasNextPage = $currentPage < $totalPages;
             box-shadow: 0 12px 30px rgba(0,0,0,0.3);
         }
 
-        /* Active Level */
         .level-node.active {
             width: 300px;
             height: 300px;
@@ -392,7 +401,6 @@ $hasNextPage = $currentPage < $totalPages;
             font-size: 2.5rem;
         }
 
-        /* Level Details */
         .level-details {
             opacity: 0;
             transform: translateY(10px);
@@ -419,6 +427,136 @@ $hasNextPage = $currentPage < $totalPages;
         .level-description {
             font-size: 0.95rem;
             color: #333;
+            line-height: 1.4;
+        }*/
+        .level-node {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            background: linear-gradient(135deg, rgba(66, 88, 122, 0.95), rgba(52, 73, 94, 0.95));
+            border: 4px solid rgba(41, 128, 185, 0.8);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 5;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3),
+            inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .level-node:hover:not(.locked):not(.active) {
+            transform: scale(1.15);
+            background: linear-gradient(135deg, rgba(66, 88, 122, 1), rgba(52, 73, 94, 1));
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4),
+            0 0 20px rgba(41, 128, 185, 0.5);
+        }
+
+        /* Active Level */
+        .level-node.active {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, rgba(41, 128, 185, 0.98), rgba(52, 152, 219, 0.98));
+            border-color: #3498db;
+            border-width: 6px;
+            box-shadow: 0 0 50px rgba(52, 152, 219, 0.8),
+            0 15px 50px rgba(0,0,0,0.5),
+            inset 0 2px 8px rgba(255, 255, 255, 0.2);
+            z-index: 10;
+            transform: translateY(70px);
+        }
+
+        .level-node.active:hover {
+            transform: translateY(70px) scale(1.03);
+        }
+
+        .level-node.locked {
+            background: linear-gradient(135deg, rgba(127, 140, 141, 0.7), rgba(149, 165, 166, 0.7));
+            border-color: #95a5a6;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .level-node.locked:hover {
+            transform: scale(1);
+        }
+
+        .level-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ecf0f1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 0;
+            transition: all 0.5s ease;
+        }
+
+        .level-node.active .level-title {
+            font-size: 4rem;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+            text-shadow: 0 3px 8px rgba(0,0,0,0.4);
+        }
+
+        .level-number {
+            font-size: 1rem;
+            color: #bdc3c7;
+            font-weight: 600;
+            transition: all 0.5s ease;
+        }
+
+        .level-node.active .level-number {
+            font-size: 1.5rem;
+
+            margin-bottom: 0.3rem;
+            color: #ecf0f1;
+        }
+
+        .level-status {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 1.8rem;
+            transition: all 0.5s ease;
+        }
+
+        .level-node.active .level-status {
+            top: 15px;
+            right: 15px;
+            font-size: 2.5rem;
+        }
+
+        /* Level Details */
+        .level-details {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+            text-align: center;
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .level-node.active .level-details {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 200px;
+        }
+
+        .level-subtitle {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .level-description {
+            font-size: 0.95rem;
+            color: #ecf0f1;
             line-height: 1.4;
         }
 
@@ -474,6 +612,39 @@ $hasNextPage = $currentPage < $totalPages;
             position: absolute;
             top: 20px;
             left: 20px;
+            padding: 0.6rem 1.1rem;
+            background: rgba(52, 73, 94, 0.7);
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 25px;
+            font-weight: 600;
+            color: rgba(236, 240, 241, 0.9);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+            font-family: 'Orbitron', sans-serif;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.85rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .back-button:hover {
+            background: rgba(52, 73, 94, 0.85);
+            border-color: rgba(52, 152, 219, 0.6);
+            color: #ecf0f1;
+            transform: translateX(-3px);
+        }
+
+        .back-button::before {
+            content: '← ';
+            margin-right: 5px;
+            opacity: 0.8;
+        }
+
+        /*.back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
             padding: 0.7rem 1.3rem;
             background: rgba(255, 255, 255, 0.9);
             border: 2px solid rgba(102, 126, 234, 0.5);
@@ -498,7 +669,7 @@ $hasNextPage = $currentPage < $totalPages;
         .back-button::before {
             content: '← ';
             margin-right: 5px;
-        }
+        }*/
 
         /* Start Button */
         .start-level-btn {
@@ -507,7 +678,7 @@ $hasNextPage = $currentPage < $totalPages;
             left: 50%;
             transform: translateX(-50%);
             padding: 0.8rem 2rem;
-            background: #667eea;
+            background: linear-gradient(135deg, #FF8C00 0%, #FF6347 100%); /*#667eea*/
             color: #fff;
             border: none;
             border-radius: 30px;
@@ -521,14 +692,20 @@ $hasNextPage = $currentPage < $totalPages;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
+        .start-level-btn:hover {
+            /*background: #764ba2;*/
+            box-shadow:
+                    0 20px 80px rgba(0, 0, 0, 0.6),
+                    0 0 80px rgba(255, 140, 0, 1),
+                    inset 0 -3px 10px rgba(0, 0, 0, 0.2);
+            transform: translateX(-50%) scale(1.05);
+        }
+
         .level-node.active .start-level-btn {
             opacity: 1;
         }
 
-        .start-level-btn:hover {
-            background: #764ba2;
-            transform: translateX(-50%) scale(1.05);
-        }
+
 
         /* Navigation Arrows */
         .nav-arrow {
@@ -838,13 +1015,20 @@ $hasNextPage = $currentPage < $totalPages;
     ◀
 </div>
 
-<div class="nav-arrow nav-arrow-right <?php echo !$hasNextPage ? 'disabled' : ''; ?>"
+
+<div class="nav-arrow nav-arrow-right <?php
+$lastLevel = end($levelsDone);
+if ($lastLevel !== 7 || !$hasNextPage) {
+    echo "disabled";
+}
+?>"
      id="nextPageArrow"
-    <?php if ($hasNextPage): ?>
-        onclick="window.location.href='Level-Auswahl?page=<?php echo $currentPage + 1; ?>'"
-    <?php endif; ?>>
+        <?php if ($hasNextPage && $lastLevel === 7): ?>
+            onclick="window.location.href='Level-Auswahl?page=<?php echo $currentPage + 1; ?>'"
+        <?php endif; ?>>
     ▶
 </div>
+
 
 <!-- Road Container -->
 <div class="road-container">
