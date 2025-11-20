@@ -3,7 +3,7 @@
  * HashCity - Level 9: Mehrfamilienhäuser (Separate Chaining)
  * UPDATE: Suchphase erfordert "Durchklicken" (Traversieren) der Liste bis zum Ziel.
  */
-
+//ÄNDERUNG
 $anzahl_haeuser = 10;
 
 // Die Bewohner laut Text-Vorgabe
