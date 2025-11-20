@@ -1,4 +1,3 @@
-
 <?php
 /**
  * HashCity - Level 1: Einführung in Hashmaps (Drag & Drop) - angepasst an Level 2 Design
@@ -211,7 +210,7 @@
         .houses-row {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 0.8rem;
+            gap: 1rem;
             margin-bottom: 0.5rem;
             padding: 0 1rem;
             position: relative;
@@ -222,7 +221,7 @@
             width: 100%;
             height: 60px;
             background-image: url('./assets/Strasse.svg');
-            background-size: cover;
+            Background-size: cover;
             background-position: center;
             background-repeat: repeat-x;
             position: relative;
@@ -281,11 +280,14 @@
             box-shadow: 0 0 35px 12px rgba(255, 215, 0, 0.9);
             z-index: 11;
         }
+        .house.quadratic-target {
+            transform: translateY(-10px) scale(1.15) !important;
+            box-shadow: 0 0 35px 12px rgba(255, 0, 0, 0.9);
+            z-index: 11;
+        }
         .house-icon {
             width: 100%;
             height: 100%;
-            max-width: 100%;
-            max-height: 100%;
             object-fit: contain;
             transition: all 0.3s ease;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
@@ -441,6 +443,42 @@
             color: #999;
             transform: none;
         }
+        /* Load Factor Display */
+        .load-factor-box {
+            text-align: center;
+            padding: 0.5rem;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 2px solid #ccc;
+            transition: all 0.5s ease;
+        }
+        .lf-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .lf-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        /* Ampel-Farben für Load Factor */
+        .lf-good {
+            color: #4CAF50;
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        } /* <= 0.5 */
+        .lf-medium {
+            color: #FF9800;
+            border-color: #FF9800;
+            background: #fff3e0;
+        } /* 0.5 - 0.75 */
+        .lf-bad {
+            color: #D32F2F;
+            border-color: #D32F2F;
+            background: #FFEBEE;
+        } /* > 0.75 */
         /* Success Modal */
         .success-overlay {
             position: fixed;
@@ -568,13 +606,6 @@
             .info-panel {
                 position: static;
             }
-            .houses-row {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 0.6rem;
-            }
-            .street {
-                height: 50px;
-            }
         }
         @media (max-width: 768px) {
             .game-container {
@@ -585,40 +616,8 @@
                 padding: 1.5rem 1rem;
             }
             .houses-row {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 0.4rem;
-                padding: 0 0.5rem;
-            }
-            .house-number {
-                font-size: 0.8rem;
-                padding: 0.1rem 0.3rem;
-            }
-            .street {
-                height: 40px;
-            }
-            .street::after {
-                height: 3px;
-            }
-            .success-modal {
-                padding: 2rem;
-                margin: 1rem;
-            }
-            .success-title {
-                font-size: 2rem;
-            }
-            .stat-value {
-                font-size: 2rem;
-            }
-            .street-block {
-                margin-bottom: 2rem;
-            }
-        }
-        @media (max-width: 480px) {
-            .houses-row {
-                grid-template-columns: repeat(5, 1fr);
-            }
-            .grid-title {
-                font-size: 1.4rem;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.6rem;
             }
         }
     </style>
@@ -666,12 +665,34 @@
         <!-- Houses Grid -->
         <div class="houses-grid">
             <h2 class="grid-title">🏘️ HashCity Neuer Stadtteil</h2>
-            <!-- Street Block: Houses 1-5 -->
+            <!-- Street Block: Houses 0-4 -->
+            <?php
+            // Paare der neuen Assets für PHP
+            $housePairs = [
+                    ["empty" => "WohnhauBlauBraunLeerNeu.svg", "filled" => "WohnhauBlauBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauBlauGrauLeerNeu.svg", "filled" => "WohnhauBlauGrauBesetztNeu.svg"],
+                    ["empty" => "WohnhauBlauRotLeerNeu.svg", "filled" => "WohnhauBlauRotBesetztNeu.svg"],
+                    ["empty" => "WohnhauGelbBraunLeerNeu.svg", "filled" => "WohnhauGelbBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGelbRotLeerNeu.svg", "filled" => "WohnhauGelbRotBesetztNeu.svg"],
+                    ["empty" => "WohnhauGrauBraunLeerNeu.svg", "filled" => "WohnhauGrauBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenBraunLeerNeu.svg", "filled" => "WohnhauGruenBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenGrauLeerNeu.svg", "filled" => "WohnhauGruenGrauBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenBraunLeerNeu.svg", "filled" => "WohnhauGruenBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenGrauLeerNeu.svg", "filled" => "WohnhauGruenGrauBesetztNeu.svg"],
+                    ["empty" => "WohnhauRotRotLeerNeu.svg", "filled" => "WohnhauRotRotBesetztNeu.svg"]
+            ];
+
+            // Zufällige Zuordnung der Asset-Paare zu den Häusern
+            $houseAssets = [];
+            for ($i = 0; $i <= 4; $i++) {
+                $houseAssets[$i] = $housePairs[array_rand($housePairs)];
+            }
+            ?>
             <div class="street-block">
                 <div class="houses-row">
                     <?php for ($i = 0; $i <= 4; $i++): ?>
                         <div class="house" data-house="<?php echo $i; ?>" data-family="">
-                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
                             <div class="house-family"></div>
                         </div>
@@ -706,12 +727,6 @@
             <div class="info-item">
                 <div class="info-label">Eingetragene Familien:</div>
                 <div class="info-value" id="occupiedCount">0 / 5</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">💡 Spieltipp:</div>
-                <div style="font-size: 0.95rem; color: #333; margin-top: 0.5rem; font-weight: 500; line-height: 1.5;">
-                    Klicke auf einen Namen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechnen'.
-                </div>
             </div>
         </div>
     </div>
@@ -755,6 +770,42 @@
         let gameCompleted = false;
         let searchMode = false;
         let selectedFamily = null;
+
+        // Paare der neuen Assets für JavaScript
+        const housePairs = [
+            { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
+            { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
+            { empty: "WohnhauBlauRotLeerNeu.svg", filled: "WohnhauBlauRotBesetztNeu.svg" },
+            { empty: "WohnhauGelbBraunLeerNeu.svg", filled: "WohnhauGelbBraunBesetztNeu.svg" },
+            { empty: "WohnhauGelbRotLeerNeu.svg", filled: "WohnhauGelbRotBesetztNeu.svg" },
+            { empty: "WohnhauGrauBraunLeerNeu.svg", filled: "WohnhauGrauBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
+            { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
+            { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
+        ];
+
+        // Funktion zum Setzen des Haus-Assets
+        function setHouseAsset(houseElement, isFilled) {
+            // Aktuelles Asset des Hauses auslesen
+            const currentAsset = houseElement.find('.house-icon').attr('src');
+            const assetName = currentAsset.split('/').pop();
+
+            // Passendes Paar in housePairs finden
+            let matchingPair = null;
+            for (const pair of housePairs) {
+                if (pair.empty === assetName || pair.filled === assetName) {
+                    matchingPair = pair;
+                    break;
+                }
+            }
+
+            // Neues Asset basierend auf isFilled setzen
+            const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
+            houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
+        }
+
         const dialogues = [
             "Guck mal, das ist einer der neuen Stadtteile. Hier ziehen demnächst die neuen Stadtbewohner ein. Damit das nicht so unübersichtlich wie im vorherigen Stadtteil wird, habe ich mir etwas ganz Besonderes überlegt. Dafür dürfen keine Namen doppelt existieren.",
             "Hier unten rechts befindet sich unser Stadtplaner. Dort siehst du, welche Hausnummer zu welchem Namen gehört. Klicke einfach auf einen Namen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechnen'."
@@ -830,7 +881,6 @@
             if (!family) return;
             const hash = getHash(family, HASH_SIZE);
             $('#hashResult').text(hash);
-
             if (searchMode) {
                 if (family === 'Sophie' && hash === 4) {
                     $('.house[data-house="4"]').addClass('found show-family');
@@ -856,7 +906,6 @@
         $('.house').click(function() {
             const $house = $(this);
             const houseNumber = $house.data('house');
-
             if (searchMode) {
                 const occupant = stadt[houseNumber];
                 if (occupant) {
@@ -881,28 +930,24 @@
                     if(gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
                     return;
                 }
-
                 const targetHash = getHash(selectedFamily, HASH_SIZE);
                 if (houseNumber !== targetHash) {
                     $('#dialogueText').text(`Halt! Der Rechner hat Haus ${targetHash} für Familie ${selectedFamily} berechnet, nicht Haus ${houseNumber}.`);
                     return;
                 }
-
                 const currentOccupant = stadt[houseNumber];
                 if (currentOccupant === null) {
                     // --- HAUS IST FREI ---
                     stadt[houseNumber] = selectedFamily;
-                    $house.find('.house-icon').attr('src', './assets/filled_house.svg');
+                    setHouseAsset($house, true);
                     $house.addClass('checked');
                     $house.removeClass('highlight-target');
                     $(`.to-do-family[data-family="${selectedFamily}"]`)
                         .removeClass('active')
                         .addClass('list-group-item-success')
                         .off('click');
-
                     occupiedHouses++;
                     $('#occupiedCount').text(occupiedHouses + ' / 5');
-
                     if (occupiedHouses < 5) {
                         $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen. Wen nehmen wir als nächstes?`);
                     } else {
@@ -910,7 +955,6 @@
                         searchMode = true;
                         $('#hashInput').prop('readonly', false).val('');
                     }
-
                     selectedFamily = null;
                     $('#hashInput').val('');
                     $('#hashResult').text('-');
