@@ -216,6 +216,7 @@
             width: 100%;
             height: 60px;
             background-image: url('./assets/Strasse.svg');
+            Background-size: cover;
             background-position: center;
             background-repeat: repeat-x;
             position: relative;
@@ -264,8 +265,6 @@
             position: relative;
             border-radius: 10px;
             padding: 0.3rem;
-            heiht: 100px;
-            width: 100px;
         }
         .house:hover:not(.checked):not(.found) {
             transform: translateY(-8px) scale(1.08);
@@ -284,8 +283,6 @@
         .house-icon {
             width: 100%;
             height: 100%;
-            max-width: 100%;
-            max-height: 100%;
             object-fit: contain;
             transition: all 0.3s ease;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
@@ -604,29 +601,6 @@
             .info-panel {
                 position: static;
             }
-            .houses-row {
-                grid-template-columns: repeat(10, 1fr);
-                gap: 0.6rem;
-            }
-            .street {
-                height: 50px;
-            }
-            .street::after {
-                height: 3px;
-            }
-            .success-modal {
-                padding: 2rem;
-                margin: 1rem;
-            }
-            .success-title {
-                font-size: 2rem;
-            }
-            .stat-value {
-                font-size: 2rem;
-            }
-            .street-block {
-                margin-bottom: 2rem;
-            }
         }
         @media (max-width: 768px) {
             .game-container {
@@ -637,32 +611,8 @@
                 padding: 1.5rem 1rem;
             }
             .houses-row {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 0.4rem;
-                padding: 0 0.5rem;
-            }
-            .house-number {
-                font-size: 0.8rem;
-                padding: 0.1rem 0.3rem;
-            }
-            .street {
-                height: 40px;
-            }
-            .street::after {
-                height: 3px;
-            }
-            .success-modal {
-                padding: 2rem;
-                margin: 1rem;
-            }
-            .success-title {
-                font-size: 2rem;
-            }
-            .stat-value {
-                font-size: 2rem;
-            }
-            .street-block {
-                margin-bottom: 2rem;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.6rem;
             }
         }
     </style>
@@ -789,12 +739,6 @@
                 <div class="info-label">Eingetragene Familien:</div>
                 <div class="info-value" id="occupiedCount">19 / 20</div>
             </div>
-            <div class="info-item">
-                <div class="info-label">💡 Spieltipp:</div>
-                <div style="font-size: 0.95rem; color: #333; margin-top: 0.5rem; font-weight: 500; line-height: 1.5;">
-                    Klicke auf den Namen "Levi", um den Rechner zu füllen, und klicke dann auf 'Berechnen'.
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -804,7 +748,7 @@
         <div class="success-icon">🎉</div>
         <h2 class="success-title">Stadterweiterung!</h2>
         <p class="success-message" id="successMessage">
-            Thomas und ich haben besprochen, dass man in so einem Fall eine Stadtteil Erweiterung machen sollte. Mehr Häuser, mehr Platz, bessere Verteilung, weniger Kollisionen.
+            Thomas und ich haben besprochen, dass man in so einem Fall eine Stadtteilerweiterung machen sollte. Mehr Häuser, mehr Platz, bessere Verteilung, weniger Kollisionen.
         </p>
         <div class="success-buttons">
             <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 11 →</button>
