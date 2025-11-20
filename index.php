@@ -15,6 +15,10 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
 
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons8-hash-scribby-32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons8-hash-scribby-96.png">
+    <!-- Bootstrap 5 CSS -->
+
     <style>
         * {
             margin: 0;
