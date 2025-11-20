@@ -771,7 +771,7 @@ $familien = [
     <div class="container-fluid">
         <div class="row align-items-center">
             <div class="col-auto">
-                <a href="level-select.php" class="back-btn">Zurück</a>
+                <a href="Level-Auswahl" class="back-btn">Zurück</a>
             </div>
         </div>
     </div>
@@ -1083,7 +1083,7 @@ $familien = [
 
             // Redirect to level 1 (or level-select if level 1 doesn't exist yet)
             setTimeout(function() {
-                window.location.href = 'level-select.php';
+                window.location.href = 'Level-Auswahl?page=1&completed=0&level=1';
             }, 500);
         };
 
