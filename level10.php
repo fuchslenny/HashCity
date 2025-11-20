@@ -1,14 +1,9 @@
-<?php
-/**
- * HashCity - Level 5: Quadratic Probing
- */
-?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HashCity - Level 5: Quadratic Probing</title>
+    <title>HashCity - Level 10: Load-Faktor</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts -->
@@ -653,7 +648,7 @@
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">
-                    Linear probing erzeugt Cluster, was zu einem großen Suchaufwand führt, wenn man viele Daten speichern möchte. Also entstehen große Nachbarschaften, in denen man sehr lang suchen muss, bis man das richtige Haus gefunden hat.
+                    Separate Chaining erzeugt bei vielen Daten lange Listen, die die Such Performance beeinträchtigen. Außerdem können einige Speicherbereiche ungenutzt bleiben. Also entstehen sehr große Mehrfamilienhäuser, in denen man dann auch keine Bewohner schnell findet. Zudem können Häuser so auch leer stehen bleiben.
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
                     Drücke Enter ↵
@@ -663,9 +658,9 @@
         <!-- Houses Grid -->
         <div class="houses-grid">
             <h2 class="grid-title">🏘️ HashCity Neuer Stadtteil</h2>
-            <!-- Street Block: Houses 0-9 -->
+            <!-- 4 Straßen mit je 5 Häusern -->
             <?php
-            // Paare der neuen Assets für PHP
+            // Paare der neuen Assets
             $housePairs = [
                     ["empty" => "WohnhauBlauBraunLeerNeu.svg", "filled" => "WohnhauBlauBraunBesetztNeu.svg"],
                     ["empty" => "WohnhauBlauGrauLeerNeu.svg", "filled" => "WohnhauBlauGrauBesetztNeu.svg"],
@@ -681,7 +676,7 @@
             ];
             // Zufällige Zuordnung der Asset-Paare zu den Häusern
             $houseAssets = [];
-            for ($i = 0; $i < 10; $i++) {
+            for ($i = 0; $i < 20; $i++) {
                 $houseAssets[$i] = $housePairs[array_rand($housePairs)];
             }
             ?>
@@ -709,9 +704,41 @@
                 </div>
                 <div class="street"></div>
             </div>
+            <div class="street-block">
+                <div class="houses-row">
+                    <?php for ($i = 10; $i < 15; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <div class="house-number"><?php echo $i; ?></div>
+                            <div class="house-family"></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+                <div class="street"></div>
+            </div>
+            <div class="street-block">
+                <div class="houses-row">
+                    <?php for ($i = 15; $i < 20; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <div class="house-number"><?php echo $i; ?></div>
+                            <div class="house-family"></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+                <div class="street"></div>
+            </div>
         </div>
         <!-- Info Panel -->
         <div class="info-panel">
+            <!-- Load Factor Display -->
+            <div class="info-item">
+                <div class="info-label">Load-Faktor</div>
+                <div class="load-factor-box lf-bad" id="loadFactorBox">
+                    <div class="lf-value" id="loadFactorValue">0.95</div>
+                    <div class="lf-label">19/20 Häuser belegt</div>
+                </div>
+            </div>
             <!-- Stadtplaner (Hash-Rechner) -->
             <div class="info-item hash-calculator">
                 <div class="info-label">Hash-Rechner 3000</div>
@@ -726,16 +753,12 @@
                 <div class="family-list-container">
                     <ul id="familienListe" class="list-group">
                         <li class="list-group-item to-do-family" data-family="Levi">Levi</li>
-                        <li class="list-group-item to-do-family" data-family="Emil">Emil</li>
-                        <li class="list-group-item to-do-family" data-family="Lars">Lars</li>
-                        <li class="list-group-item to-do-family" data-family="Thomas">Thomas</li>
-                        <li class="list-group-item to-do-family" data-family="Noah">Noah</li>
                     </ul>
                 </div>
             </div>
             <div class="info-item">
                 <div class="info-label">Eingetragene Familien:</div>
-                <div class="info-value" id="occupiedCount">0 / 5</div>
+                <div class="info-value" id="occupiedCount">19 / 20</div>
             </div>
         </div>
     </div>
@@ -744,23 +767,12 @@
 <div class="success-overlay" id="successOverlay">
     <div class="success-modal">
         <div class="success-icon">🎉</div>
-        <h2 class="success-title">Familie gefunden!</h2>
+        <h2 class="success-title">Stadterweiterung!</h2>
         <p class="success-message" id="successMessage">
-            Vielen Dank! Nun ist auch dieser Stadtteil fertig.
+            Thomas und ich haben besprochen, dass man in so einem Fall eine Stadtteilerweiterung machen sollte. Mehr Häuser, mehr Platz, bessere Verteilung, weniger Kollisionen.
         </p>
-        <div class="success-stats">
-            <div class="stat-box">
-                <div class="stat-label">Versuche</div>
-                <div class="stat-value" id="finalAttempts">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Familien eingetragen</div>
-                <div class="stat-value" id="finalOccupied">0</div>
-            </div>
-        </div>
         <div class="success-buttons">
-            <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
-            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 6 →</button>
+            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 11 →</button>
         </div>
     </div>
 </div>
@@ -770,32 +782,18 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // --- Level 5 Setup ---
-        const HASH_SIZE = 10;
+        // --- Level 10 Setup ---
+        const HASH_SIZE = 20;
         let stadt = new Array(HASH_SIZE).fill(null);
-        let occupiedHouses = 0;
-        let attempts = 0;
-        let gameStarted = false;
+        let occupiedHouses = 19;
         let gameCompleted = false;
-        let searchMode = false;
-        let selectedFamily = null;
-        let firstCollisionHandled = false;
-        let currentFamilyIndex = 0;
-        const families = ["Levi", "Emil", "Lars", "Thomas", "Noah"];
-        const dialogues = [
-            "Linear probing erzeugt Cluster, was zu einem großen Suchaufwand führt, wenn man viele Daten speichern möchte. Also entstehen große Nachbarschaften, in denen man sehr lang suchen muss, bis man das richtige Haus gefunden hat.",
-            "Trage zunächst erstmal diese Bewohner ein, bevor ich meine neue Idee vorstelle."
-        ];
-        const successDialogue = "Vielen Dank! Nun ist auch dieser Stadtteil fertig.";
-        const errorDialogue = "Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen.";
-        const correctDialogue = "Sehr gut! Dies ist das richtige Haus.";
-        const thomasDialogue = "Sehr gut! Dies ist das richtige Haus. Wie du siehst, ist es aber schon belegt. So kann Thomas also nicht einziehen. Das neue Verfahren heißt 'quadratic probing'. Der Bewohner soll ins nächste freie Haus ziehen. Allerdings berechnet man erst das Quadrat, startend bei 1, und verschiebt den Bewohner dann um das Ergebnis. Falls auch dieses belegt ist, geht es weiter mit 2, 3, 4, usw.. Thomas soll also ins Haus 0, dies ist schon belegt und wir rechnen 0 + 1^2. Haus 1 ist ebenfalls belegt und deswegen rechnen wir 0 + 2^2. Haus 4 ist frei und Thomas kann einziehen.";
-        const noahDialogue = "Trage nach demselben Prinzip Noah ein.";
-        const thomasSearchDialogue = "Kannst du mir die Hausnummer von Thomas geben? Ich brauche noch ein paar Unterlagen von ihm.";
-        const thomasSearchErrorDialogue = "Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen. Beachte auch das Verfahren bei einer Kollision (quadratic probing).";
-        let currentDialogue = 0;
+        let currentDialogueStep = 0;
+        let probingActive = false;
+        let maxProbes = 6;
+        let canSkipDialogue = true;
+        let houseAssets = [];
 
-        // Paare der neuen Assets für JavaScript
+        // Paare der neuen Assets (für JavaScript)
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
             { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
@@ -812,23 +810,153 @@
 
         // Funktion zum Setzen des Haus-Assets
         function setHouseAsset(houseElement, isFilled) {
-            // Aktuelles Asset des Hauses auslesen
-            const currentAsset = houseElement.find('.house-icon').attr('src');
-            const assetName = currentAsset.split('/').pop(); // z. B. "WohnhauBlauBraunLeerNeu.svg"
+            const houseIndex = parseInt(houseElement.data('house'));
+            const asset = isFilled ? housePairs[houseIndex % housePairs.length].filled : housePairs[houseIndex % housePairs.length].empty;
+            houseElement.find('.house-icon').attr('src', `./assets/${asset}`);
+        }
 
-            // Passendes Paar in housePairs finden
-            let matchingPair = null;
-            for (const pair of housePairs) {
-                if (pair.empty === assetName || pair.filled === assetName) {
-                    matchingPair = pair;
-                    break;
+        // Initialisierung der Stadt
+        function initCity() {
+            const initialResidents = [
+                {name: "Thomas", house: 0}, {name: "Laura", house: 1}, {name: "Paul", house: 2},
+                {name: "Clara", house: 3}, {name: "Emma", house: 4}, {name: "Elena", house: 5},
+                {name: "Mueller", house: 6}, {name: "Jonas", house: 7}, {name: "David", house: 8},
+                {name: "Stefan", house: 9}, {name: "Tobias", house: 10}, {name: "Bernd", house: 11},
+                {name: "Anton", house: 12}, {name: "Legat", house: 13}, {name: "Lea", house: 14},
+                {name: "Thorsten", house: 15}, {name: "Sophie", house: 16}, {name: "Katrin", house: 17},
+                {name: "Leon", house: 18}
+            ];
+            initialResidents.forEach(resident => {
+                stadt[resident.house] = resident.name;
+                const houseElement = $(`.house[data-house="${resident.house}"]`);
+                setHouseAsset(houseElement, true);
+                houseElement.addClass('checked');
+            });
+            $('#occupiedCount').text(occupiedHouses + ' / 20');
+            updateLoadFactor();
+        }
+
+        // Alle Dialoge in einer Liste
+        const dialogueSequence = [
+            "Separate Chaining erzeugt bei vielen Daten lange Listen, die die Such Performance beeinträchtigen. Außerdem können einige Speicherbereiche ungenutzt bleiben. Also entstehen sehr große Mehrfamilienhäuser, in denen man dann auch keine Bewohner schnell findet. Zudem können Häuser so auch leer stehen bleiben.",
+            "Ich habe hier mal etwas vorbereitet. 19 Bewohner sind bereits eingezogen, somit sind die Häuser 0 bis 18 belegt.",
+            "Nun trage Levi in diesen Stadtteil ein und benutze linear probing.",
+            "Levi soll die Hausnummer 0 haben, leider ist sie belegt, aber nach dem Prinzip des Linear Probings können wir ja einfach das nächstfreie Haus nehmen. Das sollte kein Problem sein, oder?",
+            "Der Computer sieht nicht, welche Stelle im Speicher belegt ist oder nicht. Er muss jedes Haus einzeln prüfen. Das sollst du nun auch nachvollziehen, indem du jedes Haus der Reihe nach durchgehst!",
+            "Ganz schön viel Aufwand was? Die Stadt ist einfach zu voll, das könnte mit Hashmaps genauso passieren.",
+            "Schauen wir uns diesen Stadtteil nochmal genauer an. 19 von 20 Häusern sind belegt, die Anzahl der belegten Häuser durch die Anzahl der Häuser insgesamt ist der Load-Factor.",
+            "Dieser ist ein aussagekräftiges Mittel, um zu bestimmen, wie voll eine Hashmap bzw. der Stadtteil ist. Wenn dieser über 0,75 liegt, entstehen riesige Suchketten und die Verfahren verlieren an Effizienz.",
+            "Glücklicherweise haben wir dir eine Hilfe bereitgestellt, welcher immer die Übersicht bewahrt. Dieser zeigt gerade 0.95. Das ist viel zu hoch für eine effiziente Stadt, also sollten wir trotz der hohen Kosten eine Stadterweiterung durchführen."
+        ];
+
+        // Funktion zum Aktualisieren des Load-Factors
+        function updateLoadFactor() {
+            const loadFactor = occupiedHouses / HASH_SIZE;
+            $('#loadFactorValue').text(loadFactor.toFixed(2));
+            $('#loadFactorBox').removeClass('lf-good lf-medium lf-bad');
+            if (loadFactor <= 0.5) {
+                $('#loadFactorBox').addClass('lf-good');
+            } else if (loadFactor <= 0.75) {
+                $('#loadFactorBox').addClass('lf-medium');
+            } else {
+                $('#loadFactorBox').addClass('lf-bad');
+            }
+        }
+
+        // Funktion zum Anzeigen eines bestimmten Dialogs
+        function showDialogue(step) {
+            $('#dialogueText').fadeOut(200, function() {
+                $(this).text(dialogueSequence[step]).fadeIn(200);
+                if (step === 2) {
+                    $('#hashInput').val('Levi');
+                    $('#hashButton').prop('disabled', false);
+                }
+                if (step === 3) {
+                    probingActive = true;
+                    const startHash = parseInt($('#hashResult').text());
+                    currentProbeIndex = startHash;
+                    $(`.house[data-house="${currentProbeIndex}"]`).addClass('highlight-target');
+                }
+                if (step === 6) {
+                    gameCompleted = true;
+                    $('#successOverlay').css('display', 'flex');
+                }
+            });
+        }
+
+        // --- Listener für Dialoge ---
+        $(document).keydown(function(e) {
+            if ((e.key === 'Enter' || e.key === ' ') && !gameCompleted && canSkipDialogue) {
+                if (currentDialogueStep < 2 || (currentDialogueStep > 3 && currentDialogueStep < 6)) {
+                    currentDialogueStep++;
+                    showDialogue(currentDialogueStep);
                 }
             }
+        });
 
-            // Neues Asset basierend auf isFilled setzen
-            const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
-            houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
-        }
+        $('.dialogue-box').click(function() {
+            if (!gameCompleted && canSkipDialogue) {
+                if (currentDialogueStep < 2 || (currentDialogueStep > 3 && currentDialogueStep < 6)) {
+                    currentDialogueStep++;
+                    showDialogue(currentDialogueStep);
+                }
+            }
+        });
+
+        // --- Level 10 Spielmechanik ---
+        // 1. Familie aus der Liste auswählen
+        $('#familienListe .to-do-family').click(function() {
+            if (gameCompleted || currentDialogueStep < 2) return;
+            const $item = $(this);
+            const family = $item.data('family');
+            $('#hashInput').val(family);
+            $('#hashButton').prop('disabled', false);
+            $('.to-do-family').removeClass('active');
+            $item.addClass('active');
+        });
+
+        // Aktivieren des Buttons, sobald etwas eingegeben ist
+        $('#hashInput').on('input', function() {
+            if (currentDialogueStep < 2) {
+                $(this).val('');
+                $('#hashButton').prop('disabled', true);
+                return;
+            }
+            if ($(this).val().trim() !== '') {
+                $('#hashButton').prop('disabled', false);
+            } else {
+                $('#hashButton').prop('disabled', true);
+            }
+        });
+
+        // 2. Hash-Wert berechnen (ereignisgebunden)
+        $('#hashButton').click(function() {
+            if (gameCompleted) return;
+            const family = $('#hashInput').val().trim();
+            if (!family) return;
+            const startHash = getHash(family, HASH_SIZE);
+            $('#hashResult').text(startHash);
+            currentDialogueStep = 3;
+            showDialogue(currentDialogueStep);
+        });
+
+        // 3. Haus klicken, um zum nächsten Haus zu gehen
+        $('.house').click(function() {
+            if (!probingActive || gameCompleted) return;
+            const $house = $(this);
+            const houseNumber = parseInt($house.data('house'));
+            if (houseNumber === currentProbeIndex) {
+                $(`.house[data-house="${currentProbeIndex}"]`).removeClass('highlight-target');
+                currentProbeIndex = (currentProbeIndex + 1) % HASH_SIZE;
+                if (currentProbeIndex > maxProbes) {
+                    probingActive = false;
+                    currentDialogueStep = 4;
+                    showDialogue(currentDialogueStep);
+                    return;
+                }
+                $(`.house[data-house="${currentProbeIndex}"]`).addClass('highlight-target');
+            }
+        });
 
         // --- Hash-Funktion (zero-based) ---
         function getHash(key, size) {
@@ -839,197 +967,6 @@
             return sum % size;
         }
 
-        // --- Quadratic Probing ---
-        function quadraticProbing(key, size, stadt) {
-            let hash = getHash(key, size);
-            let i = 1;
-            let steps = [hash];
-            let position = hash;
-            while (stadt[position] !== null) {
-                position = (hash + Math.pow(i, 2)) % size;
-                steps.push(position);
-                i++;
-            }
-            return { finalIndex: position, steps: steps };
-        }
-
-        // Familienliste initial ausgrauen
-        function initFamilyListUI() {
-            $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
-            const currentFamily = families[currentFamilyIndex];
-            $(`.to-do-family[data-family="${currentFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick);
-            selectedFamily = currentFamily;
-            $('#hashInput').val(selectedFamily);
-        }
-
-        // --- Dialog-Steuerung ---
-        function showNextDialogue() {
-            if (currentDialogue >= dialogues.length) {
-                $('#dialogueContinue').fadeOut();
-                gameStarted = true;
-                $('#dialogueText').text('Okay, lass uns anfangen! Wähle die erste Familie aus der Liste.');
-                return;
-            }
-            $('#dialogueText').fadeOut(200, function() {
-                $(this).text(dialogues[currentDialogue]).fadeIn(200);
-            });
-            currentDialogue++;
-        }
-
-        // Familie anklicken
-        function handleFamilyClick() {
-            const $item = $(this);
-            if ($item.hasClass('disabled') || $item.hasClass('list-group-item-success')) return;
-            selectedFamily = $item.data('family');
-            $('#hashInput').val(selectedFamily);
-            $('#hashResult').text('-');
-            $('#hashButton').prop('disabled', false);
-            $('.to-do-family').removeClass('active');
-            $item.addClass('active');
-            $('.house').removeClass('highlight-target quadratic-target');
-            $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
-        }
-
-        // --- Listener für Dialoge ---
-        $(document).keydown(function(e) {
-            if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
-                showNextDialogue();
-            }
-        });
-
-        $('.dialogue-box').click(function() {
-            if (!gameStarted) {
-                showNextDialogue();
-            }
-        });
-
-        // --- Level 5 Spielmechanik ---
-        // Aktivieren des Buttons, sobald etwas eingegeben ist
-        $('#hashInput').on('input', function() {
-            if ($(this).val().trim() !== '') {
-                $('#hashButton').prop('disabled', false);
-            } else {
-                $('#hashButton').prop('disabled', true);
-            }
-        });
-
-        // Familienliste direkt beim Laden ausgrauen
-        initFamilyListUI();
-
-        // 2. Hash-Wert berechnen
-        $('#hashButton').click(function() {
-            if (gameCompleted) return;
-            const family = $('#hashInput').val().trim();
-            if (!family) return;
-            const anzeige = getHash(family, HASH_SIZE);
-            const result = quadraticProbing(family, HASH_SIZE, stadt);
-            const hashSteps = result.steps;
-            const finalIndex = result.finalIndex;
-            $('#hashResult').text(anzeige);
-            if (searchMode) {
-                if (family === 'Thomas') {
-                    $('#dialogueText').text(`Laut Rechner wohnt Thomas in Haus ${anzeige}. Doch durch das Probing könnte sich der Index verschoben haben. Vollziehe die Schritte von vorher nach!`);
-                }
-            } else {
-                $('.house').removeClass('highlight-target quadratic-target');
-                if (!firstCollisionHandled && hashSteps.length > 1) {
-                    // Belegte Häuser rot markieren
-                    hashSteps.slice(0, -1).forEach(step => {
-                        $(`.house[data-house=${step}]`).addClass('quadratic-target');
-                    });
-                    // Freies Haus gelb markieren
-                    $(`.house[data-house=${finalIndex}]`).addClass('highlight-target');
-                    let stepsText = hashSteps.map((step, index) => {
-                        if (index === 0) {
-                            return `Initial-Hash: ${step}`;
-                        } else if (index < hashSteps.length - 1) {
-                            return `Haus ${step} (belegt)`;
-                        } else {
-                            return `Haus ${step} (frei)`;
-                        }
-                    }).join(" → ");
-                    $('#dialogueText').html(
-                        `Kollision! Der Platzierungsprozess war: <strong>${stepsText}</strong>. Klicke auf das freie Haus.`
-                    );
-                    firstCollisionHandled = true;
-                } else {
-                    $('#dialogueText').text(
-                        `Laut Rechner gehört Familie ${family} in Haus ${anzeige}. Klicke auf das Haus, um sie einziehen zu lassen.`
-                    );
-                }
-            }
-        });
-
-        // 3. Haus klicken, um Familie zu platzieren oder Bewohner zu suchen
-        $('.house').click(function() {
-            const $house = $(this);
-            const houseNumber = parseInt($house.data('house'));
-            if (searchMode) {
-                const occupant = stadt[houseNumber];
-                if (occupant) {
-                    $house.addClass('show-family');
-                    $house.find('.house-family').text(occupant);
-                    const result = quadraticProbing('Thomas', HASH_SIZE, stadt);
-                    const steps = result.steps;
-                    if (steps.includes(houseNumber)) {
-                        $('#dialogueText').text("Du bist auf dem richtigen Weg!");
-                    } else {
-                        $('#dialogueText').text("Dieses Haus kommt nicht in Frage.");
-                    }
-                    if (occupant === 'Thomas') {
-                        $('#successMessage').html(
-                            `<strong style="color: #667eea;">Major Mike sagt:</strong><br>
-                            "${successDialogue}"`
-                        );
-                        $('#finalAttempts').text(attempts);
-                        $('#finalOccupied').text(occupiedHouses);
-                        $('#successOverlay').css('display', 'flex');
-                        gameCompleted = true;
-                    }
-                }
-            } else {
-                if (gameCompleted || !gameStarted || !selectedFamily) {
-                    if (gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
-                    return;
-                }
-                const finalIndex = quadraticProbing(selectedFamily, HASH_SIZE, stadt).finalIndex;
-                if (houseNumber !== finalIndex) {
-                    $('#dialogueText').text(errorDialogue);
-                    return;
-                }
-                const currentOccupant = stadt[houseNumber];
-                if (currentOccupant === null) {
-                    // --- HAUS IST FREI ---
-                    stadt[houseNumber] = selectedFamily;
-                    setHouseAsset($house, true);
-                    $house.addClass('checked');
-                    $house.removeClass('highlight-target quadratic-target');
-                    $house.find('.house-family').text(selectedFamily);
-                    $(`.to-do-family[data-family="${selectedFamily}"]`)
-                        .removeClass('active')
-                        .addClass('list-group-item-success')
-                        .css('opacity', '1');
-                    occupiedHouses++;
-                    $('#occupiedCount').text(occupiedHouses + ' / 5');
-                    currentFamilyIndex++;
-                    if (currentFamilyIndex < families.length) {
-                        $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen.`);
-                        const nextFamily = families[currentFamilyIndex];
-                        $('.to-do-family').removeClass('active');
-                        $(`.to-do-family[data-family="${nextFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick).addClass('active');
-                        selectedFamily = nextFamily;
-                        $('#hashInput').val(selectedFamily);
-                        $('#hashButton').prop('disabled', false);
-                    } else {
-                        $('#dialogueText').text(thomasSearchDialogue);
-                        searchMode = true;
-                        $('#hashInput').prop('readonly', false).val('');
-                    }
-                    $('#hashResult').text('-');
-                }
-            }
-        });
-
         // --- Global functions for buttons ---
         window.restartLevel = function() {
             location.reload();
@@ -1039,16 +976,12 @@
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-auswahl.php?completed=5&next=6';
+                window.location.href = 'level-select.php';
             }, 500);
         };
 
-        // --- Add keyboard hint ---
-        setTimeout(function() {
-            if (!gameStarted) {
-                $('#dialogueContinue').html('Klicke hier oder drücke Enter ↵');
-            }
-        }, 3000);
+        // Stadt initialisieren
+        initCity();
     });
 </script>
 </body>
