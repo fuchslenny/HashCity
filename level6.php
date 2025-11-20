@@ -14,7 +14,6 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Hier den gleichen CSS-Code wie in Level 5 verwenden */
         * {
             margin: 0;
             padding: 0;
@@ -210,8 +209,8 @@
         /* Houses Row */
         .houses-row {
             display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 0.8rem;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
             margin-bottom: 0.5rem;
             padding: 0 1rem;
             position: relative;
@@ -222,6 +221,7 @@
             width: 100%;
             height: 60px;
             background-image: url('./assets/Strasse.svg');
+            Background-size: cover;
             background-position: center;
             background-repeat: repeat-x;
             position: relative;
@@ -275,11 +275,19 @@
             transform: translateY(-8px) scale(1.08);
             z-index: 10;
         }
+        .house.highlight-target {
+            transform: translateY(-10px) scale(1.15) !important;
+            box-shadow: 0 0 35px 12px rgba(255, 215, 0, 0.9);
+            z-index: 11;
+        }
+        .house.quadratic-target {
+            transform: translateY(-10px) scale(1.15) !important;
+            box-shadow: 0 0 35px 12px rgba(255, 0, 0, 0.9);
+            z-index: 11;
+        }
         .house-icon {
             width: 100%;
             height: 100%;
-            max-width: 100%;
-            max-height: 100%;
             object-fit: contain;
             transition: all 0.3s ease;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
@@ -435,6 +443,42 @@
             color: #999;
             transform: none;
         }
+        /* Load Factor Display */
+        .load-factor-box {
+            text-align: center;
+            padding: 0.5rem;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 2px solid #ccc;
+            transition: all 0.5s ease;
+        }
+        .lf-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .lf-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        /* Ampel-Farben für Load Factor */
+        .lf-good {
+            color: #4CAF50;
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        } /* <= 0.5 */
+        .lf-medium {
+            color: #FF9800;
+            border-color: #FF9800;
+            background: #fff3e0;
+        } /* 0.5 - 0.75 */
+        .lf-bad {
+            color: #D32F2F;
+            border-color: #D32F2F;
+            background: #FFEBEE;
+        } /* > 0.75 */
         /* Success Modal */
         .success-overlay {
             position: fixed;
@@ -562,13 +606,6 @@
             .info-panel {
                 position: static;
             }
-            .houses-row {
-                grid-template-columns: repeat(10, 1fr);
-                gap: 0.6rem;
-            }
-            .street {
-                height: 50px;
-            }
         }
         @media (max-width: 768px) {
             .game-container {
@@ -579,32 +616,8 @@
                 padding: 1.5rem 1rem;
             }
             .houses-row {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 0.4rem;
-                padding: 0 0.5rem;
-            }
-            .house-number {
-                font-size: 0.8rem;
-                padding: 0.1rem 0.3rem;
-            }
-            .street {
-                height: 40px;
-            }
-            .street::after {
-                height: 3px;
-            }
-            .success-modal {
-                padding: 2rem;
-                margin: 1rem;
-            }
-            .success-title {
-                font-size: 2rem;
-            }
-            .stat-value {
-                font-size: 2rem;
-            }
-            .street-block {
-                margin-bottom: 2rem;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.6rem;
             }
         }
     </style>
@@ -650,12 +663,32 @@
         <!-- Houses Grid -->
         <div class="houses-grid">
             <h2 class="grid-title">🏘️ HashCity Neuer Stadtteil</h2>
-            <!-- Street Blocks: Houses 0-19 -->
+            <!-- Street Blocks: 2 Straßen mit je 10 Häusern (2 × 5 Häuser pro Reihe) -->
+            <?php
+            // Paare der neuen Assets für PHP
+            $housePairs = [
+                    ["empty" => "WohnhauBlauBraunLeerNeu.svg", "filled" => "WohnhauBlauBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauBlauGrauLeerNeu.svg", "filled" => "WohnhauBlauGrauBesetztNeu.svg"],
+                    ["empty" => "WohnhauBlauRotLeerNeu.svg", "filled" => "WohnhauBlauRotBesetztNeu.svg"],
+                    ["empty" => "WohnhauGelbBraunLeerNeu.svg", "filled" => "WohnhauGelbBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGelbRotLeerNeu.svg", "filled" => "WohnhauGelbRotBesetztNeu.svg"],
+                    ["empty" => "WohnhauGrauBraunLeerNeu.svg", "filled" => "WohnhauGrauBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenBraunLeerNeu.svg", "filled" => "WohnhauGruenBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenGrauLeerNeu.svg", "filled" => "WohnhauGruenGrauBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenBraunLeerNeu.svg", "filled" => "WohnhauGruenBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenGrauLeerNeu.svg", "filled" => "WohnhauGruenGrauBesetztNeu.svg"],
+                    ["empty" => "WohnhauRotRotLeerNeu.svg", "filled" => "WohnhauRotRotBesetztNeu.svg"]
+            ];
+            // Zufällige Zuordnung der Asset-Paare zu den Häusern
+            for ($i = 0; $i < 20; $i++) {
+                $houseAssets[$i] = $housePairs[array_rand($housePairs)];
+            }
+            ?>
             <div class="street-block">
                 <div class="houses-row">
-                    <?php for ($i = 0; $i < 10; $i++): ?>
+                    <?php for ($i = 0; $i < 5; $i++): ?>
                         <div class="house" data-house="<?php echo $i; ?>" data-family="">
-                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
                             <div class="house-family"></div>
                         </div>
@@ -665,9 +698,33 @@
             </div>
             <div class="street-block">
                 <div class="houses-row">
-                    <?php for ($i = 10; $i < 20; $i++): ?>
+                    <?php for ($i = 5; $i < 10; $i++): ?>
                         <div class="house" data-house="<?php echo $i; ?>" data-family="">
-                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <div class="house-number"><?php echo $i; ?></div>
+                            <div class="house-family"></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+                <div class="street"></div>
+            </div>
+            <div class="street-block">
+                <div class="houses-row">
+                    <?php for ($i = 10; $i < 15; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <div class="house-number"><?php echo $i; ?></div>
+                            <div class="house-family"></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+                <div class="street"></div>
+            </div>
+            <div class="street-block">
+                <div class="houses-row">
+                    <?php for ($i = 15; $i < 20; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
                             <div class="house-family"></div>
                         </div>
@@ -713,12 +770,6 @@
                 <div class="info-label">Eingetragene Familien:</div>
                 <div class="info-value" id="occupiedCount">0 / 15</div>
             </div>
-            <div class="info-item">
-                <div class="info-label">💡 Spieltipp:</div>
-                <div style="font-size: 0.95rem; color: #333; margin-top: 0.5rem; font-weight: 500; line-height: 1.5;">
-                    Klicke auf einen Namen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechnen'.
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -763,20 +814,50 @@
         let selectedFamily = null;
         let searchTarget = null;
         let currentFamilyIndex = 0;
-
         const families = ["Thomas", "Hans", "Dieter", "Lennard", "Chris", "Luise", "Jana", "Marie", "Hannah", "Sophie", "Levi", "Sammy", "Nele", "Georg", "Emma"];
-
         const dialogues = [
             "Das sieht ja schon richtig gut aus. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür quadratic probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Bearbeite sie von oben nach unten."
         ];
         const successDialogue = "Danke für deine Hilfe!";
-        const errorDialogue = "Mindestens ein Bewohner ist im falschen Haus. Versuche es erneut und achte dabei auf die Rechtschreibung des Namens und dem Verfahren bei einer Kollision (quadratic probing).";
+        const errorDialogue = "Dieses Haus kommt nicht in Frage. Versuche es erneut und achte dabei auf die Rechtschreibung des Namens und dem Verfahren bei einer Kollision (quadratic probing).";
         const correctDialogue = "Sehr gut! Alle Bewohner sind im richtigen Haus.";
         const leviSearchDialogue = "Kannst du mir die Hausnummer von Levi geben? Ich habe noch etwas mit ihm zu besprechen.";
         const chrisSearchDialogue = "Chris ist ein sehr guter Mathematiker und er wollte noch etwas mit mir besprechen. Kannst du für mich seine Hausnummer suchen?";
         const searchErrorDialogue = "Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen und vergewissere, dass du Quadratic Probing richtig angewendet hast.";
         let currentDialogue = 0;
+        // Paare der neuen Assets für JavaScript
+        const housePairs = [
+            { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
+            { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
+            { empty: "WohnhauBlauRotLeerNeu.svg", filled: "WohnhauBlauRotBesetztNeu.svg" },
+            { empty: "WohnhauGelbBraunLeerNeu.svg", filled: "WohnhauGelbBraunBesetztNeu.svg" },
+            { empty: "WohnhauGelbRotLeerNeu.svg", filled: "WohnhauGelbRotBesetztNeu.svg" },
+            { empty: "WohnhauGrauBraunLeerNeu.svg", filled: "WohnhauGrauBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
+            { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
+            { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
+        ];
+        // Funktion zum Setzen des Haus-Assets
+        function setHouseAsset(houseElement, isFilled) {
+            // Aktuelles Asset des Hauses auslesen
+            const currentAsset = houseElement.find('.house-icon').attr('src');
+            const assetName = currentAsset.split('/').pop(); // z. B. "WohnhauBlauBraunLeerNeu.svg"
 
+            // Passendes Paar in housePairs finden
+            let matchingPair = null;
+            for (const pair of housePairs) {
+                if (pair.empty === assetName || pair.filled === assetName) {
+                    matchingPair = pair;
+                    break;
+                }
+            }
+
+            // Neues Asset basierend auf isFilled setzen
+            const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
+            houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
+        }
         // --- Hash-Funktion (zero-based) ---
         function getHash(key, size) {
             let sum = 0;
@@ -785,7 +866,6 @@
             }
             return sum % size;
         }
-
         // --- Quadratic Probing ---
         function quadraticProbing(key, size, stadt) {
             let hash = getHash(key, size);
@@ -797,7 +877,6 @@
             }
             return position;
         }
-
         // --- Dialog-Steuerung ---
         function showNextDialogue() {
             if (currentDialogue >= dialogues.length) {
@@ -811,7 +890,6 @@
             });
             currentDialogue++;
         }
-
         // Familienliste initialisieren
         function initFamilyList() {
             $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
@@ -820,7 +898,6 @@
             $('#hashInput').val(selectedFamily);
             $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
         }
-
         // Familie anklicken
         function handleFamilyClick() {
             const $item = $(this);
@@ -833,30 +910,25 @@
             $item.addClass('active');
             $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
         }
-
         // --- Listener für Dialoge ---
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
                 showNextDialogue();
             }
         });
-
         $('.dialogue-box').click(function() {
             if (!gameStarted) {
                 showNextDialogue();
             }
         });
-
         // --- Level 6 Spielmechanik ---
         // 2. Hash-Wert berechnen
         $('#hashButton').click(function() {
             if (gameCompleted) return;
             const family = $('#hashInput').val().trim();
             if (!family) return;
-
             const anzeige = getHash(family, HASH_SIZE);
             $('#hashResult').text(anzeige);
-
             if (searchMode) {
                 if (family === 'Levi') {
                     $('#dialogueText').text(`Laut Rechner wohnt Levi in Haus ${anzeige}. Vollziehe die Schritte von vorher nach!`);
@@ -867,18 +939,15 @@
                 $('#dialogueText').text(`Laut Rechner gehört Familie ${family} in Haus ${anzeige}. Lasse sie nach dem Prinzip des Quadratic Probing einziehen!`);
             }
         });
-
         // 3. Haus klicken, um Familie zu platzieren oder Bewohner zu suchen
         $('.house').click(function() {
             const $house = $(this);
             const houseNumber = parseInt($house.data('house'));
-
             if (searchMode) {
                 const occupant = stadt[houseNumber];
                 if (occupant) {
                     $house.addClass('show-family');
                     $house.find('.house-family').text(occupant);
-
                     if (searchTarget === 'Levi' && occupant === 'Levi') {
                         attempts++;
                         $('#dialogueText').text(chrisSearchDialogue);
@@ -907,7 +976,6 @@
                             i++;
                         }
                         steps.push(position);
-
                         if (steps.includes(houseNumber)) {
                             $('#dialogueText').text("Du bist auf dem richtigen Weg!");
                         } else {
@@ -920,30 +988,24 @@
                     if (gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
                     return;
                 }
-
                 const finalIndex = quadraticProbing(selectedFamily, HASH_SIZE, stadt);
-
                 if (houseNumber !== finalIndex) {
                     $('#dialogueText').text(errorDialogue);
                     return;
                 }
-
                 const currentOccupant = stadt[houseNumber];
                 if (currentOccupant === null) {
                     // --- HAUS IST FREI ---
                     stadt[houseNumber] = selectedFamily;
-                    $house.find('.house-icon').attr('src', './assets/filled_house.svg');
+                    setHouseAsset($house, true);
                     $house.addClass('checked');
                     $house.find('.house-family').text(selectedFamily);
-
                     $(`.to-do-family[data-family="${selectedFamily}"]`)
                         .removeClass('active')
                         .addClass('list-group-item-success')
                         .css('opacity', '1');
-
                     occupiedHouses++;
                     $('#occupiedCount').text(occupiedHouses + ' / 15');
-
                     currentFamilyIndex++;
                     if (currentFamilyIndex < families.length) {
                         $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen.`);
@@ -958,18 +1020,15 @@
                         searchTarget = 'Levi';
                         $('#hashInput').prop('readonly', false).val('Levi');
                     }
-
                     $('#hashResult').text('-');
                     $('#hashButton').prop('disabled', false);
                 }
             }
         });
-
         // --- Global functions for buttons ---
         window.restartLevel = function() {
             location.reload();
         };
-
         window.nextLevel = function() {
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
@@ -977,7 +1036,6 @@
                 window.location.href = 'level-select.php';
             }, 500);
         };
-
         // --- Add keyboard hint ---
         setTimeout(function() {
             if (!gameStarted) {
@@ -986,6 +1044,5 @@
         }, 3000);
     });
 </script>
-
 </body>
 </html>
