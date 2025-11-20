@@ -1,30 +1,32 @@
 <?php
 /**
- * HashCity - Level 7: Double Hashing Einführung
+ * HashCity - Level 8: Anwendung Double Hashing (Advanced)
  *
- * Lernziel: Einführung von Double Hashing zur Vermeidung von Clustern.
- * Design: Angepasst an Level 2 (Konsistenz).
+ * Lernziel: Selbstständiges Anwenden von Double Hashing.
+ * Suche: Paul (Erzeugt eine schöne Kollisionskette für den Lerneffekt).
  */
 
-$anzahl_haeuser = 10; // 0-9
+$anzahl_haeuser = 20; // 0-19
 
-// Familien für die Platzierung
+// Familien
 $familien_liste = [
-    "Katharina", "David", "Sarah", "Erik", "Mia"
+        "Thomas", "Ute", "David", "Sophie", "Tim",
+        "Ada", "Leo", "Olaf", "Mika", "Georg",
+        "Renate", "Paul", "Kurt", "Nora", "Ida"
 ];
 
-// Verfügbare Haus-Assets
+// Assets
 $house_assets = [
-    './assets/WohnhauBlauBraunBesetztNeu.svg',
-    './assets/WohnhauBlauGrauBesetztNeu.svg',
-    './assets/WohnhauBlauRotBesetztNeu.svg',
-    './assets/WohnhauGelbBraunBesetztNeu.svg',
-    './assets/WohnhauGelbRotBesetztNeu.svg',
-    './assets/WohnhauGrauBraunBesetztNeu.svg',
-    './assets/WohnhauGruenBraunBesetztNeu.svg',
-    './assets/WohnhauGruenGrauBesetztNeu.svg',
-    './assets/WohnhauRotRotBesetztNeu.svg',
-    './assets/WohnhausRotBraunBesetztNeu.svg'
+        './assets/WohnhauBlauBraunBesetztNeu.svg',
+        './assets/WohnhauBlauGrauBesetztNeu.svg',
+        './assets/WohnhauBlauRotBesetztNeu.svg',
+        './assets/WohnhauGelbBraunBesetztNeu.svg',
+        './assets/WohnhauGelbRotBesetztNeu.svg',
+        './assets/WohnhauGrauBraunBesetztNeu.svg',
+        './assets/WohnhauGruenBraunBesetztNeu.svg',
+        './assets/WohnhauGruenGrauBesetztNeu.svg',
+        './assets/WohnhauRotRotBesetztNeu.svg',
+        './assets/WohnhausRotBraunBesetztNeu.svg'
 ];
 ?>
 
@@ -33,13 +35,13 @@ $house_assets = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HashCity - Level 7: Double Hashing</title>
+    <title>HashCity - Level 8: Double Hashing Praxis</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- Basis Styles (Identisch zu Level 2/4) --- */
+        /* --- Basis Styles --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Rajdhani', sans-serif; overflow-x: hidden; min-height: 100vh; position: relative; background: #4CAF50; }
 
@@ -85,9 +87,11 @@ $house_assets = [
         .house-icon { width: 100%; height: 100%; object-fit: contain; transition: all 0.3s ease; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); }
         .house.found .house-icon { animation: pulse 1.5s infinite; filter: drop-shadow(0 8px 16px rgba(76, 175, 80, 0.8)); }
 
-        .house-number { position: absolute; top: 25%; left: 50%; transform: translateX(-50%); font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 900; color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.7); z-index: 10; background: rgba(0, 0, 0, 0.3); padding: 0.2rem 0.5rem; border-radius: 8px; }
+        .house-number { position: absolute; top: 25%; left: 50%; transform: translateX(-50%); font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 900; color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.7); z-index: 10; background: rgba(0, 0, 0, 0.3); padding: 0.1rem 0.4rem; border-radius: 6px; }
 
+        /* Fix: Namen nur sichtbar bei manueller Opacity */
         .house-family { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: white; font-weight: 700; text-align: center; opacity: 0; transition: opacity 0.3s ease; background: rgba(0, 0, 0, 0.7); padding: 0.3rem 0.6rem; border-radius: 8px; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); pointer-events: none; }
+        /* .house.found .house-family { opacity: 1; } -- ENTFERNT für manuelle Kontrolle */
 
         .info-panel { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); height: fit-content; position: sticky; top: 100px; border: 4px solid #fff; }
         .info-title { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; color: #2E7D32; margin-bottom: 1.2rem; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
@@ -111,7 +115,6 @@ $house_assets = [
         .list-group-item.active { background: #667eea; color: #fff; transform: scale(1.02); z-index: 10; }
         .list-group-item.done { background: #e9f5e9; color: #999; text-decoration: line-through; cursor: default; }
 
-        /* Success Modal (Exakt wie Level 2) */
         .success-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 2000; animation: fadeIn 0.3s ease; backdrop-filter: blur(5px); }
         .success-modal { background: white; border-radius: 30px; padding: 3rem; max-width: 650px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4); animation: slideUp 0.5s ease; border: 5px solid #4CAF50; }
         .success-icon { font-size: 5rem; margin-bottom: 1rem; animation: bounce 1s infinite; }
@@ -169,33 +172,24 @@ $house_assets = [
         </div>
 
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ Double Hashing District</h2>
+            <h2 class="grid-title">🏘️ Double Hashing District (Praxis)</h2>
 
-            <div class="street-block">
-                <div class="houses-row">
-                    <?php for ($i = 0; $i < 5; $i++): ?>
-                        <div class="house" id="house-<?php echo $i; ?>" data-index="<?php echo $i; ?>">
-                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
-                            <div class="house-number"><?php echo $i; ?></div>
-                            <div class="house-family"></div>
-                        </div>
-                    <?php endfor; ?>
+            <?php for ($b = 0; $b < 4; $b++): ?>
+                <div class="street-block">
+                    <div class="houses-row">
+                        <?php for ($i = 0; $i < 5; $i++):
+                            $hNum = $b * 5 + $i;
+                            ?>
+                            <div class="house" id="house-<?php echo $hNum; ?>" data-index="<?php echo $hNum; ?>">
+                                <img src="./assets/empty_house.svg" alt="Haus <?php echo $hNum; ?>" class="house-icon">
+                                <div class="house-number"><?php echo $hNum; ?></div>
+                                <div class="house-family"></div>
+                            </div>
+                        <?php endfor; ?>
+                    </div>
+                    <div class="street"></div>
                 </div>
-                <div class="street"></div>
-            </div>
-
-            <div class="street-block">
-                <div class="houses-row">
-                    <?php for ($i = 5; $i < 10; $i++): ?>
-                        <div class="house" id="house-<?php echo $i; ?>" data-index="<?php echo $i; ?>">
-                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
-                            <div class="house-number"><?php echo $i; ?></div>
-                            <div class="house-family"></div>
-                        </div>
-                    <?php endfor; ?>
-                </div>
-                <div class="street"></div>
-            </div>
+            <?php endfor; ?>
         </div>
 
         <div class="info-panel">
@@ -203,14 +197,14 @@ $house_assets = [
 
             <div class="info-item hash-calculator">
                 <div class="info-label">1. Hash (Startposition)</div>
-                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 10</div>
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 20</div>
                 <div class="hash-result-value" id="h1Result">-</div>
                 <button id="btnCalcH1" class="calc-button btn-primary-calc" disabled>Berechnen</button>
             </div>
 
             <div class="info-item step-calculator" id="stepCalcBox">
                 <div class="info-label">2. Hash (Schrittweite)</div>
-                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 5 + 1</div>
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 10 + 1</div>
                 <div class="hash-result-value" id="h2Result">-</div>
                 <button id="btnCalcH2" class="calc-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
             </div>
@@ -235,13 +229,13 @@ $house_assets = [
 <div class="success-overlay" id="successOverlay">
     <div class="success-modal">
         <div class="success-icon">🎉</div>
-        <h2 class="success-title">Fantastisch!</h2>
+        <h2 class="success-title">Geschafft!</h2>
         <p class="success-message" id="successMessage">
-            Danke für deine Hilfe, so funktioniert alles viel besser!
+            Danke für deine Hilfe!
         </p>
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal</button>
-            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 8 →</button>
+            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 9 →</button>
         </div>
     </div>
 </div>
@@ -252,8 +246,8 @@ $house_assets = [
 <script>
     $(document).ready(function() {
         // --- Konfiguration ---
-        const HASH_SIZE = 10;
-        const HASH_SIZE_2 = 5;
+        const HASH_SIZE = 20;
+        const HASH_SIZE_2 = 10;
         const families = <?php echo json_encode($familien_liste); ?>;
         const houseAssets = <?php echo json_encode($house_assets); ?>;
 
@@ -267,20 +261,17 @@ $house_assets = [
         let h2Value = null;
         let currentProbeIndex = null;
 
-        const SEARCH_TARGET = "Sarah";
+        // WICHTIG: Suchziel ist jetzt PAUL
+        const SEARCH_TARGET = "Paul";
         let searchH1 = null;
         let searchH2 = null;
 
-        // Sperr-Variable für Animationen
         let isFading = false;
 
-        // Dialoge
         const dialogues = [
-            "Quadratic Probing war schon ein guter Anfang, führt aber leider oft zu 'Clustern'. Das sind Ketten von belegten Häusern, die das Suchen langsam machen.",
-            "Chris und ich haben deswegen ein neues System entwickelt: Double Hashing (Doppelter Hash). Damit verteilen wir die Bewohner noch besser.",
-            "Der Trick ist: Bei einer Kollision springen wir nicht einfach ein Haus weiter (+1), sondern nutzen eine zweite Formel, um die Schrittweite zu berechnen.",
-            "Diese zweite Formel lautet: (Summe ASCII) % 5 + 1. Den Rechner dafür habe ich dir unten rechts freigeschaltet.",
-            "Leg los! Berechne immer erst die normale Hausnummer. Nur wenn das Haus voll ist, berechnest du die Sprungweite mit dem zweiten Hash."
+            "Das sieht ja schon richtig gut aus! Du darfst jetzt diesen neuen Stadtteil allein bearbeiten.",
+            "Verwende dafür Double Hashing, falls es zu Kollisionen kommt. Beachte dabei, dass du die Liste von oben nach unten abarbeitest.",
+            "Denk dran: Hinten rechnen wir immer **+1**, damit die Schrittweite nie 0 ist. Viel Erfolg!"
         ];
         let dialogueIdx = 0;
 
@@ -328,7 +319,6 @@ $house_assets = [
             }
         }
 
-        // Interaktion
         $('#dialogueBox').click(function() {
             if (phase === 'intro') advanceDialogue();
         });
@@ -348,51 +338,57 @@ $house_assets = [
 
         // 1. Liste Klicken
         $(document).on('click', '.list-group-item', function() {
-            if (isFading || phase !== 'select_family') return;
+            if (isFading || (phase !== 'select_family' && phase !== 'search_intro')) return;
 
             let idx = $(this).data('index');
-            if (idx !== currentFamilyIdx) {
-                showDialogue("Bitte arbeite die Liste von oben nach unten ab.");
-                return;
+            let text = $(this).text().trim();
+
+            if (phase === 'select_family') {
+                if (idx !== currentFamilyIdx) {
+                    showDialogue("Bitte arbeite die Liste von oben nach unten ab.");
+                    return;
+                }
+                selectedFamily = families[idx];
+                phase = 'calc_h1';
+                showDialogue(`Platziere jetzt: ${selectedFamily}. Berechne den 1. Hash.`);
+            }
+            else if (phase === 'search_intro') {
+                selectedFamily = text;
+                phase = 'search_calc';
+                showDialogue(`Okay, wir suchen ${selectedFamily}. Berechne seinen 1. Hash.`);
+                $('.list-group-item').removeClass('active');
+                $(this).addClass('active');
             }
 
-            selectedFamily = families[idx];
             $('#btnCalcH1').prop('disabled', false);
+            $('#btnCalcH2').prop('disabled', true);
             $('#h1Result').text('-');
             $('#h2Result').text('-');
             $('#stepCalcBox').removeClass('active');
-
-            phase = 'calc_h1';
-            showDialogue(`Okay, wir platzieren ${selectedFamily}. Berechne zuerst die Startposition (1. Hash).`);
         });
 
         // 2. H1 Berechnen
         $('#btnCalcH1').click(function() {
             if (isFading) return;
-            if (phase !== 'calc_h1' && phase !== 'search_calc_h1') return;
+            if (phase !== 'calc_h1' && phase !== 'search_calc') return;
 
-            let name = (phase === 'search_calc_h1') ? SEARCH_TARGET : selectedFamily;
+            let name = selectedFamily;
             let val = calcH1(name);
 
-            if (phase === 'search_calc_h1') {
+            if (phase === 'search_calc') {
                 searchH1 = val;
                 $('#h1Result').text(val);
-                showDialogue(`Der Start-Hash für Sarah ist ${val}. Klicke auf Haus ${val} um nachzusehen.`);
-                $('.house').removeClass('highlight-target');
-                $(`#house-${val}`).addClass('highlight-target');
-                phase = 'search_check_h1';
+                showDialogue(`Initial-Hash: ${val}. Klicke auf Haus ${val}.`);
+                phase = 'search_find';
                 $(this).prop('disabled', true);
                 return;
             }
 
             h1Value = val;
             $('#h1Result').text(val);
-            showDialogue(`Der 1. Hash ergibt ${val}. Klicke auf Haus ${val}, um zu prüfen, ob es frei ist.`);
+            showDialogue(`Hash 1 ist ${val}. Klicke auf das entsprechende Haus.`);
 
-            $('.house').removeClass('highlight-target');
-            $(`#house-${val}`).addClass('highlight-target');
-
-            phase = 'place_h1';
+            phase = 'find_spot';
             $(this).prop('disabled', true);
         });
 
@@ -403,14 +399,17 @@ $house_assets = [
             let houseIdx = $(this).data('index');
             let $house = $(this);
 
-            if (phase.startsWith('search_')) {
+            // --- Search Logic ---
+            if (phase === 'search_find') {
                 handleSearchClick(houseIdx, $house);
                 return;
             }
 
-            if (phase === 'place_h1') {
+            // --- Placement Logic ---
+
+            if (phase === 'find_spot') {
                 if (houseIdx !== h1Value) {
-                    showDialogue("Das war das falsche Haus. Der Rechner sagt " + h1Value + ".");
+                    showDialogue("Das war das falsche Haus. (Rechner beachten!)");
                     return;
                 }
 
@@ -420,11 +419,14 @@ $house_assets = [
                     handleCollision(houseIdx);
                 }
             }
-            else if (phase === 'place_apply_step') {
+            else if (phase === 'collision_mode') {
+                showDialogue("Berechne erst die Sprungweite (2. Hash)!");
+            }
+            else if (phase === 'probing_step') {
                 let expectedIdx = (currentProbeIndex + h2Value) % HASH_SIZE;
 
                 if (houseIdx !== expectedIdx) {
-                    showDialogue(`Falsch! Wir waren bei ${currentProbeIndex}. Plus Schrittweite ${h2Value} (modulo 10) ist Haus ${expectedIdx}.`);
+                    showDialogue(`Falsch! ${currentProbeIndex} + ${h2Value} (modulo 20) = ${expectedIdx}.`);
                     return;
                 }
 
@@ -432,12 +434,51 @@ $house_assets = [
                     placeFamily(houseIdx);
                 } else {
                     currentProbeIndex = houseIdx;
-                    showDialogue(`Oha! Haus ${houseIdx} ist AUCH besetzt. Wir müssen NOCHMAL springen. Addiere wieder ${h2Value}!`, 'sad_major.png');
-                    $('.house').removeClass('highlight-target');
-                    let nextTarget = (currentProbeIndex + h2Value) % HASH_SIZE;
-                    $(`#house-${nextTarget}`).addClass('highlight-target');
+                    showDialogue(`Haus ${houseIdx} ist auch voll! Springe nochmal weiter (+${h2Value}).`);
                 }
             }
+        });
+
+        function handleCollision(idx) {
+            showDialogue(`Haus ${idx} ist belegt! Nutze Double Hashing (2. Hash).`);
+            currentProbeIndex = idx;
+
+            $('#stepCalcBox').addClass('active');
+            $('#btnCalcH2').prop('disabled', false);
+            phase = 'collision_mode';
+
+            let $house = $(`#house-${idx}`);
+            $house.addClass('found');
+            setTimeout(() => $house.removeClass('found'), 300);
+        }
+
+        // 4. H2 Berechnen
+        $('#btnCalcH2').click(function() {
+            if (isFading) return;
+
+            let name = selectedFamily;
+            let step = calcH2(name);
+
+            // Search Phase H2
+            if (phase === 'search_find') {
+                searchH2 = step;
+                $('#h2Result').text(step);
+                let next = (searchH1 + step) % HASH_SIZE;
+                showDialogue(`Schrittweite: ${step}. Rechne: ${searchH1} + ${step} = ${next}. Klicke darauf.`);
+                $(this).prop('disabled', true);
+                return;
+            }
+
+            if (phase !== 'collision_mode') return;
+
+            h2Value = step;
+            $('#h2Result').text(step);
+            $(this).prop('disabled', true);
+
+            let nextHouse = (currentProbeIndex + step) % HASH_SIZE;
+            showDialogue(`Schrittweite: ${step}. Rechne: ${currentProbeIndex} + ${step} = ?. Klicke auf das Haus.`);
+
+            phase = 'probing_step';
         });
 
         function placeFamily(idx) {
@@ -450,13 +491,17 @@ $house_assets = [
             setTimeout(() => $house.removeClass('found').addClass('checked'), 500);
 
             $(`.list-group-item[data-index="${currentFamilyIdx}"]`).removeClass('active').addClass('done');
-            $('.house').removeClass('highlight-target');
 
             $('#h1Result').text('-');
             $('#h2Result').text('-');
             $('#stepCalcBox').removeClass('active');
 
-            showDialogue(`Sehr gut! ${selectedFamily} wohnt jetzt in Haus ${idx}.`);
+            // LOAD FACTOR Hinweis (10. Person)
+            let msg = `Sehr gut! ${selectedFamily} wohnt jetzt in Haus ${idx}.`;
+            if (currentFamilyIdx === 9) {
+                msg += " Puh, es wird voll! Das nennt man einen hohen **Load Factor**. Da kracht es oft!";
+            }
+            showDialogue(msg);
 
             currentFamilyIdx++;
             if (currentFamilyIdx < families.length) {
@@ -464,143 +509,86 @@ $house_assets = [
                 highlightNextFamily();
                 setTimeout(() => {
                     if(!isFading) showDialogue("Wähle den nächsten Bewohner aus der Liste.");
-                }, 2000);
+                }, 1500);
             } else {
                 startSearchPhase();
             }
         }
 
-        function handleCollision(idx) {
-            showDialogue(`Mist! Haus ${idx} ist schon belegt. Eine Kollision! Wir brauchen Double Hashing. Klicke auf den 2. Hash Rechner!`, 'sad_major.png');
-
-            $('#stepCalcBox').addClass('active');
-            $('#btnCalcH2').prop('disabled', false);
-
-            currentProbeIndex = idx;
-            phase = 'calc_h2';
-
-            let $house = $(`#house-${idx}`);
-            $house.addClass('found');
-            setTimeout(() => $house.removeClass('found'), 500);
-        }
-
-        // 4. H2 Berechnen
-        $('#btnCalcH2').click(function() {
-            if (isFading) return;
-            if (phase !== 'calc_h2' && phase !== 'search_calc_h2') return;
-
-            let name = (phase.startsWith('search')) ? SEARCH_TARGET : selectedFamily;
-            let step = calcH2(name);
-            h2Value = step;
-
-            $('#h2Result').text(step);
-            $(this).prop('disabled', true);
-
-            if (phase === 'search_calc_h2') {
-                searchH2 = step;
-                let nextHouse = (searchH1 + step) % HASH_SIZE;
-                showDialogue(`Der 2. Hash ergibt Schrittweite ${step}. Rechne: ${searchH1} + ${step}. Klicke auf das Ergebnis.`);
-
-                $('.house').removeClass('highlight-target');
-                $(`#house-${nextHouse}`).addClass('highlight-target');
-
-                phase = 'search_check_step';
-                return;
-            }
-
-            let nextHouse = (currentProbeIndex + step) % HASH_SIZE;
-            showDialogue(`Der 2. Hash ergibt Schrittweite ${step}! Aktuelles Haus (${currentProbeIndex}) + ${step} = Haus ${nextHouse}. Klicke darauf.`);
-
-            $('.house').removeClass('highlight-target');
-            $(`#house-${nextHouse}`).addClass('highlight-target');
-
-            phase = 'place_apply_step';
-        });
-
         // --- Search Phase ---
-
         function startSearchPhase() {
-            phase = 'intro_search';
-            showDialogue("Alle Bewohner sind untergebracht! Super Arbeit.", 'wink_major.png');
+            phase = 'search_intro';
+            showDialogue("Sehr gut! Alle Bewohner sind im richtigen Haus.", 'wink_major.png');
 
-            $('.list-group-item').removeClass('done').css('cursor', 'default');
+            $('.list-group-item').removeClass('done').css('cursor', 'pointer').addClass('list-group-item');
             $('#btnCalcH1').prop('disabled', true);
             $('#btnCalcH2').prop('disabled', true);
 
             setTimeout(() => {
-                showDialogue("Ich bin heute Abend bei Sarah eingeladen. Kannst du mir ihre Hausnummer sagen? (Nutze den Rechner!)");
-
-                $('#h1Result').text('-');
-                $('#h2Result').text('-');
-                $('#stepCalcBox').removeClass('active');
-
-                $('#btnCalcH1').prop('disabled', false);
-                phase = 'search_calc_h1';
-            }, 4000);
+                showDialogue("Danke für deine Hilfe! ... Warte, wo wohnt Paul? Klicke auf ihn in der Liste.");
+            }, 3000);
         }
 
         function handleSearchClick(houseIdx, $house) {
+            // Namen anzeigen
             let occupant = city[houseIdx];
             if (occupant) {
                 $house.find('.house-family').text(occupant).css('opacity', 1);
             }
 
-            if (phase === 'search_check_h1') {
+            // 1. Versuch (nur H1)
+            if (!searchH2) {
                 if (houseIdx !== searchH1) {
-                    showDialogue(`Das ist nicht der Start-Hash (${searchH1}).`);
+                    showDialogue(`Das ist nicht Haus ${searchH1}.`);
                     return;
                 }
 
-                if (city[houseIdx] === SEARCH_TARGET) {
-                    endLevel(); // Sollte nicht passieren, da Sarah kollidiert
-                } else {
-                    showDialogue(`Das ist ${city[houseIdx]}, nicht Sarah! Wir brauchen den 2. Hash für die Suche. Klicke unten auf 'Sprungweite berechnen'.`, 'sad_major.png');
-                    $('#stepCalcBox').addClass('active');
-                    $('#btnCalcH2').prop('disabled', false);
-                    phase = 'search_calc_h2';
-                }
-            }
-            else if (phase === 'search_check_step') {
-                let expected = (searchH1 + searchH2) % HASH_SIZE;
-
-                if (houseIdx !== expected) {
-                    showDialogue(`Falsch. Start (${searchH1}) + Schritt (${searchH2}) = ${expected}.`);
-                    return;
-                }
-
-                if (city[houseIdx] === SEARCH_TARGET) {
-                    $house.addClass('found');
+                if (occupant === SEARCH_TARGET) {
                     endLevel();
                 } else {
+                    // Kollision! -> User muss H2 nutzen
+                    showDialogue(`Das ist ${occupant}. Falsch! Berechne den 2. Hash (Sprungweite).`, 'sad_major.png');
+                    $('#stepCalcBox').addClass('active');
+                    $('#btnCalcH2').prop('disabled', false);
+                }
+            }
+            // 2. Versuch (mit H2 / Step)
+            else {
+                let expected = (searchH1 + searchH2) % HASH_SIZE;
+                if (houseIdx !== expected) {
+                    showDialogue(`Falsch. ${searchH1} + ${searchH2} = ${expected}.`);
+                    return;
+                }
+
+                if (occupant === SEARCH_TARGET) {
+                    $house.addClass('found');
+                    // Finaler Dialog
+                    showDialogue("Super! Paul gefunden. Double Hashing erzeugt längere Ketten, aber verteilt besser!", 'wink_major.png');
+                    setTimeout(endLevel, 3000);
+                } else {
                     searchH1 = houseIdx;
-                    showDialogue(`Das ist ${city[houseIdx]}! Immer noch nicht. Addiere nochmal die Schrittweite ${searchH2}.`);
-                    let next = (searchH1 + searchH2) % HASH_SIZE;
-                    $('.house').removeClass('highlight-target');
-                    $(`#house-${next}`).addClass('highlight-target');
+                    showDialogue(`Das ist ${occupant}. Weiter springen (+${searchH2})!`);
                 }
             }
         }
 
         function endLevel() {
-            $('#successMessage').text("Danke für deine Hilfe, so funktioniert alles viel besser!");
+            $('#successMessage').text("Danke für deine Hilfe!");
             $('#successOverlay').css('display', 'flex');
         }
 
-        // Start
-        advanceDialogue();
-
-        // Globale Funktionen für Modal-Buttons
-        window.restartLevel = function() {
-            location.reload();
-        };
-
+        // Global Functions
+        window.restartLevel = function() { location.reload(); };
         window.nextLevel = function() {
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-select.php?completed=7&next=8';
+                window.location.href = 'level-select.php?completed=8&next=9';
             }, 500);
         };
+
+        // Start
+        advanceDialogue();
     });
 </script>
 </body>
