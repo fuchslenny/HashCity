@@ -191,3 +191,10 @@
     background: var(--error-red);
     color: white;
 }
+
+/* Highlighting - GLOW ENTFERNT */
+/* Diese Regel ist nun leer, sodass kein Glow mehr angewendet wird */
+.house-container.highlight-target .img-house-base,
+.house-container.highlight-target .img-house-extension {
+    /* filter: drop-shadow(0 0 15px gold);  ENTFERNT */
+}

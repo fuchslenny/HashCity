@@ -14,9 +14,9 @@ $familien_liste = ["Dieter"];
 
 // Häuser, die bereits belegt sind (Schlüssel = Haus-Nr, Wert = Familie)
 $prefilled_haeuser = [
-    0 => "Chris",
-    2 => "Jannes",
-    3 => "Jana"
+        0 => "Chris",
+        2 => "Jannes",
+        3 => "Jana"
 ];
 
 // Hash-Funktion (Referenz): (SUMME(ASCII) % 5)
