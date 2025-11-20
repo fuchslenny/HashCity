@@ -659,11 +659,32 @@
         <div class="houses-grid">
             <h2 class="grid-title">🏘️ HashCity Neuer Stadtteil</h2>
             <!-- 4 Straßen mit je 5 Häusern -->
+            <?php
+            // Paare der neuen Assets
+            $housePairs = [
+                    ["empty" => "WohnhauBlauBraunLeerNeu.svg", "filled" => "WohnhauBlauBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauBlauGrauLeerNeu.svg", "filled" => "WohnhauBlauGrauBesetztNeu.svg"],
+                    ["empty" => "WohnhauBlauRotLeerNeu.svg", "filled" => "WohnhauBlauRotBesetztNeu.svg"],
+                    ["empty" => "WohnhauGelbBraunLeerNeu.svg", "filled" => "WohnhauGelbBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGelbRotLeerNeu.svg", "filled" => "WohnhauGelbRotBesetztNeu.svg"],
+                    ["empty" => "WohnhauGrauBraunLeerNeu.svg", "filled" => "WohnhauGrauBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenBraunLeerNeu.svg", "filled" => "WohnhauGruenBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenGrauLeerNeu.svg", "filled" => "WohnhauGruenGrauBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenBraunLeerNeu.svg", "filled" => "WohnhauGruenBraunBesetztNeu.svg"],
+                    ["empty" => "WohnhauGruenGrauLeerNeu.svg", "filled" => "WohnhauGruenGrauBesetztNeu.svg"],
+                    ["empty" => "WohnhauRotRotLeerNeu.svg", "filled" => "WohnhauRotRotBesetztNeu.svg"]
+            ];
+            // Zufällige Zuordnung der Asset-Paare zu den Häusern
+            $houseAssets = [];
+            for ($i = 0; $i < 20; $i++) {
+                $houseAssets[$i] = $housePairs[array_rand($housePairs)];
+            }
+            ?>
             <div class="street-block">
                 <div class="houses-row">
                     <?php for ($i = 0; $i < 5; $i++): ?>
                         <div class="house" data-house="<?php echo $i; ?>" data-family="">
-                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
                             <div class="house-family"></div>
                         </div>
@@ -675,7 +696,7 @@
                 <div class="houses-row">
                     <?php for ($i = 5; $i < 10; $i++): ?>
                         <div class="house" data-house="<?php echo $i; ?>" data-family="">
-                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
                             <div class="house-family"></div>
                         </div>
@@ -687,7 +708,7 @@
                 <div class="houses-row">
                     <?php for ($i = 10; $i < 15; $i++): ?>
                         <div class="house" data-house="<?php echo $i; ?>" data-family="">
-                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
                             <div class="house-family"></div>
                         </div>
@@ -699,7 +720,7 @@
                 <div class="houses-row">
                     <?php for ($i = 15; $i < 20; $i++): ?>
                         <div class="house" data-house="<?php echo $i; ?>" data-family="">
-                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <img src="./assets/<?php echo $houseAssets[$i]['empty']; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
                             <div class="house-family"></div>
                         </div>
@@ -767,69 +788,96 @@
         let occupiedHouses = 19;
         let gameCompleted = false;
         let currentDialogueStep = 0;
-        let currentProbeIndex = 0;
         let probingActive = false;
         let maxProbes = 6;
         let canSkipDialogue = true;
+        let houseAssets = [];
+
+        // Paare der neuen Assets (für JavaScript)
+        const housePairs = [
+            { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
+            { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
+            { empty: "WohnhauBlauRotLeerNeu.svg", filled: "WohnhauBlauRotBesetztNeu.svg" },
+            { empty: "WohnhauGelbBraunLeerNeu.svg", filled: "WohnhauGelbBraunBesetztNeu.svg" },
+            { empty: "WohnhauGelbRotLeerNeu.svg", filled: "WohnhauGelbRotBesetztNeu.svg" },
+            { empty: "WohnhauGrauBraunLeerNeu.svg", filled: "WohnhauGrauBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
+            { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
+            { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
+        ];
+
+        // Funktion zum Setzen des Haus-Assets
+        function setHouseAsset(houseElement, isFilled) {
+            const houseIndex = parseInt(houseElement.data('house'));
+            const asset = isFilled ? housePairs[houseIndex % housePairs.length].filled : housePairs[houseIndex % housePairs.length].empty;
+            houseElement.find('.house-icon').attr('src', `./assets/${asset}`);
+        }
+
+        // Initialisierung der Stadt
+        function initCity() {
+            const initialResidents = [
+                {name: "Thomas", house: 0}, {name: "Laura", house: 1}, {name: "Paul", house: 2},
+                {name: "Clara", house: 3}, {name: "Emma", house: 4}, {name: "Elena", house: 5},
+                {name: "Mueller", house: 6}, {name: "Jonas", house: 7}, {name: "David", house: 8},
+                {name: "Stefan", house: 9}, {name: "Tobias", house: 10}, {name: "Bernd", house: 11},
+                {name: "Anton", house: 12}, {name: "Legat", house: 13}, {name: "Lea", house: 14},
+                {name: "Thorsten", house: 15}, {name: "Sophie", house: 16}, {name: "Katrin", house: 17},
+                {name: "Leon", house: 18}
+            ];
+            initialResidents.forEach(resident => {
+                stadt[resident.house] = resident.name;
+                const houseElement = $(`.house[data-house="${resident.house}"]`);
+                setHouseAsset(houseElement, true);
+                houseElement.addClass('checked');
+            });
+            $('#occupiedCount').text(occupiedHouses + ' / 20');
+            updateLoadFactor();
+        }
 
         // Alle Dialoge in einer Liste
         const dialogueSequence = [
-            // Einführungsdialoge
             "Separate Chaining erzeugt bei vielen Daten lange Listen, die die Such Performance beeinträchtigen. Außerdem können einige Speicherbereiche ungenutzt bleiben. Also entstehen sehr große Mehrfamilienhäuser, in denen man dann auch keine Bewohner schnell findet. Zudem können Häuser so auch leer stehen bleiben.",
             "Ich habe hier mal etwas vorbereitet. 19 Bewohner sind bereits eingezogen, somit sind die Häuser 0 bis 18 belegt.",
             "Nun trage Levi in diesen Stadtteil ein und benutze linear probing.",
-
-            // Dialog nach Hash-Berechnung (wird ereignisgebunden aufgerufen)
             "Levi soll die Hausnummer 0 haben, leider ist sie belegt, aber nach dem Prinzip des Linear Probings können wir ja einfach das nächstfreie Haus nehmen. Das sollte kein Problem sein, oder?",
-
-            // Probing-Erklärung (wird ereignisgebunden aufgerufen)
             "Der Computer sieht nicht, welche Stelle im Speicher belegt ist oder nicht. Er muss jedes Haus einzeln prüfen. Das sollst du nun auch nachvollziehen, indem du jedes Haus der Reihe nach durchgehst!",
-
-            // Abort-Dialoge (werden ereignisgebunden aufgerufen)
             "Ganz schön viel Aufwand was? Die Stadt ist einfach zu voll, das könnte mit Hashmaps genauso passieren.",
             "Schauen wir uns diesen Stadtteil nochmal genauer an. 19 von 20 Häusern sind belegt, die Anzahl der belegten Häuser durch die Anzahl der Häuser insgesamt ist der Load-Factor.",
             "Dieser ist ein aussagekräftiges Mittel, um zu bestimmen, wie voll eine Hashmap bzw. der Stadtteil ist. Wenn dieser über 0,75 liegt, entstehen riesige Suchketten und die Verfahren verlieren an Effizienz.",
-
-            // Finaler Dialog
             "Glücklicherweise haben wir dir eine Hilfe bereitgestellt, welcher immer die Übersicht bewahrt. Dieser zeigt gerade 0.95. Das ist viel zu hoch für eine effiziente Stadt, also sollten wir trotz der hohen Kosten eine Stadterweiterung durchführen."
         ];
-
-        // --- Hash-Funktion (zero-based) ---
-        function getHash(key, size) {
-            let sum = 0;
-            for (let i = 0; i < key.length; i++) {
-                sum += key.charCodeAt(i);
-            }
-            return sum % size;
-        }
 
         // Funktion zum Aktualisieren des Load-Factors
         function updateLoadFactor() {
             const loadFactor = occupiedHouses / HASH_SIZE;
             $('#loadFactorValue').text(loadFactor.toFixed(2));
-            $('#loadFactorBox').removeClass('lf-good lf-medium').addClass('lf-bad');
+            $('#loadFactorBox').removeClass('lf-good lf-medium lf-bad');
+            if (loadFactor <= 0.5) {
+                $('#loadFactorBox').addClass('lf-good');
+            } else if (loadFactor <= 0.75) {
+                $('#loadFactorBox').addClass('lf-medium');
+            } else {
+                $('#loadFactorBox').addClass('lf-bad');
+            }
         }
 
         // Funktion zum Anzeigen eines bestimmten Dialogs
         function showDialogue(step) {
             $('#dialogueText').fadeOut(200, function() {
                 $(this).text(dialogueSequence[step]).fadeIn(200);
-
-                // Nach dem 2. Dialog (Index 2) den Hash-Rechner aktivieren
                 if (step === 2) {
                     $('#hashInput').val('Levi');
                     $('#hashButton').prop('disabled', false);
                 }
-
-                // Nach dem 4. Dialog (Index 3) das erste Haus markieren
-                if (step === 4) {
+                if (step === 3) {
                     probingActive = true;
-                    currentProbeIndex = parseInt($('#hashResult').text());
+                    const startHash = parseInt($('#hashResult').text());
+                    currentProbeIndex = startHash;
                     $(`.house[data-house="${currentProbeIndex}"]`).addClass('highlight-target');
                 }
-
-                // Nach dem 7. Dialog (Index 6) das Spiel beenden
-                if (step === 7) {
+                if (step === 6) {
                     gameCompleted = true;
                     $('#successOverlay').css('display', 'flex');
                 }
@@ -838,7 +886,6 @@
 
         // --- Listener für Dialoge ---
         $(document).keydown(function(e) {
-            // Nur für normale Dialoge (nicht ereignisgebundene)
             if ((e.key === 'Enter' || e.key === ' ') && !gameCompleted && canSkipDialogue) {
                 if (currentDialogueStep < 2 || (currentDialogueStep > 3 && currentDialogueStep < 6)) {
                     currentDialogueStep++;
@@ -857,28 +904,6 @@
         });
 
         // --- Level 10 Spielmechanik ---
-        // Initialisierung der Stadt
-        function initCity() {
-            const initialResidents = [
-                {name: "Thomas", house: 0}, {name: "Laura", house: 1}, {name: "Paul", house: 2},
-                {name: "Clara", house: 3}, {name: "Emma", house: 4}, {name: "Elena", house: 5},
-                {name: "Mueller", house: 6}, {name: "Jonas", house: 7}, {name: "David", house: 8},
-                {name: "Stefan", house: 9}, {name: "Tobias", house: 10}, {name: "Bernd", house: 11},
-                {name: "Anton", house: 12}, {name: "Legat", house: 13}, {name: "Lea", house: 14},
-                {name: "Thorsten", house: 15}, {name: "Sophie", house: 16}, {name: "Katrin", house: 17},
-                {name: "Leon", house: 18}
-            ];
-            initialResidents.forEach(resident => {
-                stadt[resident.house] = resident.name;
-                $(`.house[data-house="${resident.house}"]`)
-                    .find('.house-icon')
-                    .attr('src', './assets/filled_house.svg');
-                $(`.house[data-house="${resident.house}"]`).addClass('checked');
-            });
-            $('#occupiedCount').text(occupiedHouses + ' / 20');
-            updateLoadFactor();
-        }
-
         // 1. Familie aus der Liste auswählen
         $('#familienListe .to-do-family').click(function() {
             if (gameCompleted || currentDialogueStep < 2) return;
@@ -911,7 +936,7 @@
             if (!family) return;
             const startHash = getHash(family, HASH_SIZE);
             $('#hashResult').text(startHash);
-            currentDialogueStep = 3; // Setze auf den postHashDialogue
+            currentDialogueStep = 3;
             showDialogue(currentDialogueStep);
         });
 
@@ -920,20 +945,27 @@
             if (!probingActive || gameCompleted) return;
             const $house = $(this);
             const houseNumber = parseInt($house.data('house'));
-
             if (houseNumber === currentProbeIndex) {
                 $(`.house[data-house="${currentProbeIndex}"]`).removeClass('highlight-target');
                 currentProbeIndex = (currentProbeIndex + 1) % HASH_SIZE;
-
                 if (currentProbeIndex > maxProbes) {
                     probingActive = false;
-                    currentDialogueStep = 4; // Setze auf den ersten abortDialogue
+                    currentDialogueStep = 4;
                     showDialogue(currentDialogueStep);
                     return;
                 }
                 $(`.house[data-house="${currentProbeIndex}"]`).addClass('highlight-target');
             }
         });
+
+        // --- Hash-Funktion (zero-based) ---
+        function getHash(key, size) {
+            let sum = 0;
+            for (let i = 0; i < key.length; i++) {
+                sum += key.charCodeAt(i);
+            }
+            return sum % size;
+        }
 
         // --- Global functions for buttons ---
         window.restartLevel = function() {
