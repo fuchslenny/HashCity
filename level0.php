@@ -230,14 +230,11 @@ $familien = [
             position: relative;
             margin-bottom: 2.5rem;
         }
-        .street-block:last-child {
-            margin-bottom: 0;
-        }
         /* Houses Row */
         .houses-row {
             display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 0.8rem;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
             margin-bottom: 0.5rem;
             padding: 0 1rem;
             position: relative;
@@ -248,7 +245,7 @@ $familien = [
             width: 100%;
             height: 60px;
             background-image: url('./assets/Strasse.svg');
-            background-size: cover;
+            Background-size: cover;
             background-position: center;
             background-repeat: repeat-x;
             position: relative;
@@ -302,11 +299,19 @@ $familien = [
             transform: translateY(-8px) scale(1.08);
             z-index: 10;
         }
+        .house.highlight-target {
+            transform: translateY(-10px) scale(1.15) !important;
+            box-shadow: 0 0 35px 12px rgba(255, 215, 0, 0.9);
+            z-index: 11;
+        }
+        .house.quadratic-target {
+            transform: translateY(-10px) scale(1.15) !important;
+            box-shadow: 0 0 35px 12px rgba(255, 0, 0, 0.9);
+            z-index: 11;
+        }
         .house-icon {
             width: 100%;
             height: 100%;
-            max-width: 100%;
-            max-height: 100%;
             object-fit: contain;
             transition: all 0.3s ease;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
@@ -357,8 +362,7 @@ $familien = [
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .house.checked .house-family,
-        .house.found .house-family {
+        .house.show-family .house-family {
             opacity: 1;
         }
         /* Info Panel */
@@ -401,51 +405,104 @@ $familien = [
             font-weight: 900;
             color: #2E7D32;
         }
-        .search-target {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA726 100%);
-            padding: 1.2rem;
-            border-radius: 20px;
-            text-align: center;
-            margin-bottom: 1.2rem;
-            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
-            border: 3px solid #fff;
+        .hash-calculator {
+            background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
+            border-color: #2196F3;
         }
-        .search-target-label {
-            font-size: 0.95rem;
-            color: #333;
-            font-weight: 700;
-            margin-bottom: 0.4rem;
-        }
-        .search-target-name {
+        .hash-result-value {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
+            font-size: 2.8rem;
             font-weight: 900;
-            color: #fff;
-            text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+            color: #667eea;
+            text-align: center;
         }
-        .progress-section {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 3px solid #e0e0e0;
-        }
-        .progress-bar-container {
+        .calc-button {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
             margin-top: 0.5rem;
         }
-        .progress {
-            height: 30px;
-            background: #e0e0e0;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 3px solid #fff;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        .calc-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
-        .progress-bar {
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+        .calc-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .family-list-container {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .list-group-item.to-do-family {
+            cursor: pointer;
             font-weight: 700;
-            font-size: 0.9rem;
-            line-height: 30px;
-            transition: width 0.5s ease;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
         }
+        .list-group-item.to-do-family:hover,
+        .list-group-item.to-do-family.active {
+            background: #667eea;
+            color: #fff;
+            transform: scale(1.03);
+            z-index: 10;
+        }
+        .list-group-item.list-group-item-success {
+            text-decoration: line-through;
+            background: #f0f0f0;
+            color: #999;
+            cursor: default !important;
+        }
+        .list-group-item.list-group-item-success:hover {
+            background: #f0f0f0;
+            color: #999;
+            transform: none;
+        }
+        /* Load Factor Display */
+        .load-factor-box {
+            text-align: center;
+            padding: 0.5rem;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 2px solid #ccc;
+            transition: all 0.5s ease;
+        }
+        .lf-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .lf-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        /* Ampel-Farben für Load Factor */
+        .lf-good {
+            color: #4CAF50;
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        } /* <= 0.5 */
+        .lf-medium {
+            color: #FF9800;
+            border-color: #FF9800;
+            background: #fff3e0;
+        } /* 0.5 - 0.75 */
+        .lf-bad {
+            color: #D32F2F;
+            border-color: #D32F2F;
+            background: #FFEBEE;
+        } /* > 0.75 */
         /* Success Modal */
         .success-overlay {
             position: fixed;
@@ -573,13 +630,6 @@ $familien = [
             .info-panel {
                 position: static;
             }
-            .houses-row {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 0.6rem;
-            }
-            .street {
-                height: 50px;
-            }
         }
         @media (max-width: 768px) {
             .game-container {
@@ -590,45 +640,31 @@ $familien = [
                 padding: 1.5rem 1rem;
             }
             .houses-row {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 0.4rem;
-                padding: 0 0.5rem;
-            }
-            .house-number {
-                font-size: 0.8rem;
-                padding: 0.1rem 0.3rem;
-            }
-            .house-family {
-                font-size: 0.6rem;
-                padding: 0.2rem 0.4rem;
-            }
-            .street {
-                height: 40px;
-            }
-            .street::after {
-                height: 3px;
-            }
-            .success-modal {
-                padding: 2rem;
-                margin: 1rem;
-            }
-            .success-title {
-                font-size: 2rem;
-            }
-            .stat-value {
-                font-size: 2rem;
-            }
-            .street-block {
-                margin-bottom: 2rem;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.6rem;
             }
         }
-        @media (max-width: 480px) {
-            .houses-row {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            .grid-title {
-                font-size: 1.4rem;
-            }
+        .search-target {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA726 100%);
+            padding: 1.2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+            border: 3px solid #fff;
+        }
+        .search-target-label {
+            font-size: 0.95rem;
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+        .search-target-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
         }
     </style>
 </head>
@@ -680,7 +716,31 @@ $familien = [
             <!-- First Street Block: Houses 1-10 -->
             <div class="street-block">
                 <div class="houses-row">
-                    <?php for ($i = 1; $i <= 10; $i++): ?>
+                    <?php for ($i = 0; $i < 5; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="<?php echo $familien[$i]; ?>">
+                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <div class="house-number"><?php echo $i; ?></div>
+                            <div class="house-family"><?php echo $familien[$i]; ?></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+                <div class="street"></div>
+            </div>
+            <div class="street-block">
+                <div class="houses-row">
+                    <?php for ($i = 5; $i < 10; $i++): ?>
+                        <div class="house" data-house="<?php echo $i; ?>" data-family="<?php echo $familien[$i]; ?>">
+                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <div class="house-number"><?php echo $i; ?></div>
+                            <div class="house-family"><?php echo $familien[$i]; ?></div>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+                <div class="street"></div>
+            </div>
+            <div class="street-block">
+                <div class="houses-row">
+                    <?php for ($i = 10; $i < 15; $i++): ?>
                         <div class="house" data-house="<?php echo $i; ?>" data-family="<?php echo $familien[$i]; ?>">
                             <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
@@ -693,7 +753,7 @@ $familien = [
             <!-- Second Street Block: Houses 11-20 -->
             <div class="street-block">
                 <div class="houses-row">
-                    <?php for ($i = 11; $i <= 20; $i++): ?>
+                    <?php for ($i = 15; $i < 20; $i++): ?>
                         <div class="house" data-house="<?php echo $i; ?>" data-family="<?php echo $familien[$i]; ?>">
                             <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
@@ -778,7 +838,7 @@ $familien = [
             { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
             { empty: "WohnhauGrauBraunLeerNeu.svg", filled: "WohnhauGrauBraunBesetztNeu.svg" },
             { empty: "WohnhauRotBraunLeerNeu.svg", filled: "WohnhauRotBraunBesetztNeu.svg" },
-            { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhaRotRotBesetztNeu.svg" },
+            { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
 
         // --- Zufällige Auswahl der Assets für die Häuser ---
