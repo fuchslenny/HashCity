@@ -6,46 +6,36 @@
  * Spielmechanik: 3 Häuser sind vorbefüllt. Spieler fügt "Dieter" hinzu,
  * was eine Kollision auf Haus 0 mit "Chris" auslöst.
  */
-
 $anzahl_haeuser = 5; // 5 Häuser (0, 1, 2, 3, 4)
-
 // Familien, die platziert werden müssen (nur noch Dieter)
 $familien_liste = ["Dieter"];
-
 // Häuser, die bereits belegt sind (Schlüssel = Haus-Nr, Wert = Familie)
 $prefilled_haeuser = [
-    0 => "Chris",
-    2 => "Jannes",
-    3 => "Jana"
+        0 => "Chris",
+        2 => "Jannes",
+        3 => "Jana"
 ];
-
 // Hash-Funktion (Referenz): (SUMME(ASCII) % 5)
 // h(Chris) = 505 % 5 = 0
 // h(Jannes) = 607 % 5 = 2
 // h(Jana) = 378 % 5 = 3
 // h(Dieter) = 605 % 5 = 0  <- KOLLISION mit Chris
 ?>
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HashCity - Level 2: Kollisionen</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
-
     <style>
         /* Kompletter CSS-Block aus level0.php kopiert für Konsistenz */
-        /* ... (styles von level0.php hier einfügen) ... */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Rajdhani', sans-serif;
             overflow-x: hidden;
@@ -53,7 +43,6 @@ $prefilled_haeuser = [
             position: relative;
             background: #4CAF50;
         }
-
         /* Sky and Grass Background */
         .sky-section {
             position: fixed;
@@ -64,7 +53,6 @@ $prefilled_haeuser = [
             background: linear-gradient(180deg, #87CEEB 0%, #B0D4E3 100%);
             z-index: 0;
         }
-
         .grass-section {
             position: fixed;
             bottom: 0;
@@ -74,7 +62,6 @@ $prefilled_haeuser = [
             background: linear-gradient(180deg, #76B947 0%, #4CAF50 100%);
             z-index: 0;
         }
-
         /* Clouds */
         .cloud {
             position: absolute;
@@ -83,12 +70,10 @@ $prefilled_haeuser = [
             opacity: 0.8;
             animation: cloudFloat 40s linear infinite;
         }
-
         @keyframes cloudFloat {
             0% { left: -200px; }
             100% { left: 110%; }
         }
-
         /* Header */
         .game-header {
             background: transparent;
@@ -99,7 +84,6 @@ $prefilled_haeuser = [
             z-index: 1000;
             backdrop-filter: blur(10px);
         }
-
         .header-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.8rem;
@@ -107,13 +91,11 @@ $prefilled_haeuser = [
             color: #667eea;
             margin: 0;
         }
-
         .header-subtitle {
             font-size: 1rem;
             color: #666;
             font-weight: 600;
         }
-
         .back-btn {
             padding: 0.7rem 1.3rem;
             background: rgba(255, 255, 255, 0.9);
@@ -128,18 +110,15 @@ $prefilled_haeuser = [
             display: inline-block;
             font-size: 0.9rem;
         }
-
         .back-btn:hover {
             background: #667eea;
             color: #fff;
             transform: scale(1.05);
         }
-
         .back-btn::before {
             content: '← ';
             margin-right: 5px;
         }
-
         /* Game Container */
         .game-container {
             max-width: 1600px;
@@ -148,7 +127,6 @@ $prefilled_haeuser = [
             position: relative;
             z-index: 1;
         }
-
         /* Main Game Area */
         .game-area {
             display: grid;
@@ -156,7 +134,6 @@ $prefilled_haeuser = [
             gap: 2rem;
             min-height: 70vh;
         }
-
         /* Major Mike Section */
         .major-mike-section {
             background: rgba(255, 255, 255, 0.85);
@@ -168,7 +145,6 @@ $prefilled_haeuser = [
             top: 100px;
             border: 4px solid #fff;
         }
-
         .major-mike-avatar {
             width: 100%;
             height: 240px;
@@ -181,13 +157,11 @@ $prefilled_haeuser = [
             overflow: hidden;
             position: relative;
         }
-
         .major-mike-avatar img {
             width: 100%;
             height: 100%;
             object-fit: contain;
         }
-
         .major-mike-name {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.4rem;
@@ -197,7 +171,6 @@ $prefilled_haeuser = [
             margin-bottom: 1rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-
         .dialogue-box {
             background: #fff;
             border: 3px solid #667eea;
@@ -207,7 +180,6 @@ $prefilled_haeuser = [
             position: relative;
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
         }
-
         .dialogue-box::before {
             content: '';
             position: absolute;
@@ -220,14 +192,12 @@ $prefilled_haeuser = [
             border-right: 15px solid transparent;
             border-bottom: 15px solid #667eea;
         }
-
         .dialogue-text {
             font-size: 1.05rem;
             line-height: 1.7;
             color: #333;
             font-weight: 500;
         }
-
         .dialogue-continue {
             position: absolute;
             bottom: 10px;
@@ -238,12 +208,10 @@ $prefilled_haeuser = [
             font-weight: 700;
             animation: blink 1.5s infinite;
         }
-
         @keyframes blink {
             0%, 50%, 100% { opacity: 1; }
             25%, 75% { opacity: 0.5; }
         }
-
         /* Houses Grid */
         .houses-grid {
             background: rgba(255, 255, 255, 0.85);
@@ -253,7 +221,6 @@ $prefilled_haeuser = [
             border: 4px solid #fff;
             overflow: hidden;
         }
-
         .grid-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.8rem;
@@ -263,17 +230,14 @@ $prefilled_haeuser = [
             margin-bottom: 2rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-
         /* Street Block Container */
         .street-block {
             position: relative;
             margin-bottom: 2.5rem;
         }
-
         .street-block:last-child {
             margin-bottom: 0;
         }
-
         /* Houses Row - NEU: Nur 5 Häuser */
         .houses-row {
             display: grid;
@@ -284,7 +248,6 @@ $prefilled_haeuser = [
             position: relative;
             z-index: 2;
         }
-
         /* Straße */
         .street {
             width: 100%;
@@ -298,7 +261,6 @@ $prefilled_haeuser = [
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
             z-index: 1;
         }
-
         .street::before {
             content: '';
             position: absolute;
@@ -310,7 +272,6 @@ $prefilled_haeuser = [
             border-radius: 8px;
             z-index: -1;
         }
-
         .street::after {
             content: '';
             position: absolute;
@@ -328,7 +289,6 @@ $prefilled_haeuser = [
             transform: translateY(-50%);
             z-index: 2;
         }
-
         .house {
             aspect-ratio: 1;
             background: transparent;
@@ -343,19 +303,15 @@ $prefilled_haeuser = [
             border-radius: 10px;
             padding: 0.3rem;
         }
-
         .house:hover:not(.checked):not(.found) {
             transform: translateY(-8px) scale(1.08);
             z-index: 10;
         }
-
         .house.highlight-target {
             transform: translateY(-10px) scale(1.15) !important;
             box-shadow: 0 0 35px 12px rgba(255, 215, 0, 0.9);
             z-index: 11;
         }
-
-
         .house-icon {
             width: 100%;
             height: 100%;
@@ -365,23 +321,19 @@ $prefilled_haeuser = [
             transition: all 0.3s ease;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         }
-
         /* "checked" = Vorbelegt (Licht an) */
         .house.checked .house-icon {
             filter: drop-shadow(0 4px 8px rgba(255, 167, 38, 0.5));
         }
-
         /* "found" = Kollision */
         .house.found .house-icon {
             animation: pulse 1.5s infinite;
             filter: drop-shadow(0 8px 16px rgba(255, 0, 0, 0.8)); /* Rot für Kollision */
         }
-
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.08); }
         }
-
         .house-number {
             position: absolute;
             top: 25%;
@@ -397,7 +349,6 @@ $prefilled_haeuser = [
             padding: 0.2rem 0.5rem;
             border-radius: 8px;
         }
-
         .house-family {
             position: absolute;
             bottom: 10%;
@@ -418,12 +369,10 @@ $prefilled_haeuser = [
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
         /* belegte Häuser kenntlich machen */
         .house.found .house-family {
             opacity: 1;
         }
-
         /* Info Panel */
         .info-panel {
             background: rgba(255, 255, 255, 0.85);
@@ -435,7 +384,6 @@ $prefilled_haeuser = [
             top: 100px;
             border: 4px solid #fff;
         }
-
         .info-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.4rem;
@@ -445,7 +393,6 @@ $prefilled_haeuser = [
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-
         .info-item {
             background: #fff;
             padding: 1rem;
@@ -454,26 +401,22 @@ $prefilled_haeuser = [
             border: 3px solid #4CAF50;
             box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15);
         }
-
         .info-label {
             font-weight: 700;
             color: #666;
             font-size: 0.95rem;
             margin-bottom: 0.4rem;
         }
-
         .info-value {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.6rem;
             font-weight: 900;
             color: #2E7D32;
         }
-
         .hash-calculator {
             background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
             border-color: #2196F3;
         }
-
         .hash-result-value {
             font-family: 'Orbitron', sans-serif;
             font-size: 2.8rem;
@@ -481,7 +424,6 @@ $prefilled_haeuser = [
             color: #667eea;
             text-align: center;
         }
-
         .calc-button {
             padding: 0.6rem 1.5rem;
             border: none;
@@ -505,13 +447,11 @@ $prefilled_haeuser = [
             background: #ccc;
             cursor: not-allowed;
         }
-
         .family-list-container {
             max-height: 250px;
             overflow-y: auto;
             overflow-x: hidden;
         }
-
         .list-group-item.to-do-family {
             cursor: pointer;
             font-weight: 700;
@@ -536,7 +476,6 @@ $prefilled_haeuser = [
             color: #999;
             transform: none;
         }
-
         /* Modal für Kollision */
         .success-overlay {
             position: fixed;
@@ -552,12 +491,10 @@ $prefilled_haeuser = [
             animation: fadeIn 0.3s ease;
             backdrop-filter: blur(5px);
         }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
         .success-modal {
             background: white;
             border-radius: 30px;
@@ -568,23 +505,19 @@ $prefilled_haeuser = [
             animation: slideUp 0.5s ease;
             border: 5px solid #D32F2F; /* Rot für Kollision */
         }
-
         @keyframes slideUp {
             from { transform: translateY(100px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-
         .success-icon {
             font-size: 5rem;
             margin-bottom: 1rem;
             animation: bounce 1s infinite;
         }
-
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
-
         .success-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 2.8rem;
@@ -593,7 +526,6 @@ $prefilled_haeuser = [
             margin-bottom: 1rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-
         .success-message {
             font-size: 1.2rem;
             color: #666;
@@ -601,17 +533,14 @@ $prefilled_haeuser = [
             margin-bottom: 2rem;
             font-weight: 500;
         }
-
         /* Stats (ausgeblendet in diesem Level) */
         .success-stats { display: none; }
-
         .success-buttons {
             display: flex;
             gap: 1rem;
             justify-content: center;
             flex-wrap: wrap;
         }
-
         .btn-primary, .btn-secondary {
             padding: 1rem 2.5rem;
             border: none;
@@ -623,60 +552,49 @@ $prefilled_haeuser = [
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
-
         .btn-secondary {
             background: white;
             color: #667eea;
             border: 3px solid #667eea;
         }
-
         .btn-secondary:hover {
             background: #667eea;
             color: white;
             transform: translateY(-2px);
         }
-
         /* Responsive Design */
         @media (max-width: 1200px) {
             .game-area {
                 grid-template-columns: 1fr;
                 gap: 1.5rem;
             }
-
             .major-mike-section,
             .info-panel {
                 position: static;
             }
-
             .houses-row {
                 /* 5 Häuser passen bereits gut */
             }
-
             .street {
                 height: 50px;
             }
         }
-
         @media (max-width: 768px) {
             .game-container {
                 padding: 0 1rem;
                 margin: 1rem auto;
             }
-
             .houses-grid {
                 padding: 1.5rem 1rem;
             }
-
             .houses-row {
                 grid-template-columns: repeat(3, 1fr); /* 3 in Reihe 1, 2 in Reihe 2 */
                 gap: 0.6rem;
@@ -686,13 +604,11 @@ $prefilled_haeuser = [
     </style>
 </head>
 <body>
-
 <div class="sky-section">
     <div class="cloud" style="width: 120px; height: 60px; top: 8%; animation-delay: 0s;"></div>
     <div class="cloud" style="width: 150px; height: 70px; top: 18%; animation-delay: 10s;"></div>
 </div>
 <div class="grass-section"></div>
-
 <div class="game-header">
     <div class="container-fluid">
         <div class="row align-items-center">
@@ -702,10 +618,8 @@ $prefilled_haeuser = [
         </div>
     </div>
 </div>
-
 <div class="game-container">
     <div class="game-area">
-
         <div class="major-mike-section">
             <div class="major-mike-avatar">
                 <img src="./assets/wink_major.png" alt="Major Mike" id="majorMikeImage">
@@ -720,20 +634,17 @@ $prefilled_haeuser = [
                 </div>
             </div>
         </div>
-
         <div class="houses-grid">
             <h2 class="grid-title">🏘️ Neubaugebiet (Level 2)</h2>
-
             <div class="street-block">
                 <div class="houses-row">
                     <?php for ($i = 0; $i < $anzahl_haeuser; $i++):
                         $is_filled = isset($prefilled_haeuser[$i]);
                         $family_name = $is_filled ? $prefilled_haeuser[$i] : "";
-                        $icon = $is_filled ? './assets/filled_house.svg' : './assets/empty_house.svg';
                         $class = $is_filled ? 'checked' : ''; // "checked" zeigt Namen und "Licht"
                         ?>
                         <div class="house <?php echo $class; ?>" data-house="<?php echo $i; ?>" data-family="<?php echo $family_name; ?>">
-                            <img src="<?php echo $icon; ?>" alt="Haus <?php echo $i; ?>" class="house-icon">
+                            <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
                             <div class="house-number"><?php echo $i; ?></div>
                             <div class="house-family"><?php echo $family_name; ?></div>
                         </div>
@@ -742,17 +653,14 @@ $prefilled_haeuser = [
                 <div class="street"></div>
             </div>
         </div>
-
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-
             <div class="info-item hash-calculator">
                 <div class="info-label">Hash-Rechner 3000</div>
                 <div class="info-label mt-3">Ergebnis (Hash / Haus-Nr.):</div>
                 <div class="hash-result-value" id="hashResult">-</div>
                 <button id="hashButton" class="calc-button" disabled>Berechne Haus-Nr.</button>
             </div>
-
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
                 <div class="family-list-container">
@@ -766,49 +674,53 @@ $prefilled_haeuser = [
                 </div>
             </div>
         </div>
-
     </div>
 </div>
-
 <div class="success-overlay" id="successOverlay">
     <div class="success-modal">
         <div class="success-icon">💥</div>
         <h2 class="success-title">🚨 KOLLISION!</h2>
         <p class="success-message" id="successMessage">
         </p>
-
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Level neustarten</button>
             <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 3 →</button>
         </div>
     </div>
 </div>
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
     $(document).ready(function() {
         // --- Level 2 Setup ---
         const HASH_SIZE = <?php echo $anzahl_haeuser; ?>;
         const ZIEL_FAMILIE = "Dieter";
-
         let stadt = new Array(HASH_SIZE).fill(null);
-
         const prefilled = <?php echo json_encode($prefilled_haeuser); ?>;
         for (const index in prefilled) {
             stadt[index] = prefilled[index];
         }
-
         let gameStarted = false;
-        let gameCompleted = false; // Wird jetzt erst nach der Untersuchung auf true gesetzt
+        let gameCompleted = false;
         let waitingForCollisionConfirm = false;
         let selectedFamily = null;
         let isFading = false;
+        let investigationMode = false;
 
-        // --- NEUE VARIABLE für den "Aha!"-Moment ---
-        let investigationMode = false; // Schaltet den Untersuchungsmodus ein
+        // --- Haus-Paare für Assets ---
+        const housePairs = [
+            { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
+            { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
+            { empty: "WohnhauBlauRotLeerNeu.svg", filled: "WohnhauBlauRotBesetztNeu.svg" },
+            { empty: "WohnhauGelbBraunLeerNeu.svg", filled: "WohnhauGelbBraunBesetztNeu.svg" },
+            { empty: "WohnhauGelbRotLeerNeu.svg", filled: "WohnhauGelbRotBesetztNeu.svg" },
+            { empty: "WohnhauGrauBraunLeerNeu.svg", filled: "WohnhauGrauBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
+            { empty: "WohnhausGrauBraunLeerNeu.svg", filled: "WohnhausGrauBraunBesetztNeu.svg" },
+            { empty: "WohnhausRotBraunLeerNeu.svg", filled: "WohnhausRotBraunBesetztNeu.svg" },
+            { empty: "WohnhausRotRotLeerNeu.svg", filled: "WohnhausRotRotBesetztNeu.svg" },
+        ];
 
         // --- Dialoge ---
         const dialogues = [
@@ -824,31 +736,44 @@ $prefilled_haeuser = [
             for (let i = 0; i < key.length; i++) {
                 sum += key.charCodeAt(i);
             }
-            return (sum % size); // 0-basierter Index (0-4)
+            return (sum % size);
         }
 
-        // --- Dialog-Steuerung (mit Sperre) ---
+        // --- Zufällige Auswahl der Assets für die Häuser ---
+        function getRandomHousePair() {
+            const randomIndex = Math.floor(Math.random() * housePairs.length);
+            return housePairs[randomIndex];
+        }
+
+        // --- Dialog-Steuerung ---
         function showNextDialogue() {
             if (isFading || currentDialogue >= dialogues.length) {
                 return;
             }
             isFading = true;
-
             $('#dialogueText').fadeOut(200, function() {
                 $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
                     isFading = false;
                 });
-
                 $('#majorMikeImage').attr('src', './assets/card_major.png');
-
                 if (currentDialogue === dialogues.length - 1) {
                     $('#dialogueContinue').fadeOut();
                     gameStarted = true;
                 }
-
                 currentDialogue++;
             });
         }
+
+        // --- Initialisierung der Häuser mit zufälligen Assets ---
+        $('.house').each(function() {
+            const $house = $(this);
+            const isFilled = $house.hasClass('checked');
+            const pair = getRandomHousePair();
+            const asset = isFilled ? pair.filled : pair.empty;
+            $house.find('.house-icon').attr('src', `./assets/${asset}`);
+            $house.data('empty-asset', pair.empty);
+            $house.data('filled-asset', pair.filled);
+        });
 
         // --- Event-Listener für Dialoge und Modal ---
         $(document).keydown(function(e) {
@@ -875,125 +800,82 @@ $prefilled_haeuser = [
             }
         });
 
-        // --- Level 2 Spielmechanik (NEUE MEHRSTUFIGE LOGIK) ---
-
-        // 1. Familie (Dieter) aus der Liste auswählen
+        // --- Level 2 Spielmechanik ---
         $('#familienListe .to-do-family').click(function() {
-            // Blockieren, wenn Untersuchung läuft oder Spiel fertig ist
             if (gameCompleted || !gameStarted || investigationMode) return;
-
             const $item = $(this);
             if ($item.hasClass('list-group-item-success')) return;
-
-            selectedFamily = $item.data('family'); // Speichert "Dieter"
-
+            selectedFamily = $item.data('family');
             $('#hashResult').text('-');
-            $('#hashButton').prop('disabled', false); // Button aktivieren
+            $('#hashButton').prop('disabled', false);
             $('.to-do-family').removeClass('active');
             $item.addClass('active');
             $('.house').removeClass('highlight-target');
-
             $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
         });
 
-        // 2. Hash-Wert berechnen (wird jetzt 2x genutzt)
         $('#hashButton').click(function() {
-            // Blockieren, wenn nicht gestartet oder kein Name gewählt
             if (!gameStarted || !selectedFamily) return;
+            const family = selectedFamily;
+            const hash = getHash(family, HASH_SIZE);
 
-            const family = selectedFamily; // Holt den Namen aus der Variable
-            const hash = getHash(family, HASH_SIZE); // Berechnet 0 (für Dieter oder Chris)
-
-            // --- "Aha!"-Moment: Phase 2 (Untersuchung von Chris) ---
             if (gameCompleted) {
-                $('#hashResult').text(hash); // Zeigt wieder 0 an
-
-                // Finaler Dialog
+                $('#hashResult').text(hash);
                 $('#dialogueText').html(
                     "Siehst du das?! `h('Dieter')` ist 0 und `h('Chris')` ist auch 0! Zwei verschiedene Namen zeigen auf dasselbe Haus! DAS ist eine <strong>Kollision</strong>! Mein System ist nicht perfekt... Da muss ich mir was ausdenken."
                 );
-
                 $('#dialogueContinue').fadeIn();
-                waitingForCollisionConfirm = true; // Wartet auf Enter für das Modal
-                $(this).prop('disabled', true); // Button endgültig deaktivieren
+                waitingForCollisionConfirm = true;
+                $(this).prop('disabled', true);
             }
-            // --- Normaler Ablauf: Phase 1 (Berechnung von Dieter) ---
             else {
-                $('#hashResult').text(hash); // Zeigt 0 an
+                $('#hashResult').text(hash);
                 $('#dialogueText').text(`Perfekt! Laut Rechner gehört Familie ${family} in Haus ${hash}. Klicke auf das Haus, um sie einziehen zu lassen.`);
-
                 $('.house').removeClass('highlight-target');
                 $(`.house[data-house=${hash}]`).addClass('highlight-target');
-
-                $(this).prop('disabled', true); // Button deaktivieren (bis nächsten Klick)
+                $(this).prop('disabled', true);
             }
         });
 
-        // 3. Haus klicken (hat jetzt 2 Phasen)
         $('.house').click(function() {
-
-            // --- Phase 2: Klick auf Haus 0 (Chris) für die Untersuchung ---
             if (investigationMode && $(this).data('house') === 0) {
-
-                selectedFamily = $(this).data('family'); // Holt "Chris"
-
-                // Reset UI für den nächsten Schritt
-                $('#hashButton').prop('disabled', false); // Button "Berechnen" wird klickbar
+                selectedFamily = $(this).data('family');
+                $('#hashButton').prop('disabled', false);
                 $('#hashResult').text('-');
                 $('.house').removeClass('highlight-target');
-                // Markiere Chris' Haus als "aktiv"
                 $(this).addClass('highlight-target');
-
-                // Dialog 2
                 $('#dialogueText').text(`Okay, '${selectedFamily}' ist ausgewählt. Klick jetzt bitte auf 'Berechnen'. Ich will sehen, was sein Hash-Wert ist!`);
-
-                investigationMode = false; // Untersuchungs-Klick ist vorbei
-                gameCompleted = true; // Spiel ist jetzt im finalen "Berechnen"-Schritt
-                return; // Wichtig: Klick hier beenden
+                investigationMode = false;
+                gameCompleted = true;
+                return;
             }
-
-            // --- Blockieren, wenn Klick ungültig ist ---
             if (gameCompleted || !gameStarted || waitingForCollisionConfirm || investigationMode) return;
-
-            // Verhindern, dass geklickt wird, bevor berechnet wurde
             if (!selectedFamily || $('#hashResult').text() === '-') {
                 $('#dialogueText').text(`Du musst erst 'Dieter' aus der Liste wählen und auf 'Berechnen' klicken!`);
                 return;
             }
 
-            // --- Phase 1: Normaler Klick ---
             const $house = $(this);
             const houseNumber = $house.data('house');
-            const targetHash = getHash(ZIEL_FAMILIE, HASH_SIZE); // 0
+            const targetHash = getHash(ZIEL_FAMILIE, HASH_SIZE);
 
-            // Szenario 1: Falsches Haus geklickt
             if (houseNumber !== targetHash) {
                 $('#dialogueText').text("Das war das falsche Haus. Das Ziel war Haus 0.");
-                // Reset, damit Spieler neu berechnen muss
                 $('#hashButton').prop('disabled', false);
                 $('#hashResult').text('-');
                 $('.house').removeClass('highlight-target');
                 return;
             }
 
-            // Szenario 2: Richtiges Haus geklickt (targetHash)
-            const currentOccupant = stadt[houseNumber]; // stadt[0] ist "Chris"
-
+            const currentOccupant = stadt[houseNumber];
             if (currentOccupant !== null) {
-                // --- KOLLISION ENTDECKT! Starte Phase 2 (Untersuchung) ---
-                $house.addClass('found'); // Rotes Pulsieren
+                $house.addClass('found');
                 $('#majorMikeImage').attr('src', './assets/sad_major.png');
-
-                // Dialog 1 (Mike ist verwirrt)
                 $('#dialogueText').html(
                     "Halt! Da wohnt doch schon Chris! Warum schickt dich der Rechner zu Haus 0? Das ist seltsam... Klick mal bitte auf Haus 0, um den Namen 'Chris' in den Rechner zu laden."
                 );
-
-                // Status für Phase 2 setzen
                 investigationMode = true;
-                selectedFamily = null; // Zwingt zum Klick auf das Haus
-
-                // Mache "Dieter" in der Liste wieder inaktiv
+                selectedFamily = null;
                 $(`.to-do-family[data-family="${ZIEL_FAMILIE}"]`).removeClass('active');
             }
         });
@@ -1007,12 +889,11 @@ $prefilled_haeuser = [
                 <br><br>
                 "Wir müssen im nächsten Level eine Lösung für diese <strong>Kollision</strong> finden."
             `;
-
             $('#successMessage').html(successMsg);
             $('#successOverlay').css('display', 'flex');
         }
 
-        // Globale Funktionen für Modal-Buttons
+        // --- Globale Funktionen für Modal-Buttons ---
         window.restartLevel = function() {
             location.reload();
         };
@@ -1024,9 +905,7 @@ $prefilled_haeuser = [
                 window.location.href = 'level-select.php?completed=2&next=3';
             }, 500);
         };
-
     });
 </script>
-
 </body>
 </html>
