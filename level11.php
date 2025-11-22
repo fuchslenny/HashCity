@@ -386,6 +386,8 @@ $familien_liste = array_merge($old_residents, $new_residents);
                     if (newPositions[i]) {
                         setHouseAsset($house, true);
                         $house.addClass('checked');
+                    }else{
+                        setHouseAsset($house, false);
                     }
                 }, i * 30); // Schnelle Welle (1.2 Sek total)
             }
