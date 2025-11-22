@@ -441,8 +441,6 @@ $bewohner_liste = [
 
                     if (bewohnerAnzahl > 1) {
                         const currentAsset = $(`#house-${clickedHouse}`).find('.img-house-base').attr('src');
-                        console.log(currentAsset);
-                        console.log(clickedHouse);
                         const assetName = currentAsset.split('/').pop(); // z. B. "WohnhauBlauBraunLeerNeu.svg"
                         let matchingPair = null;
                         for (const pair of housePairs) {
@@ -452,7 +450,6 @@ $bewohner_liste = [
                             }
                         }
                         var extensionImg = matchingPair.extension;
-                        console.log(extensionImg);
                         $houseElement.append($('<img>', {src: `./assets/${extensionImg}`, alt: "Erweiterung", class: "img-house-extension"}));
                     }
 
