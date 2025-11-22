@@ -717,9 +717,9 @@ $prefilled_haeuser = [
             { empty: "WohnhauGrauBraunLeerNeu.svg", filled: "WohnhauGrauBraunBesetztNeu.svg" },
             { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
             { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
-            { empty: "WohnhausGrauBraunLeerNeu.svg", filled: "WohnhausGrauBraunBesetztNeu.svg" },
-            { empty: "WohnhausRotBraunLeerNeu.svg", filled: "WohnhausRotBraunBesetztNeu.svg" },
-            { empty: "WohnhausRotRotLeerNeu.svg", filled: "WohnhausRotRotBesetztNeu.svg" },
+            { empty: "WohnhauGrauBraunLeerNeu.svg", filled: "WohnhauGrauBraunBesetztNeu.svg" },
+            { empty: "WohnhauRotBraunLeerNeu.svg", filled: "WohnhauRotBraunBesetztNeu.svg" },
+            { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
 
         // --- Dialoge ---
