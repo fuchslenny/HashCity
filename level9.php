@@ -123,7 +123,6 @@ $bewohner_liste = [
             display: block; position: relative;
             margin-bottom: -5px; /* Abstand */
             animation: fallDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
         }
         @keyframes fallDown {
             from { opacity: 0; transform: translateY(-50px); }
