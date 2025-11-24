@@ -779,20 +779,6 @@ $familien = [
                 <div class="info-label">Anzahl Versuche:</div>
                 <div class="info-value" id="attemptsCount">0</div>
             </div>
-            <div class="progress-section">
-                <div class="info-label">Fortschritt:</div>
-                <div class="progress-bar-container">
-                    <div class="progress">
-                        <div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%">0%</div>
-                    </div>
-                </div>
-            </div>
-            <div class="info-item" style="background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%); border-color: #2196F3;">
-                <div class="info-label">💡 Spieltipp:</div>
-                <div style="font-size: 0.95rem; color: #333; margin-top: 0.5rem; font-weight: 500; line-height: 1.5;">
-                    Klicke auf die Häuser, um zu sehen, welche Familie dort wohnt. Finde Familie Müller!
-                </div>
-            </div>
         </div>
     </div>
 </div>
