@@ -847,26 +847,11 @@ $familien = [
             return housePairs[randomIndex];
         }
 
-        // --- Setzt das Haus-Asset ---
-        function setHouseAsset(houseElement, isFilled) {
-            const currentAsset = houseElement.find('.house-icon').attr('src');
-            const assetName = currentAsset.split('/').pop();
-            let matchingPair = null;
-            for (const pair of housePairs) {
-                if (pair.empty === assetName || pair.filled === assetName) {
-                    matchingPair = pair;
-                    break;
-                }
-            }
-            const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
-            houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
-        }
-
-        // --- Initialisierung der Häuser mit zufälligen Assets ---
+        // --- Initialisierung der Häuser mit zufälligen Assets (als leer) ---
         $('.house').each(function() {
             const $house = $(this);
             const pair = getRandomHousePair();
-            $house.find('.house-icon').attr('src', `./assets/${pair.empty}`);
+            $house.find('.house-icon').attr('src', `./assets/${pair.filled}`);
             $house.data('empty-asset', pair.empty);
             $house.data('filled-asset', pair.filled);
         });
@@ -938,8 +923,8 @@ $familien = [
             const family = $house.data('family');
 
             // Haus als "geprüft" markieren
-            setHouseAsset($house, true);
-            $house.addClass('checked');
+            $house.find('.house-icon').attr('src', `./assets/${$house.data('filled-asset')}`);
+            $house.addClass('checked show-family');
 
             if (family === 'Müller') {
                 $house.addClass('found');
