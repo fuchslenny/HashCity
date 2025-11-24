@@ -221,7 +221,7 @@
             width: 100%;
             height: 60px;
             background-image: url('./assets/Strasse.svg');
-            Background-size: cover;
+            background-size: cover;
             background-position: center;
             background-repeat: repeat-x;
             position: relative;
@@ -341,7 +341,7 @@
         .house.show-family .house-family {
             opacity: 1;
         }
-        /* Info Panel */
+        /* INFO-PANEL (Stil von Level 3/4) */
         .info-panel {
             background: rgba(255, 255, 255, 0.85);
             border-radius: 25px;
@@ -375,6 +375,52 @@
             font-size: 0.95rem;
             margin-bottom: 0.4rem;
         }
+        .calculator-input {
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 0.7rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            transition: border-color 0.3s ease;
+        }
+        .calculator-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .calculator-button {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            margin-top: 0.5rem;
+        }
+        .calculator-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+        .calculator-result {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #2E7D32;
+            font-size: 1.1rem;
+        }
         .info-value {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.6rem;
@@ -385,36 +431,6 @@
             background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
             border-color: #2196F3;
         }
-        .hash-result-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: #667eea;
-            text-align: center;
-        }
-        .calc-button {
-            padding: 0.6rem 1.5rem;
-            border: none;
-            border-radius: 30px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            width: 100%;
-            margin-top: 0.5rem;
-        }
-        .calc-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        .calc-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
         .family-list-container {
             max-height: 250px;
             overflow-y: auto;
@@ -424,24 +440,26 @@
             font-weight: 700;
             transition: all 0.2s ease;
             font-size: 1.1rem;
+            border: 2px solid #aab8c2;
+            margin-bottom: 0.5rem;
+            border-radius: 10px !important;
         }
-        .list-group-item.to-do-family:hover,
+        .list-group-item.to-do-family:hover:not(.placed) {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
         .list-group-item.to-do-family.active {
             background: #667eea;
-            color: #fff;
+            color: white;
+            border-color: #667eea;
             transform: scale(1.03);
             z-index: 10;
         }
-        .list-group-item.list-group-item-success {
+        .list-group-item.to-do-family.list-group-item-success {
+            opacity: 0.3;
+            background: #e0e0e0;
+            cursor: not-allowed;
             text-decoration: line-through;
-            background: #f0f0f0;
-            color: #999;
-            cursor: default !important;
-        }
-        .list-group-item.list-group-item-success:hover {
-            background: #f0f0f0;
-            color: #999;
-            transform: none;
         }
         /* Load Factor Display */
         .load-factor-box {
@@ -468,17 +486,17 @@
             color: #4CAF50;
             border-color: #4CAF50;
             background: #e8f5e9;
-        } /* <= 0.5 */
+        }
         .lf-medium {
             color: #FF9800;
             border-color: #FF9800;
             background: #fff3e0;
-        } /* 0.5 - 0.75 */
+        }
         .lf-bad {
             color: #D32F2F;
             border-color: #D32F2F;
             background: #FFEBEE;
-        } /* > 0.75 */
+        }
         /* Success Modal */
         .success-overlay {
             position: fixed;
@@ -681,7 +699,6 @@
                     ["empty" => "WohnhauGruenGrauLeerNeu.svg", "filled" => "WohnhauGruenGrauBesetztNeu.svg"],
                     ["empty" => "WohnhauRotRotLeerNeu.svg", "filled" => "WohnhauRotRotBesetztNeu.svg"]
             ];
-
             // Zufällige Zuordnung der Asset-Paare zu den Häusern
             $houseAssets = [];
             for ($i = 0; $i <= 4; $i++) {
@@ -705,11 +722,10 @@
         <div class="info-panel">
             <!-- Stadtplaner (Hash-Rechner) -->
             <div class="info-item hash-calculator">
-                <div class="info-label">Hash-Rechner 3000</div>
-                <input type="text" id="hashInput" class="form-control" placeholder="Familienname...">
-                <div class="info-label mt-3">Ergebnis (Hash / Haus-Nr.):</div>
-                <div class="hash-result-value" id="hashResult">-</div>
-                <button id="hashButton" class="calc-button" disabled>Berechne Haus-Nr.</button>
+                <label for="hashInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
+                <input type="text" id="hashInput" class="calculator-input" placeholder="Familienname...">
+                <div class="calculator-result" id="hashResult">Ergebnis: ...</div>
+                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
             </div>
             <!-- Bewerber-Liste -->
             <div class="info-item">
@@ -770,7 +786,6 @@
         let gameCompleted = false;
         let searchMode = false;
         let selectedFamily = null;
-
         // Paare der neuen Assets für JavaScript
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
@@ -785,13 +800,11 @@
             { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
         ];
-
         // Funktion zum Setzen des Haus-Assets
         function setHouseAsset(houseElement, isFilled) {
             // Aktuelles Asset des Hauses auslesen
             const currentAsset = houseElement.find('.house-icon').attr('src');
             const assetName = currentAsset.split('/').pop();
-
             // Passendes Paar in housePairs finden
             let matchingPair = null;
             for (const pair of housePairs) {
@@ -800,19 +813,16 @@
                     break;
                 }
             }
-
             // Neues Asset basierend auf isFilled setzen
             const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
             houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
         }
-
         const dialogues = [
             "Guck mal, das ist einer der neuen Stadtteile. Hier ziehen demnächst die neuen Stadtbewohner ein. Damit das nicht so unübersichtlich wie im vorherigen Stadtteil wird, habe ich mir etwas ganz Besonderes überlegt. Dafür dürfen keine Namen doppelt existieren.",
             "Hier unten rechts befindet sich unser Stadtplaner. Dort siehst du, welche Hausnummer zu welchem Namen gehört. Klicke einfach auf einen Namen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechnen'."
         ];
         const sophieDialogue = "Ich sehe, du hast für alle Bewohner ein Haus gefunden. Ich habe noch einen Termin mit Sophie, kannst du mir helfen sie zu finden? Nutze den Hash-Rechner, um ihre Hausnummer zu berechnen.";
         let currentDialogue = 0;
-
         // --- Hash-Funktion (identisch zur PHP-Logik) ---
         function getHash(key, size) {
             let sum = 0;
@@ -821,7 +831,6 @@
             }
             return (sum % size);
         }
-
         // --- Dialog-Steuerung ---
         function showNextDialogue() {
             if (currentDialogue >= dialogues.length) {
@@ -835,20 +844,17 @@
             });
             currentDialogue++;
         }
-
         // --- Listener für Dialoge ---
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
                 showNextDialogue();
             }
         });
-
         $('.dialogue-box').click(function() {
             if (!gameStarted) {
                 showNextDialogue();
             }
         });
-
         // --- Level 1 Spielmechanik ---
         // 1. Familie aus der Liste auswählen
         $('#familienListe .to-do-family').click(function() {
@@ -857,14 +863,13 @@
             if ($item.hasClass('list-group-item-success')) return;
             selectedFamily = $item.data('family');
             $('#hashInput').val(selectedFamily);
-            $('#hashResult').text('-');
+            $('#hashResult').text('Ergebnis: ...');
             $('#hashButton').prop('disabled', false);
             $('.to-do-family').removeClass('active');
             $item.addClass('active');
             $('.house').removeClass('highlight-target');
             $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
         });
-
         // Aktivieren des Buttons, sobald etwas eingegeben ist
         $('#hashInput').on('input', function() {
             if ($(this).val().trim() !== '') {
@@ -873,14 +878,13 @@
                 $('#hashButton').prop('disabled', true);
             }
         });
-
         // 2. Hash-Wert berechnen
         $('#hashButton').click(function() {
             if (gameCompleted) return;
             const family = $('#hashInput').val().trim();
             if (!family) return;
             const hash = getHash(family, HASH_SIZE);
-            $('#hashResult').text(hash);
+            $('#hashResult').text(`Initial-Hash: ${hash}`);
             if (searchMode) {
                 if (family === 'Sophie' && hash === 4) {
                     $('.house[data-house="4"]').addClass('found show-family');
@@ -901,7 +905,6 @@
                 $(`.house[data-house=${hash}]`).addClass('highlight-target');
             }
         });
-
         // 3. Haus klicken, um Familie zu platzieren oder Bewohner zu suchen
         $('.house').click(function() {
             const $house = $(this);
@@ -957,17 +960,15 @@
                     }
                     selectedFamily = null;
                     $('#hashInput').val('');
-                    $('#hashResult').text('-');
+                    $('#hashResult').text('Ergebnis: ...');
                     $('#hashButton').prop('disabled', true);
                 }
             }
         });
-
         // --- Global functions for buttons ---
         window.restartLevel = function() {
             location.reload();
         };
-
         window.nextLevel = function() {
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
@@ -975,7 +976,6 @@
                 window.location.href = 'level-select.php?completed=1&next=2';
             }, 500);
         };
-
         // --- Add keyboard hint ---
         setTimeout(function() {
             if (!gameStarted) {
