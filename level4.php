@@ -60,19 +60,121 @@ $familien_liste = [
         .house.found .house-icon { animation: pulse 1.5s infinite; filter: drop-shadow(0 8px 16px rgba(76, 175, 80, 0.8)); }
         .house-number { position: absolute; top: 25%; left: 50%; transform: translateX(-50%); font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 900; color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.7); z-index: 10; background: rgba(0, 0, 0, 0.3); padding: 0.2rem 0.5rem; border-radius: 8px; }
         .house-family { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: white; font-weight: 700; text-align: center; opacity: 0; transition: opacity 0.3s ease; background: rgba(0, 0, 0, 0.7); padding: 0.3rem 0.6rem; border-radius: 8px; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); pointer-events: none; }
-        .info-panel { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); height: fit-content; position: sticky; top: 100px; border: 4px solid #fff; }
-        .info-title { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; color: #2E7D32; margin-bottom: 1.2rem; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-        .info-item { background: #fff; padding: 1rem; border-radius: 15px; margin-bottom: 1rem; border: 3px solid #4CAF50; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15); }
-        .info-label { font-weight: 700; color: #666; font-size: 0.95rem; margin-bottom: 0.4rem; }
-        .hash-calculator { background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%); border-color: #2196F3; }
-        .hash-result-value { font-family: 'Orbitron', sans-serif; font-size: 2.8rem; font-weight: 900; color: #667eea; text-align: center; }
-        .calc-button { padding: 0.6rem 1.5rem; border: none; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 100%; margin-top: 0.5rem; }
-        .calc-button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
-        .calc-button:disabled { background: #ccc; cursor: not-allowed; }
-        .family-list-container { max-height: 250px; overflow-y: auto; overflow-x: hidden; }
-        .list-group-item.to-do-family { font-weight: 700; font-size: 1.1rem; background: #f8f9fa; color: #666; cursor: not-allowed; }
-        .list-group-item.to-do-family.active { background: #667eea; color: #fff; transform: scale(1.03); z-index: 10; }
-        .list-group-item.list-group-item-success { text-decoration: line-through; background: #e9f5e9; color: #999; }
+        /* INFO-PANEL (Stil von Level 3) */
+        .info-panel {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            border: 4px solid #fff;
+        }
+        .info-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 1.2rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .info-item {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border: 3px solid #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15);
+        }
+        .info-label {
+            font-weight: 700;
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+        }
+        .hash-calculator {
+            background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
+            border-color: #2196F3;
+        }
+        .calculator-input {
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 0.7rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            transition: border-color 0.3s ease;
+        }
+        .calculator-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .calculator-button {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            margin-top: 0.5rem;
+        }
+        .calculator-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+        .calculator-result {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #2E7D32;
+            font-size: 1.1rem;
+        }
+        /* Familien-Liste (Stil von Level 3) */
+        .family-list-container {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .list-group-item.to-do-family {
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+            border: 2px solid #aab8c2;
+            margin-bottom: 0.5rem;
+            border-radius: 10px !important;
+        }
+        .list-group-item.to-do-family:hover:not(.placed) {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+        .list-group-item.to-do-family.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.03);
+            z-index: 10;
+        }
+        .list-group-item.to-do-family.list-group-item-success {
+            opacity: 0.3;
+            background: #e0e0e0;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
         .success-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 2000; animation: fadeIn 0.3s ease; backdrop-filter: blur(5px); }
         .success-modal { background: white; border-radius: 30px; padding: 3rem; max-width: 650px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4); animation: slideUp 0.5s ease; border: 5px solid #4CAF50; }
         .success-icon { font-size: 5rem; margin-bottom: 1rem; animation: bounce 1s infinite; }
@@ -81,7 +183,9 @@ $familien_liste = [
         .success-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
         .btn-primary, .btn-secondary { padding: 1rem 2.5rem; border: none; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
         .btn-secondary { background: white; color: #667eea; border: 3px solid #667eea; }
+        .btn-secondary:hover { background: #667eea; color: white; transform: translateY(-2px); }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -163,10 +267,12 @@ $familien_liste = [
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
-                <div class="info-label">Hash-Rechner 3000</div>
-                <div class="info-label mt-3">Ergebnis (Hash / Haus-Nr.):</div>
-                <div class="hash-result-value" id="hashResult">-</div>
-                <button id="hashButton" class="calc-button" disabled>Berechne Haus-Nr.</button>
+                <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben...">
+                <button id="hashButton" class="calculator-button">Berechne Initial-Hash</button>
+                <div class="calculator-result" id="hashResult">
+                    Ergebnis: ...
+                </div>
             </div>
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
@@ -212,7 +318,6 @@ $familien_liste = [
             { empty: "WohnhauRotBraunLeerNeu.svg", filled: "WohnhauRotBraunBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
-
         // --- Level 4 Setup ---
         const HASH_SIZE = <?php echo $anzahl_haeuser; ?>;
         const familien = <?php echo json_encode($familien_liste); ?>;
@@ -231,13 +336,11 @@ $familien_liste = [
         // Ziel 2: TINA (Existiert NICHT)
         const SEARCH_TARGET_2 = "Tina";
         let search2InitialHash = null;
-
         // --- Zufällige Auswahl der Assets für die Häuser ---
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
             return housePairs[randomIndex];
         }
-
         // --- Setzt das Haus-Asset ---
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
@@ -252,7 +355,6 @@ $familien_liste = [
             const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
             houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
         }
-
         // --- Initialisierung der Häuser mit zufälligen Assets ---
         $('.house').each(function() {
             const $house = $(this);
@@ -263,14 +365,12 @@ $familien_liste = [
             $house.data('empty-asset', pair.empty);
             $house.data('filled-asset', pair.filled);
         });
-
         // --- Hash-Funktion ---
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) { sum += key.charCodeAt(i); }
             return (sum % size);
         }
-
         // --- Helper: Berechnet das finale Haus (Placement) ---
         function calculateFinalIndex(startHash) {
             let finalIndex = startHash;
@@ -282,7 +382,6 @@ $familien_liste = [
             }
             return finalIndex;
         }
-
         // --- Helper: Findet Haus (Search) ---
         function findFamilyByProbing(startHash, familyName) {
             let finalIndex = startHash;
@@ -295,13 +394,11 @@ $familien_liste = [
             }
             return -1;
         }
-
         // --- Dialoge ---
         const dialogues = [
             "Das läuft ja schon sehr gut. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür linear probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest."
         ];
         let currentDialogue = 0;
-
         function showNextDialogue() {
             if (isFading || gameStarted) return;
             isFading = true;
@@ -318,7 +415,6 @@ $familien_liste = [
                 currentDialogue++;
             });
         }
-
         // --- UI Update-Funktionen ---
         function placeFamily($house, houseNumber, family) {
             stadt[houseNumber] = family;
@@ -329,13 +425,11 @@ $familien_liste = [
             $house.attr('data-family', family);
             $(`.to-do-family[data-family-index=${currentFamilyIndex}]`).removeClass('active').addClass('list-group-item-success');
         }
-
         // --- Event-Listener ---
         $('#dialogueBox').click(function() { if (!gameStarted) showNextDialogue(); });
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) showNextDialogue();
         });
-
         // --- Spiellogik ---
         function selectNextFamily() {
             if (currentFamilyIndex >= familien.length) {
@@ -349,16 +443,21 @@ $familien_liste = [
             $('.to-do-family').removeClass('active');
             $(`.to-do-family[data-family-index=${currentFamilyIndex}]`).addClass('active');
             $('#hashButton').prop('disabled', false);
-            $('#hashResult').text('-');
+            $('#hashResult').text('Ergebnis: ...');
+            $('#nameInput').val(selectedFamily);
             $('.house').removeClass('highlight-target');
             $('#dialogueText').text(`Platziere jetzt: ${selectedFamily}. Klicke 'Berechnen'.`);
         }
-
         // --- Button Klick ---
         $('#hashButton').click(function() {
             if (!selectedFamily) return;
+            const name = $('#nameInput').val().trim();
+            if (name !== selectedFamily) {
+                $('#dialogueText').text("Der Name im Rechner passt nicht zur ausgewählten Familie.");
+                return;
+            }
             initialHash = getHash(selectedFamily, HASH_SIZE);
-            $('#hashResult').text(initialHash);
+            $('#hashResult').text(`Initial-Hash: ${initialHash}`);
             $(this).prop('disabled', true);
             if (gamePhase === "placement_calculate") {
                 correctTargetHouse = calculateFinalIndex(initialHash);
@@ -380,7 +479,6 @@ $familien_liste = [
                 gamePhase = "search_tina_find";
             }
         });
-
         // --- Haus Klick ---
         $('.house').click(function() {
             if (!gameStarted) return;
@@ -432,36 +530,34 @@ $familien_liste = [
                 }
             }
         });
-
         // --- Start Phase 2 (Sara) ---
         function startSearchPhase1() {
             gamePhase = "search_sara_calc";
             selectedFamily = SEARCH_TARGET_1;
             $('#hashButton').prop('disabled', false);
-            $('#hashResult').text('-');
+            $('#hashResult').text('Ergebnis: ...');
+            $('#nameInput').val(selectedFamily);
             $('.house').removeClass('highlight-target');
             $('#dialogueText').text("Sehr gut! Alle Bewohner sind da. Kannst du mir sagen, wo Sara wohnt? Berechne ihren Hash.");
             $('#majorMikeImage').attr('src', './assets/wink_major.png');
         }
-
         // --- Start Phase 3 (Tina) ---
         function startSearchPhase2() {
             gamePhase = "search_tina_calc";
             selectedFamily = SEARCH_TARGET_2;
             $('#hashButton').prop('disabled', false);
-            $('#hashResult').text('-');
+            $('#hashResult').text('Ergebnis: ...');
+            $('#nameInput').val(selectedFamily);
             $('.house').removeClass('highlight-target');
             $('.house').removeClass('found');
             $('#dialogueText').text("Eine Frage noch: Wohnt eigentlich 'Tina' hier? Berechne ihren Hash und prüf das mal.");
             $('#majorMikeImage').attr('src', './assets/card_major.png');
         }
-
         // --- Success Modal ---
         function showSuccessModal() {
             $('#successMessage').text("Klasse! Du hast verstanden, wie man in einer Hashmap sucht (und auch, wie man sieht, dass etwas fehlt).");
             $('#successOverlay').css('display', 'flex');
         }
-
         // --- Globale Funktionen ---
         window.restartLevel = function() { location.reload(); };
         window.nextLevel = function() {
