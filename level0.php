@@ -7,26 +7,26 @@
  * Familie Müller befindet sich in Haus 16
  */
 $familien = [
-        1 => "Schmidt",
-        2 => "Weber",
-        3 => "Wagner",
-        4 => "Becker",
-        5 => "Schulz",
-        6 => "Hoffmann",
-        7 => "Koch",
-        8 => "Richter",
-        9 => "Klein",
-        10 => "Wolf",
-        11 => "Schröder",
-        12 => "Neumann",
-        13 => "Schwarz",
-        14 => "Zimmermann",
-        15 => "Braun",
-        16 => "Müller", // Ziel-Familie
-        17 => "Krüger",
-        18 => "Hofmann",
-        19 => "Hartmann",
-        20 => "Lange"
+        0 => "Schmidt",
+        1 => "Weber",
+        2 => "Wagner",
+        3=> "Becker",
+        4 => "Schulz",
+        5 => "Hoffmann",
+        6 => "Koch",
+        7 => "Richter",
+        8 => "Klein",
+        9 => "Wolf",
+        10 => "Schröder",
+        11 => "Neumann",
+        12 => "Schwarz",
+        13 => "Zimmermann",
+        14 => "Braun",
+        15 => "Müller", // Ziel-Familie
+        16 => "Krüger",
+        17 => "Hofmann",
+        18 => "Hartmann",
+        19 => "Lange"
 ];
 ?>
 <!DOCTYPE html>
