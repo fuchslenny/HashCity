@@ -1033,7 +1033,7 @@
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-select.php';
+                window.location.href = 'level-auswahl.php?completed=6&next=7';
             }, 500);
         };
         // --- Add keyboard hint ---

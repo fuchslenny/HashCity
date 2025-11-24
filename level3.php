@@ -2,50 +2,39 @@
 /**
  * HashCity - Level 3: Lineares Sondieren (PDF-Version)
  *
- * Lernziel: Das Konzept der Kollisionsbehandlung "Linear Probing" verstehen und anwenden. [cite: 111]
- * Spielmechanik: Folgt exakt dem PDF-Ablaufplan für Level 3. [cite: 103-107]
+ * Lernziel: Das Konzept der Kollisionsbehandlung "Linear Probing" verstehen und anwenden.
+ * Spielmechanik: Folgt exakt dem PDF-Ablaufplan für Level 3.
  * -> Häuser 0, 2, 3 sind vor-belegt (gemäß L2-Plan).
- * -> Spieler fügt Dieter (Kollision -> 1) hinzu. [cite: 112]
- * -> Spieler fügt Lars (Kollision -> 4) hinzu. [cite: 114]
- * -> Spieler sucht Jannes (Haus 2). [cite: 121]
+ * -> Spieler fügt Dieter (Kollision -> 1) hinzu.
+ * -> Spieler fügt Lars (Kollision -> 4) hinzu.
+ * -> Spieler sucht Jannes (Haus 2).
  * -> Hausnamen sind nach Platzierung versteckt (nicht bei Hover sichtbar).
- *
- * Layout: Basiert auf L2-Panel (Info-Panel mit Klick-Liste)
- * Logik: Genaue Abfolge von PDF Level 3 [cite: 98-125]
  */
-
-// Level 3 - Konfiguration
 $anzahl_haeuser = 5;
-
 // Voreingestellte Belegung laut L2/L3-Plan
 $bewohner_start = [
-    0 => "Chris",
-    2 => "Jannes",
-    3 => "Jana"
+        0 => "Chris",
+        2 => "Jannes",
+        3 => "Jana"
 ];
-
 // Hash-Werte
 $hash_werte = [
-    "Chris" => 505, // % 5 = 0
-    "Jana" => 378,  // % 5 = 3
-    "Dieter" => 605, // % 5 = 0
-    "Lars" => 402,   // % 5 = 2
-    "Jannes" => 607  // % 5 = 2
+        "Chris" => 505, // % 5 = 0
+        "Jana" => 378,  // % 5 = 3
+        "Dieter" => 605, // % 5 = 0
+        "Lars" => 402,   // % 5 = 2
+        "Jannes" => 607  // % 5 = 2
 ];
-
 // Aufgaben für die Liste
 $neue_bewohner = ["Dieter", "Lars"];
 $suchbare_bewohner = ["Jannes"];
-
 ?>
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HashCity - Level 3: Linear Probing</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
@@ -55,7 +44,6 @@ $suchbare_bewohner = ["Jannes"];
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Rajdhani', sans-serif;
             overflow-x: hidden;
@@ -63,7 +51,6 @@ $suchbare_bewohner = ["Jannes"];
             position: relative;
             background: #4CAF50;
         }
-
         .sky-section {
             position: fixed; top: 0; left: 0; width: 100%; height: 50%;
             background: linear-gradient(180deg, #87CEEB 0%, #B0D4E3 100%); z-index: 0;
@@ -80,7 +67,6 @@ $suchbare_bewohner = ["Jannes"];
         @keyframes cloudFloat {
             0% { left: -200px; } 100% { left: 110%; }
         }
-
         .game-header {
             background: transparent; padding: 1rem 2rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -98,7 +84,6 @@ $suchbare_bewohner = ["Jannes"];
             background: #667eea; color: #fff; transform: scale(1.05);
         }
         .back-btn::before { content: '← '; margin-right: 5px; }
-
         .game-container {
             max-width: 1600px; margin: 2rem auto; padding: 0 2rem;
             position: relative; z-index: 1;
@@ -107,7 +92,6 @@ $suchbare_bewohner = ["Jannes"];
             display: grid; grid-template-columns: 280px 1fr 320px;
             gap: 2rem; min-height: 70vh;
         }
-
         /* Major Mike Section */
         .major-mike-section {
             background: rgba(255, 255, 255, 0.85); border-radius: 25px;
@@ -150,7 +134,6 @@ $suchbare_bewohner = ["Jannes"];
         @keyframes blink {
             0%, 50%, 100% { opacity: 1; } 25%, 75% { opacity: 0.5; }
         }
-
         /* Houses Grid (5 Häuser) */
         .houses-grid {
             background: rgba(255, 255, 255, 0.85); border-radius: 25px;
@@ -187,7 +170,6 @@ $suchbare_bewohner = ["Jannes"];
             background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px);
             transform: translateY(-50%); z-index: 2;
         }
-
         /* Haus-Styles (Klick-basiert) */
         .house {
             aspect-ratio: 1; background: transparent; border: none;
@@ -240,9 +222,6 @@ $suchbare_bewohner = ["Jannes"];
         .house.found .house-family {
             opacity: 1;
         }
-        /* HOVER-REGEL ENTFERNT */
-
-
         /* INFO-PANEL (Stil von L2) */
         .info-panel {
             background: rgba(255, 255, 255, 0.85);
@@ -277,7 +256,6 @@ $suchbare_bewohner = ["Jannes"];
             font-size: 0.95rem;
             margin-bottom: 0.4rem;
         }
-
         /* Hash-Rechner */
         .hash-calculator {
             background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
@@ -306,7 +284,6 @@ $suchbare_bewohner = ["Jannes"];
             text-align: center; font-family: 'Orbitron', sans-serif;
             font-weight: 700; color: #2E7D32; font-size: 1.1rem;
         }
-
         /* Familien-Liste (Stil von L2) */
         .family-list-container {
             max-height: 250px;
@@ -332,15 +309,12 @@ $suchbare_bewohner = ["Jannes"];
             transform: scale(1.03);
             z-index: 10;
         }
-        /* 'disabled' Klasse wird nicht mehr verwendet */
         li.family-to-assign.placed {
             opacity: 0.3;
             background: #e0e0e0;
             cursor: not-allowed;
             text-decoration: line-through;
         }
-
-
         /* Success Modal (von L3) */
         .success-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -349,7 +323,6 @@ $suchbare_bewohner = ["Jannes"];
             backdrop-filter: blur(5px);
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .success-modal {
             background: white; border-radius: 30px; padding: 3rem;
             max-width: 650px; text-align: center;
@@ -394,7 +367,6 @@ $suchbare_bewohner = ["Jannes"];
         .btn-secondary:hover {
             background: #667eea; color: white; transform: translateY(-2px);
         }
-
         /* Responsive Design */
         @media (max-width: 1200px) {
             .game-area { grid-template-columns: 1fr; gap: 1.5rem; }
@@ -413,13 +385,11 @@ $suchbare_bewohner = ["Jannes"];
     </style>
 </head>
 <body>
-
 <div class="sky-section">
     <div class="cloud" style="width: 120px; height: 60px; top: 8%; animation-delay: 0s;"></div>
     <div class="cloud" style="width: 150px; height: 70px; top: 18%; animation-delay: 10s;"></div>
 </div>
 <div class="grass-section"></div>
-
 <div class="game-header">
     <div class="container-fluid">
         <div class="row align-items-center">
@@ -429,10 +399,8 @@ $suchbare_bewohner = ["Jannes"];
         </div>
     </div>
 </div>
-
 <div class="game-container">
     <div class="game-area">
-
         <div class="major-mike-section">
             <div class="major-mike-avatar">
                 <img src="./assets/wink_major.png" alt="Major Mike" id="majorMikeImage">
@@ -447,7 +415,6 @@ $suchbare_bewohner = ["Jannes"];
                 </div>
             </div>
         </div>
-
         <div class="houses-grid">
             <h2 class="grid-title">🏘️ Stadtteil 3: Linear Probing</h2>
             <div class="street-block">
@@ -469,10 +436,8 @@ $suchbare_bewohner = ["Jannes"];
                 <div class="street"></div>
             </div>
         </div>
-
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-
             <div class="info-item hash-calculator">
                 <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
                 <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben...">
@@ -481,7 +446,6 @@ $suchbare_bewohner = ["Jannes"];
                     Ergebnis: ...
                 </div>
             </div>
-
             <div class="info-item">
                 <div class="info-label">Aufgaben (Klicken):</div>
                 <div class="family-list-container">
@@ -498,11 +462,9 @@ $suchbare_bewohner = ["Jannes"];
                     </ul>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
-
 <div class="success-overlay" id="successOverlay">
     <div class="success-modal">
         <div class="success-icon">🎉</div>
@@ -516,24 +478,34 @@ $suchbare_bewohner = ["Jannes"];
         </div>
     </div>
 </div>
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
     $(document).ready(function() {
+        // --- Haus-Paare für Assets ---
+        const housePairs = [
+            { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
+            { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
+            { empty: "WohnhauBlauRotLeerNeu.svg", filled: "WohnhauBlauRotBesetztNeu.svg" },
+            { empty: "WohnhauGelbBraunLeerNeu.svg", filled: "WohnhauGelbBraunBesetztNeu.svg" },
+            { empty: "WohnhauGelbRotLeerNeu.svg", filled: "WohnhauGelbRotBesetztNeu.svg" },
+            { empty: "WohnhauGrauBraunLeerNeu.svg", filled: "WohnhauGrauBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
+            { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
+            { empty: "WohnhauGrauBraunLeerNeu.svg", filled: "WohnhauGrauBraunBesetztNeu.svg" },
+            { empty: "WohnhauRotBraunLeerNeu.svg", filled: "WohnhauRotBraunBesetztNeu.svg" },
+            { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
+        ];
 
         // --- Spielstatus-Variablen ---
         let gameState = 'dialogue_start';
         let currentTask = 'Dieter'; // Startaufgabe
         let selectedFamily = null;
         let calculatedHash = null;
-
         // --- PHP-Daten ---
         const anzahlHaeuser = <?php echo $anzahl_haeuser; ?>; // 5
         const hashValues = <?php echo json_encode($hash_werte); ?>;
         const correctJannesPosition = <?php echo $bewohner_start[2] ? 2 : -1; ?>; // Haus 2
-
         // --- Dialoge & Task-Struktur ---
         const introDialogues = [
             // Monolog 1 (Teil 1)
@@ -543,42 +515,61 @@ $suchbare_bewohner = ["Jannes"];
         ];
         let introDialogueIndex = 0;
 
+        // --- Zufällige Auswahl der Assets für die Häuser ---
+        function getRandomHousePair() {
+            const randomIndex = Math.floor(Math.random() * housePairs.length);
+            return housePairs[randomIndex];
+        }
+
+        // --- Setzt das Haus-Asset ---
+        function setHouseAsset(houseElement, isFilled) {
+            const currentAsset = houseElement.find('.house-icon').attr('src');
+            const assetName = currentAsset.split('/').pop();
+            let matchingPair = null;
+            for (const pair of housePairs) {
+                if (pair.empty === assetName || pair.filled === assetName) {
+                    matchingPair = pair;
+                    break;
+                }
+            }
+            const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
+            houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
+        }
 
         // --- UI Update-Funktionen ---
-        // KORREKTUR: "Lade..."-Problem behoben
         function updateDialogue(text, img = 'card_major.png') {
-            $('#dialogueText').html(text); // Sofortiger Text-Austausch
+            $('#dialogueText').html(text);
             $('#majorMikeImage').attr('src', './assets/' + img);
         }
 
         function updateHouse($house, familyName) {
             $house.removeClass('leer').addClass('belegt').data('family', familyName);
-            // ANPASSUNG: Name wird NICHT permanent angezeigt
-            $house.find('.house-family').text(familyName); // Name für Feedback setzen
-            $house.find('.house-icon').attr('src', './assets/filled_house.svg');
+            $house.find('.house-family').text(familyName);
+            setHouseAsset($house, true);
             $house.addClass('found');
-
-            // Namen kurz einblenden, dann ausblenden
             $house.find('.house-family').css('opacity', 1);
             setTimeout(() => {
                 $house.removeClass('found');
-                $house.find('.house-family').css('opacity', 0); // Namen wieder verstecken
+                $house.find('.house-family').css('opacity', 0);
             }, 2000);
         }
 
-        // ANPASSUNG: Hover-Listener entfernt
-        /*
-        $('.house').on('mouseleave', ...);
-        $('.house').on('mouseenter', ...);
-        */
-
-
         function gameCompleted() {
             gameState = 'game_completed';
-            // Monolog 7
-            updateDialogue("Danke für deine Hilfe, so funktioniert alles viel besser!", "wink_major.png"); // [cite: 125]
+            updateDialogue("Danke für deine Hilfe, so funktioniert alles viel besser!", "wink_major.png");
             setTimeout(showSuccessModal, 2500);
         }
+
+        // --- Initialisierung der Häuser mit zufälligen Assets ---
+        $('.house').each(function() {
+            const $house = $(this);
+            const isFilled = $house.hasClass('belegt');
+            const pair = getRandomHousePair();
+            const asset = isFilled ? pair.filled : pair.empty;
+            $house.find('.house-icon').attr('src', `./assets/${asset}`);
+            $house.data('empty-asset', pair.empty);
+            $house.data('filled-asset', pair.filled);
+        });
 
         // --- Task-Steuerung ---
         function showNextIntroDialogue() {
@@ -586,9 +577,7 @@ $suchbare_bewohner = ["Jannes"];
                 const dialogue = introDialogues[introDialogueIndex];
                 updateDialogue(dialogue.text, dialogue.img);
                 introDialogueIndex++;
-
                 if (introDialogueIndex === introDialogues.length) {
-                    // Letzter Intro-Dialog, warte auf Auswahl für Dieter
                     $('#dialogueContinue').fadeOut();
                     gameState = 'awaiting_selection';
                     currentTask = 'Dieter';
@@ -596,31 +585,25 @@ $suchbare_bewohner = ["Jannes"];
             }
         }
 
-
         // --- Event Handler ---
-
-        // 1. Monolog-Steuerung (Enter / Klick)
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && gameState === 'dialogue_start') {
                 showNextIntroDialogue();
             }
         });
+
         $('.dialogue-box').click(function() {
             if (gameState === 'dialogue_start') {
                 showNextIntroDialogue();
             }
         });
 
-        // 2. Familie aus Liste auswählen (Sandbox-Stil)
         $('li.family-to-assign').click(function() {
             if (gameState === 'game_completed' || $(this).hasClass('placed')) {
                 return;
             }
-
             const familyData = $(this).data('family');
-            const familyName = $(this).data('name') || familyData; // "Jannes" oder "Dieter"
-
-            // Falsche Auswahl abfangen
+            const familyName = $(this).data('name') || familyData;
             if (familyData !== 'Jannes-Suche' && currentTask !== familyName) {
                 updateDialogue(`Moment! Wir müssen uns zuerst um ${currentTask} kümmern.`, "sad_major.png");
                 return;
@@ -629,38 +612,27 @@ $suchbare_bewohner = ["Jannes"];
                 updateDialogue(`Moment! Wir müssen uns zuerst um ${currentTask} kümmern.`, "sad_major.png");
                 return;
             }
-
-            // Korrekte Auswahl
             selectedFamily = familyName;
-
             $('li.family-to-assign').removeClass('active');
             $(this).addClass('active');
             $('#nameInput').val(selectedFamily);
             $('#hashResult').text('Ergebnis: ...');
-
             updateDialogue(`Okay, ${selectedFamily} ausgewählt. Klicke auf 'Berechnen'.`, 'card_major.png');
-
             gameState = 'awaiting_hash';
         });
 
-
-        // 3. Hash-Rechner
         $('#hashButton').click(function() {
             if (gameState === 'game_completed' || !selectedFamily) return;
-
             const name = $('#nameInput').val().trim();
             if (name !== selectedFamily) {
                 updateDialogue(`Der Name im Rechner passt nicht zur ausgewählten Familie.`, "sad_major.png");
                 return;
             }
-
             const hashSum = hashValues[name];
-            calculatedHash = hashSum % anzahlHaeuser; // 0-basiert
+            calculatedHash = hashSum % anzahlHaeuser;
             $('#hashResult').text(`Initial-Hash: ${calculatedHash}`);
-
             if (currentTask === 'Dieter' && name === 'Dieter') {
-                // Monolog 1 (Teil 2 - PDF-konform)
-                updateDialogue("Dieter soll ins Haus 0, dies ist aber schon belegt. Das nächste freie Haus ist das Haus 1. Trage Dieter ins Haus 1 ein.", "sad_major.png"); // [cite: 111, 112]
+                updateDialogue("Dieter soll ins Haus 0, dies ist aber schon belegt. Das nächste freie Haus ist das Haus 1. Trage Dieter ins Haus 1 ein.", "sad_major.png");
                 gameState = 'awaiting_click';
             }
             else if (currentTask === 'Lars' && name === 'Lars') {
@@ -673,77 +645,53 @@ $suchbare_bewohner = ["Jannes"];
             }
         });
 
-        // 4. Haus-Klick (Zuweisung)
         $('.house').click(function() {
             if (gameState !== 'awaiting_click' || !selectedFamily) {
                 return;
             }
-
             const $house = $(this);
             const targetHouseNum = $house.data('house');
-
-            // --- Phase 1: Dieter platzieren ---
             if (currentTask === 'Dieter') {
                 if ($house.data('family') && targetHouseNum !== 1) {
                     updateDialogue(`Haus ${targetHouseNum} ist bereits belegt!`, "sad_major.png");
                     return;
                 }
-
-                if (targetHouseNum === 1) { // Korrektes Haus für Dieter
+                if (targetHouseNum === 1) {
                     updateHouse($house, "Dieter");
                     $('li.family-to-assign[data-family="Dieter"]').addClass('placed').removeClass('active');
-
-                    // Monolog 2
-                    updateDialogue("Der nächste Bewohner ist Lars. Trage Ihn ins richtige Haus ein.", "wink_major.png"); // [cite: 114]
-
+                    updateDialogue("Der nächste Bewohner ist Lars. Trage Ihn ins richtige Haus ein.", "wink_major.png");
                     currentTask = 'Lars';
                     gameState = 'awaiting_selection';
                 } else {
-                    // Falsch für Dieter
-                    // Monolog 3 (angepasst)
-                    updateDialogue("Das war das falsche Haus. Beachte das aktuelle Verfahren bei einer Kollision (linear Probing).", "sad_major.png"); // [cite: 116, 117]
+                    updateDialogue("Das war das falsche Haus. Beachte das aktuelle Verfahren bei einer Kollision (linear Probing).", "sad_major.png");
                 }
                 return;
             }
-
-            // --- Phase 2: Lars platzieren ---
             if (currentTask === 'Lars') {
                 if ($house.data('family')) {
                     updateDialogue(`Haus ${targetHouseNum} ist bereits belegt!`, "sad_major.png");
                     return;
                 }
-
-                // Korrekte Position für Lars (Hash 2 -> 3 voll -> 4 frei)
                 if (targetHouseNum === 4) {
                     updateHouse($house, "Lars");
                     $('li.family-to-assign[data-family="Lars"]').addClass('placed').removeClass('active');
-
-                    // Monolog 4
-                    updateDialogue("Sehr gut! Dies ist das richtige Haus.", "wink_major.png"); // [cite: 119]
-
                     setTimeout(() => {
-                        // Monolog 5
-                        updateDialogue("Ich bin heute Abend bei Jannes eingeladen. Kannst du mir noch seine Hausnummer sagen?", "card_major.png"); // [cite: 121]
+                        updateDialogue("Ich bin heute Abend bei Jannes eingeladen. Kannst du mir noch seine Hausnummer sagen?", "card_major.png");
                         currentTask = 'Jannes';
                         gameState = 'awaiting_selection';
                     }, 2000);
-
                 } else {
-                    // Falsch für Lars
-                    // Monolog 3
-                    updateDialogue("Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen. Beachte auch das aktuelle Verfahren bei einer Kollision (linear Probing).", "sad_major.png"); // [cite: 116, 117]
+                    updateDialogue("Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen. Beachte auch das aktuelle Verfahren bei einer Kollision (linear Probing).", "sad_major.png");
                     $house.addClass('checked');
                     setTimeout(() => {
                         $house.removeClass('checked');
-                        $house.find('.house-family').css('opacity', 0); // Namen nach Fehler-Feedback ausblenden
+                        $house.find('.house-family').css('opacity', 0);
                     }, 1000);
                 }
                 return;
             }
-
-            // --- Phase 3: Jannes suchen ---
             if (currentTask === 'Jannes') {
-                if (targetHouseNum === correctJannesPosition) { // Haus 2
+                if (targetHouseNum === correctJannesPosition) {
                     if ($house.data('family') === 'Jannes') {
                         $house.addClass('found');
                         $('li.family-to-assign[data-family="Jannes-Suche"]').addClass('placed').removeClass('active');
@@ -752,32 +700,26 @@ $suchbare_bewohner = ["Jannes"];
                         updateDialogue("Moment... da wohnt ja gar nicht Jannes. Seltsam!", "sad_major.png");
                     }
                 } else {
-                    // Monolog 6
-                    updateDialogue("Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen.", "sad_major.png"); // [cite: 123]
+                    updateDialogue("Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen.", "sad_major.png");
                     $house.addClass('checked');
                     setTimeout(() => {
                         $house.removeClass('checked');
-                        $house.find('.house-family').css('opacity', 0); // Namen nach Fehler-Feedback ausblenden
+                        $house.find('.house-family').css('opacity', 0);
                     }, 1000);
                 }
                 return;
             }
         });
 
-
-        // --- Spielstart ---
         function startGame() {
-            // Zeigt den ersten Teil des Monologs
             updateDialogue(introDialogues[0].text, introDialogues[0].img);
             $('#dialogueContinue').fadeIn();
             gameState = 'dialogue_start';
-            introDialogueIndex = 1; // Setzt den Zähler auf den nächsten Dialog
+            introDialogueIndex = 1;
         }
 
-        // --- Modal- & Navigationsfunktionen ---
         function showSuccessModal() {
-            // PDF-konforme Erfolgsnachricht
-            $('#successMessage').text("Danke für deine Hilfe, so funktioniert alles viel besser!"); // [cite: 125]
+            $('#successMessage').text("Danke für deine Hilfe, so funktioniert alles viel besser!");
             $('#successOverlay').css('display', 'flex');
         }
 
@@ -789,10 +731,8 @@ $suchbare_bewohner = ["Jannes"];
             window.location.href = 'level-select.php';
         };
 
-        // Spiel initialisieren
         startGame();
     });
 </script>
-
 </body>
 </html>
