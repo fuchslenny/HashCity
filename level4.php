@@ -269,7 +269,7 @@ $familien_liste = [
             <div class="info-item hash-calculator">
                 <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
                 <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben...">
-                <button id="hashButton" class="calculator-button">Berechne Initial-Hash</button>
+                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
                 <div class="calculator-result" id="hashResult">
                     Ergebnis: ...
                 </div>
@@ -457,11 +457,11 @@ $familien_liste = [
                 return;
             }
             initialHash = getHash(selectedFamily, HASH_SIZE);
-            $('#hashResult').text(`Initial-Hash: ${initialHash}`);
+            $('#hashResult').text(`Hausnummer: ${initialHash}`);
             $(this).prop('disabled', true);
             if (gamePhase === "placement_calculate") {
                 correctTargetHouse = calculateFinalIndex(initialHash);
-                $('#dialogueText').text(`Initial-Hash: ${initialHash}. Klicke auf das entsprechende Haus.`);
+                $('#dialogueText').text(`Hausnummer: ${initialHash}. Klicke auf das entsprechende Haus.`);
                 $(`.house[data-house=${initialHash}]`).addClass('highlight-target');
                 gamePhase = "placement_find_spot";
             }
