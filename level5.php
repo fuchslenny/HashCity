@@ -975,7 +975,6 @@
                     stadt[houseNumber] = selectedFamily;
                     setHouseAsset($house, true);
                     $house.addClass('checked');
-                    $house.removeClass('highlight-target quadratic-target');
                     $house.find('.house-family').text(selectedFamily);
                     $(`.to-do-family[data-family="${selectedFamily}"]`)
                         .removeClass('active')
