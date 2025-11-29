@@ -277,7 +277,7 @@ $familien_liste = [
                 <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben...">
                 <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
                 <div class="calculator-result" id="hashResult">
-                    Ergebnis: ...
+                    Ergebnis ...
                 </div>
             </div>
             <div class="info-item">
@@ -339,6 +339,7 @@ $familien_liste = [
         let selectedFamily = null;
         let correctTargetHouse = null;
         let initialHash = null;
+        const families = ["Sophie", "Emil", "Grit", "Sara", "Dieter", "Marie", "Nele", "Claudia", "Nils", "Sammy"];
         // Ziel 1: SARA (Existiert)
         const SEARCH_TARGET_1 = "Sara";
         let search1InitialHash = null;
@@ -346,6 +347,11 @@ $familien_liste = [
         // Ziel 2: TINA (Existiert NICHT)
         const SEARCH_TARGET_2 = "Tina";
         let search2InitialHash = null;
+
+        function initFamilyListUI() {
+            $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
+        }
+        initFamilyListUI();
         // --- Zufällige Auswahl der Assets für die Häuser ---
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
@@ -433,7 +439,7 @@ $familien_liste = [
             $house.removeClass('highlight-target');
             $house.find('.house-family').text(family);
             $house.attr('data-family', family);
-            $(`.to-do-family[data-family-index=${currentFamilyIndex}]`).removeClass('active').addClass('list-group-item-success');
+            $(`.to-do-family[data-family-index=${currentFamilyIndex}]`).removeClass('active').addClass('list-group-item-success').css('opacity', '1');
         }
         // --- Event-Listener ---
         $('#dialogueBox').click(function() { if (!gameStarted) showNextDialogue(); });
@@ -451,9 +457,9 @@ $familien_liste = [
             initialHash = null;
             correctTargetHouse = null;
             $('.to-do-family').removeClass('active');
-            $(`.to-do-family[data-family-index=${currentFamilyIndex}]`).addClass('active');
+            $(`.to-do-family[data-family-index=${currentFamilyIndex}]`).removeClass('disabled').css('opacity', '1').addClass('active');
             $('#hashButton').prop('disabled', false);
-            $('#hashResult').text('Ergebnis: ...');
+            $('#hashResult').text('Ergebnis ...');
             $('#nameInput').val(selectedFamily);
             $('.house').removeClass('highlight-target');
             $('#dialogueText').text(`Platziere jetzt: ${selectedFamily}. Klicke 'Berechnen'.`);
@@ -546,7 +552,7 @@ $familien_liste = [
             gamePhase = "search_sara_calc";
             selectedFamily = SEARCH_TARGET_1;
             $('#hashButton').prop('disabled', false);
-            $('#hashResult').text('Ergebnis: ...');
+            $('#hashResult').text('Ergebnis ...');
             $('#nameInput').val(selectedFamily);
             $('.house').removeClass('highlight-target');
             $('#dialogueText').text("Sehr gut! Alle Bewohner sind da. Kannst du mir sagen, wo Sara wohnt? Berechne ihren Hash.");
@@ -557,7 +563,7 @@ $familien_liste = [
             gamePhase = "search_tina_calc";
             selectedFamily = SEARCH_TARGET_2;
             $('#hashButton').prop('disabled', false);
-            $('#hashResult').text('Ergebnis: ...');
+            $('#hashResult').text('Ergebnis ...');
             $('#nameInput').val(selectedFamily);
             $('.house').removeClass('highlight-target');
             $('.house').removeClass('found');
