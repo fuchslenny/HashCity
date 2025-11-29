@@ -225,7 +225,7 @@ $bewohner_liste = [
             <div class="dialogue-box" id="dialogueBox">
                 <div class="dialogue-text" id="dialogueText">
                 </div>
-                <div class="dialogue-continue" id="dialogueContinue">Weiter ↵</div>
+                <div class="dialogue-continue" id="dialogueContinue">Klicken oder Enter ↵</div>
             </div>
         </div>
         <div class="houses-grid">
@@ -350,6 +350,18 @@ $bewohner_liste = [
             }
         });
 
+        $(document).keydown(function(e) {
+            if ((e.key === 'Enter' || e.key === ' ')) {
+                if (gamePhase !== "intro") return;
+                introStep++;
+                if (introStep < introTexts.length) {
+                    $('#dialogueText').fadeOut(100, function() { $(this).html(introTexts[introStep]).fadeIn(100); });
+                    if(introStep === 1) $('#majorMikeImage').attr('src', './assets/card_major.png');
+                } else {
+                    startGamePlacement();
+                }
+            }
+        });
         function startGamePlacement() {
             gamePhase = "placement_calc";
             $('#dialogueContinue').hide();

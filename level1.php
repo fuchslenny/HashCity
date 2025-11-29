@@ -676,7 +676,7 @@
                     Dafür dürfen keine Namen doppelt existieren.
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue">
-                    Drücke Enter ↵
+                    Klicken oder Enter ↵
                 </div>
             </div>
         </div>
@@ -976,12 +976,7 @@
                 window.location.href = 'level-select.php?completed=1&next=2';
             }, 500);
         };
-        // --- Add keyboard hint ---
-        setTimeout(function() {
-            if (!gameStarted) {
-                $('#dialogueContinue').html('Klicke hier oder drücke Enter ↵');
-            }
-        }, 3000);
+
     });
 </script>
 </body>

@@ -706,7 +706,7 @@ $familien = [
                     Kannst du mir helfen, sie zu finden?
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
-                    Drücke Enter ↵
+                    Klicken oder Enter ↵
                 </div>
             </div>
         </div>

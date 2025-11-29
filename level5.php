@@ -655,8 +655,8 @@
                 <div class="dialogue-text" id="dialogueText">
                     Linear probing erzeugt Cluster, was zu einem großen Suchaufwand führt, wenn man viele Daten speichern möchte. Also entstehen große Nachbarschaften, in denen man sehr lang suchen muss, bis man das richtige Haus gefunden hat.
                 </div>
-                <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
-                    Drücke Enter ↵
+                <div class="dialogue-continue" id="dialogueContinue">
+                    Klicken oder Enter ↵
                 </div>
             </div>
         </div>

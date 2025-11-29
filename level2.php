@@ -630,7 +630,7 @@ $prefilled_haeuser = [
                     Ich habe hier mal etwas vorbereitet. Drei Bewohner sind bereits eingezogen.
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue">
-                    Drücke Enter ↵
+                    Klicken oder Enter ↵
                 </div>
             </div>
         </div>
