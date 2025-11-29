@@ -889,16 +889,18 @@
         }
         // Familie anklicken
         function handleFamilyClick() {
-            const $item = $(this);
-            if ($item.hasClass('disabled') || $item.hasClass('list-group-item-success')) return;
-            selectedFamily = $item.data('family');
-            $('#hashInput').val(selectedFamily);
-            $('#hashResult').text('Ergebnis: ...');
-            $('#hashButton').prop('disabled', false);
-            $('.to-do-family').removeClass('active');
-            $item.addClass('active');
-            $('.house').removeClass('highlight-target quadratic-target');
-            $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
+            if (gameStarted){
+                const $item = $(this);
+                if ($item.hasClass('disabled') || $item.hasClass('list-group-item-success')) return;
+                selectedFamily = $item.data('family');
+                $('#hashInput').val(selectedFamily);
+                $('#hashResult').text('Ergebnis: ...');
+                $('#hashButton').prop('disabled', false);
+                $('.to-do-family').removeClass('active');
+                $item.addClass('active');
+                $('.house').removeClass('highlight-target quadratic-target');
+                $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
+            }
         }
         // --- Listener für Dialoge ---
         $(document).keydown(function(e) {
