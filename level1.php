@@ -720,12 +720,12 @@
         </div>
         <!-- Info Panel -->
         <div class="info-panel">
-            <!-- Stadtplaner (Hash-Rechner) -->
+            <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
                 <label for="hashInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
-                <input type="text" id="hashInput" class="calculator-input" placeholder="Familienname...">
-                <div class="calculator-result" id="hashResult">Ergebnis: ...</div>
+                <input type="text" id="hashInput" class="calculator-input" placeholder="Namen eingeben...">
                 <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">Ergebnis ...</div>
             </div>
             <!-- Bewerber-Liste -->
             <div class="info-item">
@@ -863,7 +863,7 @@
             if ($item.hasClass('list-group-item-success')) return;
             selectedFamily = $item.data('family');
             $('#hashInput').val(selectedFamily);
-            $('#hashResult').text('Ergebnis: ...');
+            $('#hashResult').text('Ergebnis ...');
             $('#hashButton').prop('disabled', false);
             $('.to-do-family').removeClass('active');
             $item.addClass('active');
@@ -960,7 +960,7 @@
                     }
                     selectedFamily = null;
                     $('#hashInput').val('');
-                    $('#hashResult').text('Ergebnis: ...');
+                    $('#hashResult').text('Ergebnis ...');
                     $('#hashButton').prop('disabled', true);
                 }
             }
