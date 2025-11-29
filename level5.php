@@ -465,42 +465,7 @@
             cursor: not-allowed;
             text-decoration: line-through;
         }
-        /* Load Factor Display */
-        .load-factor-box {
-            text-align: center;
-            padding: 0.5rem;
-            background: #f0f0f0;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            border: 2px solid #ccc;
-            transition: all 0.5s ease;
-        }
-        .lf-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
-        .lf-label {
-            font-size: 0.8rem;
-            color: #666;
-        }
-        /* Ampel-Farben für Load Factor */
-        .lf-good {
-            color: #4CAF50;
-            border-color: #4CAF50;
-            background: #e8f5e9;
-        } /* <= 0.5 */
-        .lf-medium {
-            color: #FF9800;
-            border-color: #FF9800;
-            background: #fff3e0;
-        } /* 0.5 - 0.75 */
-        .lf-bad {
-            color: #D32F2F;
-            border-color: #D32F2F;
-            background: #FFEBEE;
-        } /* > 0.75 */
+
         /* Success Modal */
         .success-overlay {
             position: fixed;
@@ -894,7 +859,7 @@
                 if ($item.hasClass('disabled') || $item.hasClass('list-group-item-success')) return;
                 selectedFamily = $item.data('family');
                 $('#hashInput').val(selectedFamily);
-                $('#hashResult').text('Ergebnis: ...');
+                $('#hashResult').text('Ergebnis ...');
                 $('#hashButton').prop('disabled', false);
                 $('.to-do-family').removeClass('active');
                 $item.addClass('active');
