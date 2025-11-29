@@ -175,6 +175,12 @@ $familien_liste = [
             cursor: not-allowed;
             text-decoration: line-through;
         }
+        .info-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #2E7D32;
+        }
         .success-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 2000; animation: fadeIn 0.3s ease; backdrop-filter: blur(5px); }
         .success-modal { background: white; border-radius: 30px; padding: 3rem; max-width: 650px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4); animation: slideUp 0.5s ease; border: 5px solid #4CAF50; }
         .success-icon { font-size: 5rem; margin-bottom: 1rem; animation: bounce 1s infinite; }
@@ -285,6 +291,10 @@ $familien_liste = [
                         <?php endforeach; ?>
                     </ul>
                 </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Eingetragene Familien:</div>
+                <div class="info-value" id="occupiedCount">0 / 10</div>
             </div>
         </div>
     </div>
@@ -488,6 +498,7 @@ $familien_liste = [
                 if (houseNumber === correctTargetHouse) {
                     placeFamily($house, houseNumber, selectedFamily);
                     currentFamilyIndex++;
+                    $('#occupiedCount').text(currentFamilyIndex + ' / 10');
                     selectNextFamily();
                 } else if (stadt[houseNumber] !== null) {
                     $('#dialogueText').text("Halt! Belegt. Nutze Linear Probing (nächstes freies Haus).");
