@@ -309,7 +309,6 @@ $familien_liste = [
         }
         // 1. Liste Klicken
         $(document).on('click', '.list-group-item', function() {
-            console.log("test");
             if ((phase === 'collision_mode') || (phase === 'probing_step')) return;
             let idx = $(this).data('index');
             let text = $(this).text().trim();
