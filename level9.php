@@ -177,24 +177,125 @@ $bewohner_liste = [
         }
         /* Controls Right */
         .info-panel {
-            background: rgba(255, 255, 255, 0.9); border-radius: 25px; padding: 1.5rem;
-            position: sticky; top: 80px; border: 4px solid #fff; height: fit-content;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            border: 4px solid #fff;
         }
-        .hash-display {
-            font-family: 'Orbitron', sans-serif; font-size: 2.5rem; color: #667eea;
-            text-align: center; margin: 1rem 0; font-weight: 900;
+        .info-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 1.2rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-        .btn-calc {
-            width: 100%; padding: 0.8rem; border-radius: 30px; border: none;
-            background: linear-gradient(90deg, #667eea, #764ba2); color: white;
-            font-weight: 700; text-transform: uppercase; transition: transform 0.2s;
+        .info-item {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border: 3px solid #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15);
         }
-        .btn-calc:disabled { background: #ccc; }
-        .btn-calc:hover:not(:disabled) { transform: scale(1.03); }
-        .family-list { max-height: 300px; overflow-y: auto; margin-top: 1rem; }
-        .list-item { padding: 0.5rem; border-bottom: 1px solid #eee; color: #666; }
-        .list-item.active { background: #e3f2fd; color: #1565c0; font-weight: bold; }
-        .list-item.done { text-decoration: line-through; color: #aaa; }
+        .info-label {
+            font-weight: 700;
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+        }
+        .hash-calculator {
+            background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
+            border-color: #2196F3;
+        }
+        .calculator-input {
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 0.7rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            transition: border-color 0.3s ease;
+        }
+        .calculator-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .calculator-button {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            margin-top: 0.5rem;
+        }
+        .calculator-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+        .calculator-result {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #2E7D32;
+            font-size: 1.1rem;
+        }
+        /* Familien-Liste (Stil von Level 3) */
+        .family-list-container {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .list-group-item.to-do-family {
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+            border: 2px solid #aab8c2;
+            margin-bottom: 0.5rem;
+            border-radius: 10px !important;
+        }
+        .list-group-item.to-do-family:hover:not(.placed) {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+        .list-group-item.to-do-family.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.03);
+            z-index: 10;
+        }
+        .list-group-item.to-do-family.list-group-item-success {
+            opacity: 0.3;
+            background: #e0e0e0;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        .info-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #2E7D32;
+        }
         /* Success Overlay */
         .success-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -257,21 +358,30 @@ $bewohner_liste = [
             </div>
         </div>
         <div class="info-panel">
-            <h4 class="text-center text-success fw-bold">📝 Bauamt</h4>
-            <div class="text-center mt-4">
-                <div class="text-muted fw-bold">Hash / Haus-Nr.</div>
-                <div class="hash-display" id="hashResult">-</div>
-                <button id="hashButton" class="btn-calc" disabled>Berechnen</button>
-            </div>
-            <div class="mt-4">
-                <strong>Einwohner-Meldeamt:</strong>
-                <div class="family-list">
-                    <?php foreach ($bewohner_liste as $idx => $name): ?>
-                        <div class="list-item to-do-item" data-index="<?php echo $idx; ?>">
-                            <?php echo $name; ?>
-                        </div>
-                    <?php endforeach; ?>
+            <h3 class="info-title">📊 Stadtplanung</h3>
+            <div class="info-item hash-calculator">
+                <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben...">
+                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">
+                    Ergebnis ...
                 </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Einziehende Familien:</div>
+                <div class="family-list-container">
+                    <ul id="familienListe" class="list-group">
+                        <?php foreach ($bewohner_liste as $index => $familie): ?>
+                            <li class="list-group-item to-do-family" data-family-index="<?php echo $index; ?>">
+                                <?php echo $familie; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Eingetragene Familien:</div>
+                <div class="info-value" id="occupiedCount">0 / 10</div>
             </div>
         </div>
     </div>
@@ -281,16 +391,17 @@ $bewohner_liste = [
         <h2 class="text-success fw-bold mb-3">Fantastisch!</h2>
         <p class="mb-4 text-muted" id="successMessage">Thomas wurde gefunden.</p>
         <button class="btn btn-primary px-4" onclick="location.reload()">Neustart</button>
-        <a href="level10.php" class="btn btn-success px-4 ms-2">Nächstes Level →</a>
+        <a href="Level-Auswahl?completed=9&next=10" class="btn btn-success px-4 ms-2">Nächstes Level →</a>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
+
     $(document).ready(function() {
         // --- KONFIGURATION ---
         var HASH_SIZE = 10;
         var familien = <?php echo json_encode($bewohner_liste); ?>;
-        // Fix für Zeile 5 Fehler: Explizite Funktion statt Arrow-Function
         var stadt = new Array(HASH_SIZE).fill(null).map(function() { return []; });
         var introStep = 0;
         var gamePhase = "intro";
@@ -307,6 +418,26 @@ $bewohner_liste = [
             { base: "Wohnhaus2BlauRot.svg", extension: "WohnhausBlauRotErweiterung.svg" },
             { base: "Wohnhaus2GrauBraun.svg", extension: "WohnhausGrauBraunErweiterung.svg" },
         ];
+        const families = [
+            "Franz",    // Hash 3
+            "Heinrich", // Hash 0
+            "Nora",     // Hash 0 (Kollision)
+            "Thomas",   // Hash 0 (Kollision)
+            "Markus",   // Hash 7
+            "Emma",     // Hash 4
+            "Johannes", // Hash 2
+            "Katrin",   // Hash 7 (Kollision)
+            "Peter",    // Hash 2 (Kollision)
+            "Nina",     // Hash 0 (Kollision)
+            "Julia"     // Hash 1
+            ];
+        function initFamilyList() {
+            $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
+            const currentFamily = families[currentIdx];
+            $(`.to-do-family[data-family="${currentFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', selectNextResident);
+            selectedFamily = currentFamily;
+        }
+        initFamilyList();
 
         // --- Zufällige Auswahl der Assets für die Häuser ---
         function getRandomHousePair() {
@@ -336,6 +467,7 @@ $bewohner_liste = [
             "Das funktioniert so: Wenn mehrere Bewohner ins selbe Haus sollen, entsteht ein Mehrfamilienhaus (Liste).",
             "Trage nun die Bewohner ein. Berechne zuerst die Hausnummer. Nur bei einer Kollision entsteht ein Anbau."
         ];
+
         $('#dialogueText').html(introTexts[0]);
 
         // --- INTRO LOGIK ---
@@ -362,6 +494,7 @@ $bewohner_liste = [
                 }
             }
         });
+
         function startGamePlacement() {
             gamePhase = "placement_calc";
             $('#dialogueContinue').hide();
@@ -375,11 +508,11 @@ $bewohner_liste = [
                 return;
             }
             currentName = familien[currentIdx];
+            $('#nameInput').val(currentName);
             currentHash = null;
-            $('.to-do-item').removeClass('active');
-            $('.to-do-item[data-index=' + currentIdx + ']').addClass('active');
+            $('.to-do-family[data-family-index=' + currentIdx + ']').addClass('active').css('opacity', '1');
             $('#hashButton').prop('disabled', false).text("Berechnen");
-            $('#hashResult').text("-");
+            $('#hashResult').text("Ergebnis ...");
             inputLocked = false;
         }
 
@@ -393,13 +526,13 @@ $bewohner_liste = [
         $('#hashButton').click(function() {
             if (gamePhase === "placement_calc") {
                 currentHash = getHash(currentName);
-                $('#hashResult').text(currentHash);
+                $('#hashResult').text(`Hausnummer: ${currentHash}`);
                 $(this).prop('disabled', true);
                 $('#house-' + currentHash).addClass('highlight-target');
                 gamePhase = "placement_click";
             } else if (gamePhase === "search_calc") {
                 currentHash = getHash(SEARCH_TARGET);
-                $('#hashResult').text(currentHash);
+                $('#hashResult').text(`Hausnummer: ${currentHash}`);
                 $(this).prop('disabled', true);
                 $('#house-' + currentHash).addClass('highlight-target');
                 gamePhase = "search_click";
@@ -422,11 +555,10 @@ $bewohner_liste = [
             var $houseElement = $(this);
             var $nameContainer = $('#names-' + clickedHouse);
 
-            // 1. Andere Häuser schließen (nur in Search Phase sichtbar)
+            // Andere Häuser schließen (nur in Search Phase sichtbar)
             $('.house-container').not(this).find('.resident-name').removeClass('revealed');
 
-            // 2. TRAVERSIEREN (Namen aufdecken)
-            // NUR noch in der Suchphase ("search_click")
+            // TRAVERSIEREN (Namen aufdecken)
             if (gamePhase === "search_click") {
                 var $hiddenNames = $nameContainer.find('.resident-name').not('.revealed');
                 if ($hiddenNames.length > 0) {
@@ -445,14 +577,12 @@ $bewohner_liste = [
                     $('#majorMikeImage').attr('src', './assets/wink_major.png');
                     stadt[clickedHouse].push(currentName);
                     var bewohnerAnzahl = stadt[clickedHouse].length;
-
-                    // HINZUFÜGEN OHNE 'revealed' KLASSE
                     var nameTag = $('<div class="resident-name">' + currentName + '</div>');
                     $nameContainer.append(nameTag);
 
                     if (bewohnerAnzahl > 1) {
                         const currentAsset = $(`#house-${clickedHouse}`).find('.img-house-base').attr('src');
-                        const assetName = currentAsset.split('/').pop(); // z. B. "WohnhauBlauBraunLeerNeu.svg"
+                        const assetName = currentAsset.split('/').pop();
                         let matchingPair = null;
                         for (const pair of housePairs) {
                             if (pair.base === assetName || pair.extension === assetName) {
@@ -465,9 +595,8 @@ $bewohner_liste = [
                     }
 
                     $houseElement.removeClass('highlight-target');
-                    $('.to-do-item[data-index=' + currentIdx + ']').removeClass('active').addClass('done');
+                    $('.to-do-family[data-family-index=' + currentIdx + ']').removeClass('active').addClass('list-group-item-success').css('opacity', '1');
                     currentIdx++;
-
                     setTimeout(function() {
                         if(currentIdx < familien.length) {
                             gamePhase = "placement_calc";
@@ -476,7 +605,7 @@ $bewohner_liste = [
                             else $('#dialogueText').text("Trage den nächsten Bewohner ein.");
                             $('#majorMikeImage').attr('src', './assets/card_major.png');
                         } else {
-                            selectNextResident(); // Trigger search logic
+                            startSearchPhase();
                         }
                     }, 1000);
                 } else {
@@ -487,20 +616,17 @@ $bewohner_liste = [
             // --- PHASE: SUCHEN (MIT DURCHKLICKEN) ---
             else if (gamePhase === "search_click") {
                 var residentList = stadt[clickedHouse];
-                // Finde das DOM Element für Thomas
                 var $thomasElement = $nameContainer.find('.resident-name').filter(function() {
                     return $(this).text() === SEARCH_TARGET;
                 });
 
                 if (clickedHouse === currentHash && residentList.includes(SEARCH_TARGET)) {
                     if ($thomasElement.hasClass('revealed')) {
-                        // GEWONNEN!
                         $('#dialogueText').text("Da ist er ja! Danke für deine Hilfe!");
                         $('#majorMikeImage').attr('src', './assets/wink_major.png');
                         $thomasElement.addClass('found');
                         setTimeout(function() { $('#successOverlay').fadeIn(); }, 1000);
                     } else {
-                        // Noch verdeckt
                         $('#dialogueText').text("Er wohnt in diesem Haus. Klicke weiter, um ihn in der Liste zu finden!");
                         $('#majorMikeImage').attr('src', './assets/card_major.png');
                     }
@@ -517,7 +643,8 @@ $bewohner_liste = [
             currentHash = null;
             $('#hashButton').prop('disabled', false).text("Thomas suchen");
             $('#hashResult').text("?");
-            $('.to-do-item').removeClass('active');
+            $('.to-do-family').removeClass('active').css('opacity', '0.5');
+            $('.to-do-family[data-family-index=' + currentIdx + ']').addClass('active').css('opacity', '1');
             $('#dialogueText').text("Thomas hat noch eine Idee. Kannst du seine Hausnummer suchen?");
             $('#majorMikeImage').attr('src', './assets/card_major.png');
             $('.resident-name').removeClass('revealed');
