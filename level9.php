@@ -304,6 +304,15 @@ $bewohner_liste = [
         .success-box {
             background: white; padding: 3rem; border-radius: 20px; text-align: center; border: 5px solid #4CAF50;
         }
+        .grid-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #2E7D32;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
         @media (max-width: 1200px) { .game-area { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -330,8 +339,7 @@ $bewohner_liste = [
             </div>
         </div>
         <div class="houses-grid">
-            <h2 class="grid-title" style="font-family: 'Orbitron', sans-serif; text-align:center; color:#2E7D32;">🏘️ Separate Chaining</h2>
-            <p class="text-center text-muted mb-4">Klicke auf ein Haus, um Bewohner zu sehen. Klicke weiter, um in der Liste zu suchen.</p>
+            <h2 class="grid-title">🏘️ Double Hashing District (Praxis)</h2>
             <div class="street-block">
                 <div class="houses-row">
                     <?php for ($i = 0; $i < 5; $i++): ?>
