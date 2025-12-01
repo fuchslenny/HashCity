@@ -411,7 +411,7 @@ $suchbare_bewohner = ["Jannes"];
                     Lade...
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
-                    Klicke hier oder drücke Enter ↵
+                    Klicken oder Enter ↵
                 </div>
             </div>
         </div>

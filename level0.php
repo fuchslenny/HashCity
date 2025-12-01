@@ -7,26 +7,26 @@
  * Familie Müller befindet sich in Haus 16
  */
 $familien = [
-        1 => "Schmidt",
-        2 => "Weber",
-        3 => "Wagner",
-        4 => "Becker",
-        5 => "Schulz",
-        6 => "Hoffmann",
-        7 => "Koch",
-        8 => "Richter",
-        9 => "Klein",
-        10 => "Wolf",
-        11 => "Schröder",
-        12 => "Neumann",
-        13 => "Schwarz",
-        14 => "Zimmermann",
-        15 => "Braun",
-        16 => "Müller", // Ziel-Familie
-        17 => "Krüger",
-        18 => "Hofmann",
-        19 => "Hartmann",
-        20 => "Lange"
+        0 => "Schmidt",
+        1 => "Weber",
+        2 => "Wagner",
+        3=> "Becker",
+        4 => "Schulz",
+        5 => "Hoffmann",
+        6 => "Koch",
+        7 => "Richter",
+        8 => "Klein",
+        9 => "Wolf",
+        10 => "Schröder",
+        11 => "Neumann",
+        12 => "Schwarz",
+        13 => "Zimmermann",
+        14 => "Braun",
+        15 => "Müller", // Ziel-Familie
+        16 => "Krüger",
+        17 => "Hofmann",
+        18 => "Hartmann",
+        19 => "Lange"
 ];
 ?>
 <!DOCTYPE html>
@@ -706,7 +706,7 @@ $familien = [
                     Kannst du mir helfen, sie zu finden?
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
-                    Drücke Enter ↵
+                    Klicken oder Enter ↵
                 </div>
             </div>
         </div>
@@ -779,20 +779,6 @@ $familien = [
                 <div class="info-label">Anzahl Versuche:</div>
                 <div class="info-value" id="attemptsCount">0</div>
             </div>
-            <div class="progress-section">
-                <div class="info-label">Fortschritt:</div>
-                <div class="progress-bar-container">
-                    <div class="progress">
-                        <div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%">0%</div>
-                    </div>
-                </div>
-            </div>
-            <div class="info-item" style="background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%); border-color: #2196F3;">
-                <div class="info-label">💡 Spieltipp:</div>
-                <div style="font-size: 0.95rem; color: #333; margin-top: 0.5rem; font-weight: 500; line-height: 1.5;">
-                    Klicke auf die Häuser, um zu sehen, welche Familie dort wohnt. Finde Familie Müller!
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -847,26 +833,11 @@ $familien = [
             return housePairs[randomIndex];
         }
 
-        // --- Setzt das Haus-Asset ---
-        function setHouseAsset(houseElement, isFilled) {
-            const currentAsset = houseElement.find('.house-icon').attr('src');
-            const assetName = currentAsset.split('/').pop();
-            let matchingPair = null;
-            for (const pair of housePairs) {
-                if (pair.empty === assetName || pair.filled === assetName) {
-                    matchingPair = pair;
-                    break;
-                }
-            }
-            const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
-            houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
-        }
-
-        // --- Initialisierung der Häuser mit zufälligen Assets ---
+        // --- Initialisierung der Häuser mit zufälligen Assets (als leer) ---
         $('.house').each(function() {
             const $house = $(this);
             const pair = getRandomHousePair();
-            $house.find('.house-icon').attr('src', `./assets/${pair.empty}`);
+            $house.find('.house-icon').attr('src', `./assets/${pair.filled}`);
             $house.data('empty-asset', pair.empty);
             $house.data('filled-asset', pair.filled);
         });
@@ -938,8 +909,8 @@ $familien = [
             const family = $house.data('family');
 
             // Haus als "geprüft" markieren
-            setHouseAsset($house, true);
-            $house.addClass('checked');
+            $house.find('.house-icon').attr('src', `./assets/${$house.data('filled-asset')}`);
+            $house.addClass('checked show-family');
 
             if (family === 'Müller') {
                 $house.addClass('found');

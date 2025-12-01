@@ -362,7 +362,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
         });
         function performAutoRehash() {
             // Reset visuals
-            //$('.house').removeClass('checked found highlight-target pop-in').find('.house-icon').attr('src', './assets/empty_house.svg');
             // Reset Logic
             let tempResidents = [];
             for(let i=0; i<19; i++) tempResidents.push(families[i]);
@@ -379,6 +378,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             // 2. Animation von 0 bis 39
             for (let i = 0; i < 40; i++) {
                 let $house = $(`#house-${i}`);
+                $house.removeClass('checked');
                 $house.removeClass('pop-in');
                 setTimeout(() => {
                     $house.addClass('pop-in'); // "Schütteln" / Refresh Effekt
