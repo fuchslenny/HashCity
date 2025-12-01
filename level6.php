@@ -385,35 +385,55 @@
             background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
             border-color: #2196F3;
         }
-        .hash-result-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: #667eea;
-            text-align: center;
+        .calculator-input {
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 0.7rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            transition: border-color 0.3s ease;
         }
-        .calc-button {
-            padding: 0.6rem 1.5rem;
+        .calculator-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .calculator-button {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
             border: none;
-            border-radius: 30px;
+            border-radius: 10px;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            width: 100%;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
             margin-top: 0.5rem;
         }
-        .calc-button:hover {
+        .calculator-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
         }
-        .calc-button:disabled {
+        .calculator-button:disabled {
             background: #ccc;
             cursor: not-allowed;
+        }
+        .calculator-result {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #2E7D32;
+            font-size: 1.1rem;
         }
         .family-list-container {
             max-height: 250px;
@@ -424,24 +444,30 @@
             font-weight: 700;
             transition: all 0.2s ease;
             font-size: 1.1rem;
+            border: 2px solid #aab8c2;
+            margin-bottom: 0.5rem;
+            border-radius: 10px !important;
         }
-        .list-group-item.to-do-family:hover,
+        .list-group-item.to-do-family:hover:not(.placed) {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
         .list-group-item.to-do-family.active {
             background: #667eea;
-            color: #fff;
+            color: white;
+            border-color: #667eea;
             transform: scale(1.03);
             z-index: 10;
         }
-        .list-group-item.list-group-item-success {
+        .list-group-item.to-do-family.list-group-item-success {
+            opacity: 0.3;
+            background: #e0e0e0;
+            cursor: not-allowed;
             text-decoration: line-through;
-            background: #f0f0f0;
-            color: #999;
-            cursor: default !important;
         }
-        .list-group-item.list-group-item-success:hover {
-            background: #f0f0f0;
-            color: #999;
-            transform: none;
+        .list-group-item.to-do-family.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         /* Load Factor Display */
         .load-factor-box {
@@ -655,8 +681,8 @@
                 <div class="dialogue-text" id="dialogueText">
                     Das sieht ja schon richtig gut aus. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür quadratic probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest.
                 </div>
-                <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
-                    Drücke Enter ↵
+                <div class="dialogue-continue" id="dialogueContinue">
+                    Klicken oder Enter ↵
                 </div>
             </div>
         </div>
@@ -735,34 +761,33 @@
         </div>
         <!-- Info Panel -->
         <div class="info-panel">
-            <!-- Stadtplaner (Hash-Rechner) -->
+            <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
-                <div class="info-label">Hash-Rechner 3000</div>
-                <input type="text" id="hashInput" class="form-control" placeholder="Familienname...">
-                <div class="info-label mt-3">Ergebnis (Hash / Haus-Nr.):</div>
-                <div class="hash-result-value" id="hashResult">-</div>
-                <button id="hashButton" class="calc-button" disabled>Berechne Haus-Nr.</button>
+                <div class="info-label">Bewohnername:</div>
+                <input type="text" id="hashInput" class="calculator-input" placeholder="Namen eingeben...">
+                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">Ergebnis ...</div>
             </div>
             <!-- Bewerber-Liste -->
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
                 <div class="family-list-container">
                     <ul id="familienListe" class="list-group">
-                        <li class="list-group-item to-do-family" data-family="Thomas">Thomas</li>
-                        <li class="list-group-item to-do-family" data-family="Hans">Hans</li>
-                        <li class="list-group-item to-do-family" data-family="Dieter">Dieter</li>
-                        <li class="list-group-item to-do-family" data-family="Lennard">Lennard</li>
-                        <li class="list-group-item to-do-family" data-family="Chris">Chris</li>
-                        <li class="list-group-item to-do-family" data-family="Luise">Luise</li>
-                        <li class="list-group-item to-do-family" data-family="Jana">Jana</li>
-                        <li class="list-group-item to-do-family" data-family="Marie">Marie</li>
-                        <li class="list-group-item to-do-family" data-family="Hannah">Hannah</li>
-                        <li class="list-group-item to-do-family" data-family="Sophie">Sophie</li>
-                        <li class="list-group-item to-do-family" data-family="Levi">Levi</li>
-                        <li class="list-group-item to-do-family" data-family="Sammy">Sammy</li>
-                        <li class="list-group-item to-do-family" data-family="Nele">Nele</li>
-                        <li class="list-group-item to-do-family" data-family="Georg">Georg</li>
-                        <li class="list-group-item to-do-family" data-family="Emma">Emma</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Thomas">Thomas</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Hans">Hans</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Dieter">Dieter</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Lennard">Lennard</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Chris">Chris</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Luise">Luise</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Jana">Jana</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Marie">Marie</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Hannah">Hannah</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Sophie">Sophie</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Levi">Levi</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Sammy">Sammy</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Nele">Nele</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Georg">Georg</li>
+                        <li class="list-group-item to-do-family disabled" data-family="Emma">Emma</li>
                     </ul>
                 </div>
             </div>
@@ -841,11 +866,8 @@
         ];
         // Funktion zum Setzen des Haus-Assets
         function setHouseAsset(houseElement, isFilled) {
-            // Aktuelles Asset des Hauses auslesen
             const currentAsset = houseElement.find('.house-icon').attr('src');
-            const assetName = currentAsset.split('/').pop(); // z. B. "WohnhauBlauBraunLeerNeu.svg"
-
-            // Passendes Paar in housePairs finden
+            const assetName = currentAsset.split('/').pop();
             let matchingPair = null;
             for (const pair of housePairs) {
                 if (pair.empty === assetName || pair.filled === assetName) {
@@ -853,8 +875,6 @@
                     break;
                 }
             }
-
-            // Neues Asset basierend auf isFilled setzen
             const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
             houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
         }
@@ -893,18 +913,17 @@
         // Familienliste initialisieren
         function initFamilyList() {
             $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
-            $(`.to-do-family[data-family="${families[currentFamilyIndex]}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick);
-            selectedFamily = families[currentFamilyIndex];
-            $('#hashInput').val(selectedFamily);
-            $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
+            const currentFamily = families[currentFamilyIndex];
+            $(`.to-do-family[data-family="${currentFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick);
+            selectedFamily = currentFamily;
         }
         // Familie anklicken
         function handleFamilyClick() {
             const $item = $(this);
-            if ($item.hasClass('disabled') || $item.hasClass('list-group-item-success')) return;
+            if ($item.hasClass('disabled') || $item.hasClass('list-group-item-success') || !gameStarted) return;
             selectedFamily = $item.data('family');
             $('#hashInput').val(selectedFamily);
-            $('#hashResult').text('-');
+            $('#hashResult').text('Ergebnis ...');
             $('#hashButton').prop('disabled', false);
             $('.to-do-family').removeClass('active');
             $item.addClass('active');
@@ -922,13 +941,21 @@
             }
         });
         // --- Level 6 Spielmechanik ---
+        // Aktivieren des Buttons, sobald etwas eingegeben ist
+        $('#hashInput').on('input', function() {
+            if ($(this).val().trim() !== '') {
+                $('#hashButton').prop('disabled', false);
+            } else {
+                $('#hashButton').prop('disabled', true);
+            }
+        });
         // 2. Hash-Wert berechnen
         $('#hashButton').click(function() {
             if (gameCompleted) return;
             const family = $('#hashInput').val().trim();
             if (!family) return;
             const anzeige = getHash(family, HASH_SIZE);
-            $('#hashResult').text(anzeige);
+            $('#hashResult').text(`Hausnummer: ${anzeige}`);
             if (searchMode) {
                 if (family === 'Levi') {
                     $('#dialogueText').text(`Laut Rechner wohnt Levi in Haus ${anzeige}. Vollziehe die Schritte von vorher nach!`);
@@ -1009,18 +1036,19 @@
                     currentFamilyIndex++;
                     if (currentFamilyIndex < families.length) {
                         $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen.`);
-                        $(`.to-do-family[data-family="${families[currentFamilyIndex]}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick);
-                        selectedFamily = families[currentFamilyIndex];
-                        $('#hashInput').val(selectedFamily);
+                        const nextFamily = families[currentFamilyIndex];
                         $('.to-do-family').removeClass('active');
-                        $(`.to-do-family[data-family="${selectedFamily}"]`).addClass('active');
+                        $(`.to-do-family[data-family="${nextFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick).addClass('active');
+                        selectedFamily = nextFamily;
+                        $('#hashInput').val(selectedFamily);
+                        $('#hashButton').prop('disabled', false);
                     } else {
                         $('#dialogueText').text(leviSearchDialogue);
                         searchMode = true;
                         searchTarget = 'Levi';
                         $('#hashInput').prop('readonly', false).val('Levi');
                     }
-                    $('#hashResult').text('-');
+                    $('#hashResult').text('Ergebnis ...');
                     $('#hashButton').prop('disabled', false);
                 }
             }
@@ -1036,12 +1064,6 @@
                 window.location.href = 'level-auswahl.php?completed=6&next=7';
             }, 500);
         };
-        // --- Add keyboard hint ---
-        setTimeout(function() {
-            if (!gameStarted) {
-                $('#dialogueContinue').html('Klicke hier oder drücke Enter ↵');
-            }
-        }, 3000);
     });
 </script>
 </body>
