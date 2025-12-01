@@ -309,7 +309,7 @@ $familien_liste = [
         }
         // 1. Liste Klicken
         $(document).on('click', '.list-group-item', function() {
-            if (isFading || (phase !== 'select_family' && phase !== 'search_intro')) return;
+            if ((phase === 'collision_mode') || (phase === 'probing_step')) return;
             let idx = $(this).data('index');
             let text = $(this).text().trim();
             if (phase === 'select_family') {
@@ -321,10 +321,14 @@ $familien_liste = [
                 phase = 'calc_h1';
                 showDialogue(`Platziere jetzt: ${selectedFamily}. Berechne den 1. Hash.`);
             }
-            else if (phase === 'search_intro') {
+            else if (phase === 'search_intro' || phase === 'search_calc') {
                 selectedFamily = text;
+                if (selectedFamily !== 'Paul'){
+                    showDialogue(`Das ist nicht Paul, sondern ${selectedFamily}. Klicke bitte auf Paul.`);
+                }else{
+                    showDialogue(`Okay, wir suchen ${selectedFamily}. Berechne seinen 1. Hash.`);
+                }
                 phase = 'search_calc';
-                showDialogue(`Okay, wir suchen ${selectedFamily}. Berechne seinen 1. Hash.`);
                 $('.list-group-item').removeClass('active');
                 $(this).addClass('active');
             }
@@ -343,7 +347,12 @@ $familien_liste = [
             if (phase === 'search_calc') {
                 searchH1 = val;
                 $('#h1Result').text(val);
-                showDialogue(`Initial-Hash: ${val}. Klicke auf Haus ${val}.`);
+                if(name !== `Paul`){
+                    showDialogue(`${val} ist der Hash von ${name}. Den Suche ich aber nicht, berechne stattdessen den Wert von Paul!`);
+                    return;
+                }else{
+                    showDialogue(`Initial-Hash: ${val}. Klicke auf Haus ${val}.`);
+                }
                 phase = 'search_find';
                 $(this).prop('disabled', true);
                 return;
@@ -512,7 +521,7 @@ $familien_liste = [
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-select.php?completed=8&next=9';
+                window.location.href = 'Level-Auswahl?completed=8&next=9';
             }, 500);
         };
         // Start
