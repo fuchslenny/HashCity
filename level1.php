@@ -637,7 +637,6 @@
                 grid-template-columns: repeat(3, 1fr);
                 gap: 0.6rem;
             }
-        }
     </style>
 </head>
 <body>
@@ -723,8 +722,8 @@
             <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
                 <label for="hashInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
-                <input type="text" id="hashInput" class="calculator-input" placeholder="Namen eingeben...">
-                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <input type="text" id="hashInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="hashButton" class="calculator-button" disabled>Berechne Haus-Nr.</button>
                 <div class="calculator-result" id="hashResult">Ergebnis ...</div>
             </div>
             <!-- Bewerber-Liste -->
@@ -797,15 +796,12 @@
             { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
             { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
             { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
-            { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
         ];
         // Funktion zum Setzen des Haus-Assets
         function setHouseAsset(houseElement, isFilled) {
-            // Aktuelles Asset des Hauses auslesen
             const currentAsset = houseElement.find('.house-icon').attr('src');
             const assetName = currentAsset.split('/').pop();
-            // Passendes Paar in housePairs finden
             let matchingPair = null;
             for (const pair of housePairs) {
                 if (pair.empty === assetName || pair.filled === assetName) {
@@ -813,7 +809,6 @@
                     break;
                 }
             }
-            // Neues Asset basierend auf isFilled setzen
             const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
             houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
         }
@@ -872,9 +867,9 @@
         });
         // Aktivieren des Buttons, sobald etwas eingegeben ist
         $('#hashInput').on('input', function() {
-            if ($(this).val().trim() !== '') {
+            if ($(this).val().trim() !== '' && searchMode) {
                 $('#hashButton').prop('disabled', false);
-            } else {
+            } else if (!searchMode) {
                 $('#hashButton').prop('disabled', true);
             }
         });
@@ -940,7 +935,6 @@
                 }
                 const currentOccupant = stadt[houseNumber];
                 if (currentOccupant === null) {
-                    // --- HAUS IST FREI ---
                     stadt[houseNumber] = selectedFamily;
                     setHouseAsset($house, true);
                     $house.addClass('checked');
@@ -956,12 +950,12 @@
                     } else {
                         $('#dialogueText').text(sophieDialogue);
                         searchMode = true;
-                        $('#hashInput').prop('readonly', false).val('');
+                        $('#hashInput').prop('readonly', false).val('').focus();
+                        $('#hashButton').prop('disabled', true);
                     }
                     selectedFamily = null;
                     $('#hashInput').val('');
                     $('#hashResult').text('Ergebnis ...');
-                    $('#hashButton').prop('disabled', true);
                 }
             }
         });
@@ -973,10 +967,9 @@
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-select.php?completed=1&next=2';
+                window.location.href = 'Level-Auswahl?completed=1&next=2';
             }, 500);
         };
-
     });
 </script>
 </body>
