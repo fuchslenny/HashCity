@@ -437,6 +437,7 @@
         }
         .family-list-container {
             max-height: 250px;
+            padding: 0 5px;
             overflow-y: auto;
         }
         .list-group-item.to-do-family {
@@ -729,7 +730,7 @@
             <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
                 <div class="info-label">Bewohnername:</div>
-                <input type="text" id="hashInput" class="calculator-input" placeholder="Namen eingeben...">
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
                 <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
                 <div class="calculator-result" id="hashResult">Ergebnis ...</div>
             </div>
@@ -887,7 +888,7 @@
             const $item = $(this);
             if ($item.hasClass('disabled') || $item.hasClass('list-group-item-success') || !gameStarted) return;
             selectedFamily = $item.data('family');
-            $('#hashInput').val(selectedFamily);
+            $('#nameInput').val(selectedFamily);
             $('#hashResult').text('Ergebnis ...');
             $('#hashButton').prop('disabled', false);
             $('.to-do-family').removeClass('active');
@@ -907,7 +908,7 @@
         });
         // --- Level 6 Spielmechanik ---
         // Aktivieren des Buttons, sobald etwas eingegeben ist
-        $('#hashInput').on('input', function() {
+        $('#nameInput').on('input', function() {
             if ($(this).val().trim() !== '') {
                 $('#hashButton').prop('disabled', false);
             } else {
@@ -916,16 +917,20 @@
         });
         // 2. Hash-Wert berechnen
         $('#hashButton').click(function() {
-            if (gameCompleted) return;
-            const family = $('#hashInput').val().trim();
+            if (gameCompleted || !gameStarted) return;
+            const family = $('#nameInput').val().trim();
             if (!family) return;
             const anzeige = getHash(family, HASH_SIZE);
             $('#hashResult').text(`Hausnummer: ${anzeige}`);
             if (searchMode) {
-                if (family === 'Levi') {
-                    $('#dialogueText').text(`Laut Rechner wohnt Levi in Haus ${anzeige}. Vollziehe die Schritte von vorher nach!`);
-                } else if (family === 'Chris') {
-                    $('#dialogueText').text(`Laut Rechner wohnt Chris in Haus ${anzeige}. Vollziehe die Schritte von vorher nach!`);
+                if (searchTarget !== family){
+                    $('#dialogueText').text(`Derzeit suchen wir nach ${searchTarget} und nicht ${family}.`);
+                }else{
+                    if (family === 'Levi') {
+                        $('#dialogueText').text(`Laut Rechner wohnt Levi in Haus ${anzeige}. Vollziehe die Schritte von vorher nach!`);
+                    } else if (family === 'Chris') {
+                        $('#dialogueText').text(`Laut Rechner wohnt Chris in Haus ${anzeige}. Vollziehe die Schritte von vorher nach!`);
+                    }
                 }
             } else {
                 $('#dialogueText').text(`Laut Rechner gehört Familie ${family} in Haus ${anzeige}. Lasse sie nach dem Prinzip des Quadratic Probing einziehen!`);
@@ -944,7 +949,6 @@
                         attempts++;
                         $('#dialogueText').text(chrisSearchDialogue);
                         searchTarget = 'Chris';
-                        $('#hashInput').val('Chris');
                         $('#hashButton').prop('disabled', false);
                     } else if (searchTarget === 'Chris' && occupant === 'Chris') {
                         attempts++;
@@ -1005,13 +1009,13 @@
                         $('.to-do-family').removeClass('active');
                         $(`.to-do-family[data-family="${nextFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick).addClass('active');
                         selectedFamily = nextFamily;
-                        $('#hashInput').val(selectedFamily);
+                        $('#nameInput').val(selectedFamily);
                         $('#hashButton').prop('disabled', false);
                     } else {
                         $('#dialogueText').text(leviSearchDialogue);
+                        $('#nameInput').prop('readonly', false).val('');
                         searchMode = true;
                         searchTarget = 'Levi';
-                        $('#hashInput').prop('readonly', false).val('Levi');
                     }
                     $('#hashResult').text('Ergebnis ...');
                     $('#hashButton').prop('disabled', false);
