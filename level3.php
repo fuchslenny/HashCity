@@ -286,6 +286,7 @@ $neue_bewohner = ["Dieter", "Lars"];
         /* Familien-Liste (Stil von L2) */
         .family-list-container {
             max-height: 250px;
+            padding: 0 5px;
             overflow-y: auto;
         }
         .list-group-item.family-to-assign {
