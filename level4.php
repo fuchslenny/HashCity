@@ -274,7 +274,7 @@ $familien_liste = [
             <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
                 <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
-                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben...">
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
                 <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
                 <div class="calculator-result" id="hashResult">
                     Ergebnis ...
@@ -469,7 +469,11 @@ $familien_liste = [
             if (!selectedFamily) return;
             const name = $('#nameInput').val().trim();
             if (name !== selectedFamily) {
-                $('#dialogueText').text("Der Name im Rechner passt nicht zur ausgewählten Familie.");
+                if ('search_sara_calc' || 'search_tina_calc'){
+                    $('#dialogueText').text(`Derzeit wird nicht nach ${name} gesucht, sondern nach ${selectedFamily}`);
+                }else {
+                    $('#dialogueText').text("Der Name im Rechner passt nicht zur ausgewählten Familie.");
+                }
                 return;
             }
             initialHash = getHash(selectedFamily, HASH_SIZE);
@@ -550,10 +554,12 @@ $familien_liste = [
         // --- Start Phase 2 (Sara) ---
         function startSearchPhase1() {
             gamePhase = "search_sara_calc";
+
             selectedFamily = SEARCH_TARGET_1;
             $('#hashButton').prop('disabled', false);
             $('#hashResult').text('Ergebnis ...');
-            $('#nameInput').val(selectedFamily);
+            $('#nameInput').prop('readonly', false);
+            $('#nameInput').val('');
             $('.house').removeClass('highlight-target');
             $('#dialogueText').text("Sehr gut! Alle Bewohner sind da. Kannst du mir sagen, wo Sara wohnt? Berechne ihren Hash.");
             $('#majorMikeImage').attr('src', './assets/wink_major.png');
@@ -564,7 +570,6 @@ $familien_liste = [
             selectedFamily = SEARCH_TARGET_2;
             $('#hashButton').prop('disabled', false);
             $('#hashResult').text('Ergebnis ...');
-            $('#nameInput').val(selectedFamily);
             $('.house').removeClass('highlight-target');
             $('.house').removeClass('found');
             $('#dialogueText').text("Eine Frage noch: Wohnt eigentlich 'Tina' hier? Berechne ihren Hash und prüf das mal.");
@@ -581,7 +586,7 @@ $familien_liste = [
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-select.php?completed=4&next=5';
+                window.location.href = 'Level-Auswahl?completed=4&next=5';
             }, 500);
         };
     });
