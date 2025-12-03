@@ -14,334 +14,45 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Rajdhani', sans-serif;
-            overflow-x: hidden;
-            min-height: 100vh;
-            position: relative;
-            background: #4CAF50;
-        }
-        /* Sky and Grass Background */
-        .sky-section {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 50%;
-            background: linear-gradient(180deg, #87CEEB 0%, #B0D4E3 100%);
-            z-index: 0;
-        }
-        .grass-section {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 50%;
-            background: linear-gradient(180deg, #76B947 0%, #4CAF50 100%);
-            z-index: 0;
-        }
-        /* Clouds */
-        .cloud {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 100px;
-            opacity: 0.8;
-            animation: cloudFloat 40s linear infinite;
-        }
-        @keyframes cloudFloat {
-            0% { left: -200px; }
-            100% { left: 110%; }
-        }
-        /* Header */
-        .game-header {
-            background: transparent;
-            padding: 1rem 2rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            position: relative;
-            top: 0;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-        }
-        .back-btn {
-            padding: 0.7rem 1.3rem;
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid rgba(102, 126, 234, 0.5);
-            border-radius: 30px;
-            font-weight: 700;
-            color: #667eea;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Orbitron', sans-serif;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 0.9rem;
-        }
-        .back-btn:hover {
-            background: #667eea;
-            color: #fff;
-            transform: scale(1.05);
-        }
-        .back-btn::before {
-            content: '← ';
-            margin-right: 5px;
-        }
-        /* Game Container */
-        .game-container {
-            max-width: 1600px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-            position: relative;
-            z-index: 1;
-        }
-        /* Main Game Area */
-        .game-area {
-            display: grid;
-            grid-template-columns: 280px 1fr 320px;
-            gap: 2rem;
-            min-height: 70vh;
-        }
-        /* Major Mike Section */
-        .major-mike-section {
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 25px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            height: fit-content;
-            position: sticky;
-            top: 100px;
-            border: 4px solid #fff;
-        }
-        .major-mike-avatar {
-            width: 100%;
-            height: 240px;
-            background: transparent;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-            overflow: hidden;
-            position: relative;
-        }
-        .major-mike-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        .major-mike-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 900;
-            color: #667eea;
-            text-align: center;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-        .dialogue-box {
-            background: #fff;
-            border: 3px solid #667eea;
-            border-radius: 20px;
-            padding: 1.5rem;
-            min-height: 180px;
-            position: relative;
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
-        }
-        .dialogue-box::before {
-            content: '';
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-bottom: 15px solid #667eea;
-        }
-        .dialogue-text {
-            font-size: 1.05rem;
-            line-height: 1.7;
-            color: #333;
-            font-weight: 500;
-        }
-        .dialogue-continue {
-            position: absolute;
-            bottom: 10px;
-            right: 15px;
-            font-size: 0.85rem;
-            color: #667eea;
-            font-style: italic;
-            font-weight: 700;
-            animation: blink 1.5s infinite;
-        }
-        @keyframes blink {
-            0%, 50%, 100% { opacity: 1; }
-            25%, 75% { opacity: 0.5; }
-        }
-        /* Houses Grid */
-        .houses-grid {
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 25px;
-            padding: 2rem;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            border: 4px solid #fff;
-            overflow: hidden;
-        }
-        .grid-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: #2E7D32;
-            text-align: center;
-            margin-bottom: 2rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-        /* Street Block Container */
-        .street-block {
-            position: relative;
-            margin-bottom: 2.5rem;
-        }
-        /* Houses Row */
-        .houses-row {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 1rem;
-            margin-bottom: 0.5rem;
-            padding: 0 1rem;
-            position: relative;
-            z-index: 2;
-        }
-        /* Straße */
-        .street {
-            width: 100%;
-            height: 60px;
-            background-image: url('./assets/Strasse.svg');
-            Background-size: cover;
-            background-position: center;
-            background-repeat: repeat-x;
-            position: relative;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            z-index: 1;
-        }
-        .street::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
-            border-radius: 8px;
-            z-index: -1;
-        }
-        .street::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: repeating-linear-gradient(
-                    90deg,
-                    #fff 0px,
-                    #fff 30px,
-                    transparent 30px,
-                    transparent 50px
-            );
-            transform: translateY(-50%);
-            z-index: 2;
-        }
-        .house {
-            aspect-ratio: 1;
-            background: transparent;
-            border: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            border-radius: 10px;
-            padding: 0.3rem;
-        }
-        .house:hover:not(.checked):not(.found) {
-            transform: translateY(-8px) scale(1.08);
-            z-index: 10;
-        }
-        .house.highlight-target {
-            transform: translateY(-10px) scale(1.15) !important;
-            box-shadow: 0 0 35px 12px rgba(255, 215, 0, 0.9);
-            z-index: 11;
-        }
-        .house.quadratic-target {
-            transform: translateY(-10px) scale(1.15) !important;
-            box-shadow: 0 0 35px 12px rgba(255, 0, 0, 0.9);
-            z-index: 11;
-        }
-        .house-icon {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            transition: all 0.3s ease;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
-        }
-        .house.checked .house-icon {
-            filter: drop-shadow(0 4px 8px rgba(255, 167, 38, 0.5));
-        }
-        .house.found .house-icon {
-            animation: pulse 1.5s infinite;
-            filter: drop-shadow(0 8px 16px rgba(255, 215, 0, 0.8));
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
-        }
-        .house-number {
-            position: absolute;
-            top: 25%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1rem;
-            font-weight: 900;
-            color: white;
-            text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
-            z-index: 10;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 0.2rem 0.5rem;
-            border-radius: 8px;
-        }
-        .house-family {
-            position: absolute;
-            bottom: 10%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.7rem;
-            color: white;
-            font-weight: 700;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 0.3rem 0.6rem;
-            border-radius: 8px;
-            white-space: nowrap;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-            max-width: 90%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .house.show-family .house-family {
-            opacity: 1;
-        }
-        /* Info Panel */
+        /* --- Styles wie immer --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Rajdhani', sans-serif; overflow-x: hidden; min-height: 100vh; position: relative; background: #4CAF50; }
+        .sky-section { position: fixed; top: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(180deg, #87CEEB 0%, #B0D4E3 100%); z-index: 0; }
+        .grass-section { position: fixed; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(180deg, #76B947 0%, #4CAF50 100%); z-index: 0; }
+        .cloud { position: absolute; background: rgba(255, 255, 255, 0.7); border-radius: 100px; opacity: 0.8; animation: cloudFloat 40s linear infinite; }
+        @keyframes cloudFloat { 0% { left: -200px; } 100% { left: 110%; } }
+        .game-header { background: transparent; padding: 1rem 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
+        .back-btn { padding: 0.7rem 1.3rem; background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 30px; font-weight: 700; color: #667eea; cursor: pointer; transition: all 0.3s ease; font-family: 'Orbitron', sans-serif; text-decoration: none; display: inline-block; font-size: 0.9rem; }
+        .back-btn:hover { background: #667eea; color: #fff; transform: scale(1.05); }
+        .back-btn::before { content: '← '; margin-right: 5px; }
+        .game-container { max-width: 1600px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+        .game-area { display: grid; grid-template-columns: 280px 1fr 320px; gap: 2rem; min-height: 70vh; }
+        .major-mike-section { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); height: fit-content; position: sticky; top: 100px; border: 4px solid #fff; }
+        .major-mike-avatar { width: 100%; height: 240px; background: transparent; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; overflow: hidden; position: relative; }
+        .major-mike-avatar img { width: 100%; height: 100%; object-fit: contain; }
+        .major-mike-name { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 900; color: #667eea; text-align: center; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+        .dialogue-box { background: #fff; border: 3px solid #667eea; border-radius: 20px; padding: 1.5rem; min-height: 180px; position: relative; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2); cursor: pointer; }
+        .dialogue-box::before { content: ''; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 15px solid #667eea; }
+        .dialogue-text { font-size: 1.05rem; line-height: 1.7; color: #333; font-weight: 500; }
+        .dialogue-continue { position: absolute; bottom: 10px; right: 15px; font-size: 0.85rem; color: #667eea; font-style: italic; font-weight: 700; animation: blink 1.5s infinite; }
+        @keyframes blink { 0%, 50%, 100% { opacity: 1; } 25%, 75% { opacity: 0.5; } }
+        .houses-grid { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 4px solid #fff; overflow: hidden; }
+        .grid-title { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; color: #2E7D32; text-align: center; margin-bottom: 2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+        .street-block { position: relative; margin-bottom: 2.5rem; }
+        .street-block:last-child { margin-bottom: 0; }
+        .houses-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 0.5rem; padding: 0 1rem; position: relative; z-index: 2; }
+        .street { width: 100%; height: 60px; background-image: url('./assets/Strasse.svg'); background-size: cover; background-position: center; position: relative; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 1; }
+        .street::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%); border-radius: 8px; z-index: -1; }
+        .street::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px); transform: translateY(-50%); z-index: 2; }
+        .house { aspect-ratio: 1; background: transparent; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; position: relative; border-radius: 10px; padding: 0.3rem; }
+        .house:hover:not(.checked):not(.found) { transform: translateY(-8px) scale(1.08); z-index: 10; }
+        .house.highlight-target { transform: translateY(-10px) scale(1.15) !important; box-shadow: 0 0 35px 12px rgba(255, 215, 0, 0.9); z-index: 11; }
+        .house-icon { width: 100%; height: 100%; object-fit: contain; transition: all 0.3s ease; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); }
+        .house.checked .house-icon { filter: drop-shadow(0 4px 8px rgba(255, 167, 38, 0.5)); }
+        .house.found .house-icon { animation: pulse 1.5s infinite; filter: drop-shadow(0 8px 16px rgba(76, 175, 80, 0.8)); }
+        .house-number { position: absolute; top: 25%; left: 50%; transform: translateX(-50%); font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 900; color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.7); z-index: 10; background: rgba(0, 0, 0, 0.3); padding: 0.2rem 0.5rem; border-radius: 8px; }
+        .house-family { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: white; font-weight: 700; text-align: center; opacity: 0; transition: opacity 0.3s ease; background: rgba(0, 0, 0, 0.7); padding: 0.3rem 0.6rem; border-radius: 8px; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); pointer-events: none; }
+        /* INFO-PANEL (Stil von Level 3) */
         .info-panel {
             background: rgba(255, 255, 255, 0.85);
             border-radius: 25px;
@@ -375,46 +86,57 @@
             font-size: 0.95rem;
             margin-bottom: 0.4rem;
         }
-        .info-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.6rem;
-            font-weight: 900;
-            color: #2E7D32;
-        }
         .hash-calculator {
             background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
             border-color: #2196F3;
         }
-        .hash-result-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: #667eea;
-            text-align: center;
+        .calculator-input {
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 0.7rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            transition: border-color 0.3s ease;
         }
-        .calc-button {
-            padding: 0.6rem 1.5rem;
+        .calculator-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .calculator-button {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
             border: none;
-            border-radius: 30px;
+            border-radius: 10px;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            width: 100%;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
             margin-top: 0.5rem;
         }
-        .calc-button:hover {
+        .calculator-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
         }
-        .calc-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+        .calculator-result {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #2E7D32;
+            font-size: 1.1rem;
         }
+        /* Familien-Liste (Stil von Level 3) */
         .family-list-container {
             max-height: 250px;
             padding: 0 5px;
@@ -425,167 +147,50 @@
             font-weight: 700;
             transition: all 0.2s ease;
             font-size: 1.1rem;
+            border: 2px solid #aab8c2;
+            margin-bottom: 0.5rem;
+            border-radius: 10px !important;
         }
-        .list-group-item.to-do-family:hover,
+        .list-group-item.to-do-family:hover:not(.placed) {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
         .list-group-item.to-do-family.active {
             background: #667eea;
-            color: #fff;
+            color: white;
+            border-color: #667eea;
             transform: scale(1.03);
             z-index: 10;
         }
-        .list-group-item.list-group-item-success {
+        .list-group-item.to-do-family.list-group-item-success {
+            opacity: 0.3;
+            background: #e0e0e0;
+            cursor: not-allowed;
             text-decoration: line-through;
-            background: #f0f0f0;
-            color: #999;
-            cursor: default !important;
         }
-        .list-group-item.list-group-item-success:hover {
-            background: #f0f0f0;
-            color: #999;
-            transform: none;
-        }
-
-        /* Success Modal */
-        .success-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            animation: fadeIn 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .success-modal {
-            background: white;
-            border-radius: 30px;
-            padding: 3rem;
-            max-width: 650px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            animation: slideUp 0.5s ease;
-            border: 5px solid #4CAF50;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .success-icon {
-            font-size: 5rem;
-            margin-bottom: 1rem;
-            animation: bounce 1s infinite;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        .success-title {
+        .info-value {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: #4CAF50;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-        .success-message {
-            font-size: 1.2rem;
-            color: #666;
-            line-height: 1.7;
-            margin-bottom: 2rem;
-            font-weight: 500;
-        }
-        .success-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .stat-box {
-            background: #f8f9fa;
-            padding: 1.2rem;
-            border-radius: 15px;
-            border: 3px solid #4CAF50;
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
-        }
-        .stat-label {
-            font-size: 0.95rem;
-            color: #666;
-            font-weight: 700;
-            margin-bottom: 0.4rem;
-        }
-        .stat-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem;
+            font-size: 1.6rem;
             font-weight: 900;
             color: #2E7D32;
         }
-        .success-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .btn-primary, .btn-secondary {
-            padding: 1rem 2.5rem;
-            border: none;
-            border-radius: 30px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 1.05rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        .btn-secondary {
-            background: white;
-            color: #667eea;
-            border: 3px solid #667eea;
-        }
-        .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-        }
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .game-area {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-            .major-mike-section,
-            .info-panel {
-                position: static;
-            }
-        }
-        @media (max-width: 768px) {
-            .game-container {
-                padding: 0 1rem;
-                margin: 1rem auto;
-            }
-            .houses-grid {
-                padding: 1.5rem 1rem;
-            }
-            .houses-row {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.6rem;
-            }
-        }
+        .success-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 2000; animation: fadeIn 0.3s ease; backdrop-filter: blur(5px); }
+        .success-modal { background: white; border-radius: 30px; padding: 3rem; max-width: 650px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4); animation: slideUp 0.5s ease; border: 5px solid #4CAF50; }
+        .success-icon { font-size: 5rem; margin-bottom: 1rem; animation: bounce 1s infinite; }
+        .success-title { font-family: 'Orbitron', sans-serif; font-size: 2.8rem; font-weight: 900; color: #4CAF50; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+        .success-message { font-size: 1.2rem; color: #666; line-height: 1.7; margin-bottom: 2rem; font-weight: 500; }
+        .success-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn-primary, .btn-secondary { padding: 1rem 2.5rem; border: none; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: white; color: #667eea; border: 3px solid #667eea; }
+        .btn-secondary:hover { background: #667eea; color: white; transform: translateY(-2px); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        @media (max-width: 1200px) { .game-area { grid-template-columns: 1fr; } .major-mike-section, .info-panel { position: static; } }
+        @media (max-width: 768px) { .houses-row { grid-template-columns: repeat(3, 1fr); } }
     </style>
 </head>
 <body>
@@ -621,8 +226,8 @@
                 <div class="dialogue-text" id="dialogueText">
                     Linear probing erzeugt Cluster, was zu einem großen Suchaufwand führt, wenn man viele Daten speichern möchte. Also entstehen große Nachbarschaften, in denen man sehr lang suchen muss, bis man das richtige Haus gefunden hat.
                 </div>
-                <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
-                    Drücke Enter ↵
+                <div class="dialogue-continue" id="dialogueContinue">
+                    Klicken oder Enter ↵
                 </div>
             </div>
         </div>
@@ -679,12 +284,14 @@
         <!-- Info Panel -->
         <div class="info-panel">
             <!-- Stadtplaner (Hash-Rechner) -->
+            <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
-                <div class="info-label">Hash-Rechner 3000</div>
-                <input type="text" id="hashInput" class="form-control" placeholder="Familienname...">
-                <div class="info-label mt-3">Ergebnis (Hash / Haus-Nr.):</div>
-                <div class="hash-result-value" id="hashResult">-</div>
-                <button id="hashButton" class="calc-button" disabled>Berechne Haus-Nr.</button>
+                <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">
+                    Ergebnis ...
+                </div>
             </div>
             <!-- Bewerber-Liste -->
             <div class="info-item">
@@ -824,8 +431,6 @@
             $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
             const currentFamily = families[currentFamilyIndex];
             $(`.to-do-family[data-family="${currentFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick);
-            selectedFamily = currentFamily;
-            $('#hashInput').val(selectedFamily);
         }
 
         // --- Dialog-Steuerung ---
@@ -844,11 +449,12 @@
 
         // Familie anklicken
         function handleFamilyClick() {
+            if(!gameStarted) return;
             const $item = $(this);
             if ($item.hasClass('disabled') || $item.hasClass('list-group-item-success')) return;
             selectedFamily = $item.data('family');
-            $('#hashInput').val(selectedFamily);
-            $('#hashResult').text('-');
+            $('#nameInput').val(selectedFamily);
+            $('#hashResult').text('Ergebnis ...');
             $('#hashButton').prop('disabled', false);
             $('.to-do-family').removeClass('active');
             $item.addClass('active');
@@ -871,7 +477,7 @@
 
         // --- Level 5 Spielmechanik ---
         // Aktivieren des Buttons, sobald etwas eingegeben ist
-        $('#hashInput').on('input', function() {
+        $('#nameInput').on('input', function() {
             if ($(this).val().trim() !== '') {
                 $('#hashButton').prop('disabled', false);
             } else {
@@ -884,14 +490,14 @@
 
         // 2. Hash-Wert berechnen
         $('#hashButton').click(function() {
-            if (gameCompleted) return;
-            const family = $('#hashInput').val().trim();
+            if (gameCompleted || !gameStarted) return;
+            const family = $('#nameInput').val().trim();
             if (!family) return;
             const anzeige = getHash(family, HASH_SIZE);
             const result = quadraticProbing(family, HASH_SIZE, stadt);
             const hashSteps = result.steps;
             const finalIndex = result.finalIndex;
-            $('#hashResult').text(anzeige);
+            $('#hashResult').text(`Hausnummer: ${anzeige}`);
             if (searchMode) {
                 if (family === 'Thomas') {
                     $('#dialogueText').text(`Laut Rechner wohnt Thomas in Haus ${anzeige}. Doch durch das Probing könnte sich der Index verschoben haben. Vollziehe die Schritte von vorher nach!`);
@@ -954,10 +560,11 @@
                     }
                 }
             } else {
-                if (gameCompleted || !gameStarted || !selectedFamily) {
+                if (gameCompleted || !selectedFamily) {
                     if (gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
                     return;
                 }
+
                 const finalIndex = quadraticProbing(selectedFamily, HASH_SIZE, stadt).finalIndex;
                 if (houseNumber !== finalIndex) {
                     $('#dialogueText').text(errorDialogue);
@@ -984,14 +591,14 @@
                         $('.to-do-family').removeClass('active');
                         $(`.to-do-family[data-family="${nextFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick).addClass('active');
                         selectedFamily = nextFamily;
-                        $('#hashInput').val(selectedFamily);
+                        $('#nameInput').val(selectedFamily);
                         $('#hashButton').prop('disabled', false);
                     } else {
                         $('#dialogueText').text(thomasSearchDialogue);
                         searchMode = true;
-                        $('#hashInput').prop('readonly', false).val('');
+                        $('#nameInput').prop('readonly', false).val('');
                     }
-                    $('#hashResult').text('-');
+                    $('#hashResult').text('Ergebnis ...');
                 }
             }
         });
@@ -1009,12 +616,6 @@
             }, 500);
         };
 
-        // --- Add keyboard hint ---
-        setTimeout(function() {
-            if (!gameStarted) {
-                $('#dialogueContinue').html('Klicke hier oder drücke Enter ↵');
-            }
-        }, 3000);
     });
 </script>
 </body>
