@@ -380,38 +380,59 @@
             background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
             border-color: #2196F3;
         }
-        .hash-result-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: #667eea;
-            text-align: center;
+        .calculator-input {
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 0.7rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            transition: border-color 0.3s ease;
         }
-        .calc-button {
-            padding: 0.6rem 1.5rem;
+        .calculator-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .calculator-button {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
             border: none;
-            border-radius: 30px;
+            border-radius: 10px;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            width: 100%;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
             margin-top: 0.5rem;
         }
-        .calc-button:hover {
+        .calculator-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
         }
-        .calc-button:disabled {
+        .calculator-button:disabled {
             background: #ccc;
             cursor: not-allowed;
         }
+        .calculator-result {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #2E7D32;
+            font-size: 1.1rem;
+        }
         .family-list-container {
             max-height: 250px;
+            padding: 0 5px;
             overflow-y: auto;
         }
         .list-group-item.to-do-family {
@@ -419,45 +440,35 @@
             font-weight: 700;
             transition: all 0.2s ease;
             font-size: 1.1rem;
+            border: 2px solid #aab8c2;
+            margin-bottom: 0.5rem;
+            border-radius: 10px !important;
         }
-        .list-group-item.to-do-family:hover,
+        .list-group-item.to-do-family:hover:not(.placed) {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
         .list-group-item.to-do-family.active {
             background: #667eea;
-            color: #fff;
+            color: white;
+            border-color: #667eea;
             transform: scale(1.03);
             z-index: 10;
         }
-        .list-group-item.list-group-item-success {
+        .list-group-item.to-do-family.list-group-item-success {
+            opacity: 0.3;
+            background: #e0e0e0;
+            cursor: not-allowed;
             text-decoration: line-through;
-            background: #f0f0f0;
-            color: #999;
-            cursor: default !important;
         }
-        .list-group-item.list-group-item-success:hover {
-            background: #f0f0f0;
-            color: #999;
-            transform: none;
+        .list-group-item.to-do-family.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         /* Load Factor Display */
-        .load-factor-box {
-            text-align: center;
-            padding: 0.5rem;
-            background: #f0f0f0;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            border: 2px solid #ccc;
-            transition: all 0.5s ease;
-        }
-        .lf-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
-        .lf-label {
-            font-size: 0.8rem;
-            color: #666;
-        }
+        .load-factor-box { text-align: center; padding: 0.5rem; background: #f0f0f0; border-radius: 10px; margin-bottom: 1rem; border: 2px solid #ccc; transition: all 0.5s ease; }
+        .lf-value { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: bold; color: #333; }
+        .lf-label { font-size: 0.8rem; color: #666; }
         /* Ampel-Farben für Load Factor */
         .lf-good {
             color: #4CAF50;
@@ -650,7 +661,7 @@
                 <div class="dialogue-text" id="dialogueText">
                     Separate Chaining erzeugt bei vielen Daten lange Listen, die die Such Performance beeinträchtigen. Außerdem können einige Speicherbereiche ungenutzt bleiben. Also entstehen sehr große Mehrfamilienhäuser, in denen man dann auch keine Bewohner schnell findet. Zudem können Häuser so auch leer stehen bleiben.
                 </div>
-                <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
+                <div class="dialogue-continue" id="dialogueContinue">
                     Klicken oder Enter ↵
                 </div>
             </div>
@@ -731,21 +742,17 @@
         </div>
         <!-- Info Panel -->
         <div class="info-panel">
-            <!-- Load Factor Display -->
-            <div class="info-item">
-                <div class="info-label">Load-Faktor</div>
-                <div class="load-factor-box lf-bad" id="loadFactorBox">
-                    <div class="lf-value" id="loadFactorValue">0.95</div>
-                    <div class="lf-label">19/20 Häuser belegt</div>
-                </div>
+            <h3 class="info-title">📊 Stadtplanung</h3>
+            <div class="load-factor-box lf-bad" id="lfBox">
+                <div class="lf-label">Load Factor (Belegung)</div>
+                <div class="lf-value" id="lfValue">0.95</div>
+                <div class="lf-label" id="lfText">Kritisch (Zu voll!)</div>
             </div>
-            <!-- Stadtplaner (Hash-Rechner) -->
             <div class="info-item hash-calculator">
-                <div class="info-label">Hash-Rechner 3000</div>
-                <input type="text" id="hashInput" class="form-control" placeholder="Familienname...">
-                <div class="info-label mt-3">Ergebnis (Hash / Haus-Nr.):</div>
-                <div class="hash-result-value" id="hashResult">-</div>
-                <button id="hashButton" class="calc-button" disabled>Berechne Haus-Nr.</button>
+                <div class="info-label">Bewohnername:</div>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">Ergebnis ...</div>
             </div>
             <!-- Bewerber-Liste -->
             <div class="info-item">
@@ -758,7 +765,7 @@
             </div>
             <div class="info-item">
                 <div class="info-label">Eingetragene Familien:</div>
-                <div class="info-value" id="occupiedCount">19 / 20</div>
+                <div class="info-value" id="occupiedCount">0 / 15</div>
             </div>
         </div>
     </div>
@@ -790,7 +797,6 @@
         let currentDialogueStep = 0;
         let probingActive = false;
         let maxProbes = 6;
-        let canSkipDialogue = true;
         let houseAssets = [];
 
         // Paare der neuen Assets (für JavaScript)
@@ -833,14 +839,13 @@
                 houseElement.addClass('checked');
             });
             $('#occupiedCount').text(occupiedHouses + ' / 20');
-            updateLoadFactor();
         }
 
         // Alle Dialoge in einer Liste
         const dialogueSequence = [
             "Separate Chaining erzeugt bei vielen Daten lange Listen, die die Such Performance beeinträchtigen. Außerdem können einige Speicherbereiche ungenutzt bleiben. Also entstehen sehr große Mehrfamilienhäuser, in denen man dann auch keine Bewohner schnell findet. Zudem können Häuser so auch leer stehen bleiben.",
             "Ich habe hier mal etwas vorbereitet. 19 Bewohner sind bereits eingezogen, somit sind die Häuser 0 bis 18 belegt.",
-            "Nun trage Levi in diesen Stadtteil ein und benutze linear probing.",
+            "Wähle nun Levi aus der Liste und berechne seinen Hash. Bei Kollisionen nutze bitte linear probing.",
             "Levi soll die Hausnummer 0 haben, leider ist sie belegt, aber nach dem Prinzip des Linear Probings können wir ja einfach das nächstfreie Haus nehmen. Das sollte kein Problem sein, oder?",
             "Der Computer sieht nicht, welche Stelle im Speicher belegt ist oder nicht. Er muss jedes Haus einzeln prüfen. Das sollst du nun auch nachvollziehen, indem du jedes Haus der Reihe nach durchgehst!",
             "Ganz schön viel Aufwand was? Die Stadt ist einfach zu voll, das könnte mit Hashmaps genauso passieren.",
@@ -849,35 +854,17 @@
             "Glücklicherweise haben wir dir eine Hilfe bereitgestellt, welcher immer die Übersicht bewahrt. Dieser zeigt gerade 0.95. Das ist viel zu hoch für eine effiziente Stadt, also sollten wir trotz der hohen Kosten eine Stadterweiterung durchführen."
         ];
 
-        // Funktion zum Aktualisieren des Load-Factors
-        function updateLoadFactor() {
-            const loadFactor = occupiedHouses / HASH_SIZE;
-            $('#loadFactorValue').text(loadFactor.toFixed(2));
-            $('#loadFactorBox').removeClass('lf-good lf-medium lf-bad');
-            if (loadFactor <= 0.5) {
-                $('#loadFactorBox').addClass('lf-good');
-            } else if (loadFactor <= 0.75) {
-                $('#loadFactorBox').addClass('lf-medium');
-            } else {
-                $('#loadFactorBox').addClass('lf-bad');
-            }
-        }
-
         // Funktion zum Anzeigen eines bestimmten Dialogs
         function showDialogue(step) {
             $('#dialogueText').fadeOut(200, function() {
                 $(this).text(dialogueSequence[step]).fadeIn(200);
-                if (step === 2) {
-                    $('#hashInput').val('Levi');
-                    $('#hashButton').prop('disabled', false);
-                }
                 if (step === 3) {
                     probingActive = true;
                     const startHash = parseInt($('#hashResult').text());
                     currentProbeIndex = startHash;
                     $(`.house[data-house="${currentProbeIndex}"]`).addClass('highlight-target');
                 }
-                if (step === 6) {
+                if (step === 9) {
                     gameCompleted = true;
                     $('#successOverlay').css('display', 'flex');
                 }
@@ -886,8 +873,11 @@
 
         // --- Listener für Dialoge ---
         $(document).keydown(function(e) {
-            if ((e.key === 'Enter' || e.key === ' ') && !gameCompleted && canSkipDialogue) {
-                if (currentDialogueStep < 2 || (currentDialogueStep > 3 && currentDialogueStep < 6)) {
+            if ((e.key === 'Enter' || e.key === ' ') && !gameCompleted) {
+                if (currentDialogueStep < 2 || (currentDialogueStep > 4 && currentDialogueStep < 9)) {
+                    if(currentDialogueStep === 1){
+                        $('#dialogueContinue').hide();
+                    }
                     currentDialogueStep++;
                     showDialogue(currentDialogueStep);
                 }
@@ -895,8 +885,11 @@
         });
 
         $('.dialogue-box').click(function() {
-            if (!gameCompleted && canSkipDialogue) {
-                if (currentDialogueStep < 2 || (currentDialogueStep > 3 && currentDialogueStep < 6)) {
+            if (!gameCompleted) {
+                if (currentDialogueStep < 2 || (currentDialogueStep > 4 && currentDialogueStep < 9)) {
+                    if(currentDialogueStep === 1){
+                        $('#dialogueContinue').hide();
+                    }
                     currentDialogueStep++;
                     showDialogue(currentDialogueStep);
                 }
@@ -909,14 +902,14 @@
             if (gameCompleted || currentDialogueStep < 2) return;
             const $item = $(this);
             const family = $item.data('family');
-            $('#hashInput').val(family);
+            $('#nameInput').val(family);
             $('#hashButton').prop('disabled', false);
             $('.to-do-family').removeClass('active');
             $item.addClass('active');
         });
 
         // Aktivieren des Buttons, sobald etwas eingegeben ist
-        $('#hashInput').on('input', function() {
+        $('#nameInput').on('input', function() {
             if (currentDialogueStep < 2) {
                 $(this).val('');
                 $('#hashButton').prop('disabled', true);
@@ -932,7 +925,7 @@
         // 2. Hash-Wert berechnen (ereignisgebunden)
         $('#hashButton').click(function() {
             if (gameCompleted) return;
-            const family = $('#hashInput').val().trim();
+            const family = $('#nameInput').val().trim();
             if (!family) return;
             const startHash = getHash(family, HASH_SIZE);
             $('#hashResult').text(startHash);
@@ -946,11 +939,16 @@
             const $house = $(this);
             const houseNumber = parseInt($house.data('house'));
             if (houseNumber === currentProbeIndex) {
+                if(houseNumber === 0){
+                    currentDialogueStep = 4;
+                    showDialogue(currentDialogueStep);
+                }
                 $(`.house[data-house="${currentProbeIndex}"]`).removeClass('highlight-target');
                 currentProbeIndex = (currentProbeIndex + 1) % HASH_SIZE;
                 if (currentProbeIndex > maxProbes) {
                     probingActive = false;
-                    currentDialogueStep = 4;
+                    currentDialogueStep = 5;
+                    $('#dialogueContinue').show();
                     showDialogue(currentDialogueStep);
                     return;
                 }
