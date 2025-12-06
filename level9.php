@@ -262,6 +262,7 @@ $bewohner_liste = [
         /* Familien-Liste (Stil von Level 3) */
         .family-list-container {
             max-height: 250px;
+            padding: 0 5px;
             overflow-y: auto;
         }
         .list-group-item.to-do-family {
@@ -296,13 +297,122 @@ $bewohner_liste = [
             font-weight: 900;
             color: #2E7D32;
         }
-        /* Success Overlay */
+        /* Success Modal */
         .success-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 2000;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
         }
-        .success-box {
-            background: white; padding: 3rem; border-radius: 20px; text-align: center; border: 5px solid #4CAF50;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .success-modal {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 650px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: slideUp 0.5s ease;
+            border: 5px solid #4CAF50;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .success-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #4CAF50;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .success-message {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+        .success-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-box {
+            background: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 15px;
+            border: 3px solid #4CAF50;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+        }
+        .stat-label {
+            font-size: 0.95rem;
+            color: #666;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #2E7D32;
+        }
+        .success-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-primary, .btn-secondary {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 3px solid #667eea;
+        }
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
         }
         .grid-title {
             font-family: 'Orbitron', sans-serif;
@@ -369,7 +479,7 @@ $bewohner_liste = [
             <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
                 <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
-                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben...">
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
                 <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
                 <div class="calculator-result" id="hashResult">
                     Ergebnis ...
@@ -395,11 +505,26 @@ $bewohner_liste = [
     </div>
 </div>
 <div class="success-overlay" id="successOverlay">
-    <div class="success-box">
-        <h2 class="text-success fw-bold mb-3">Fantastisch!</h2>
-        <p class="mb-4 text-muted" id="successMessage">Thomas wurde gefunden.</p>
-        <button class="btn btn-primary px-4" onclick="location.reload()">Neustart</button>
-        <a href="Level-Auswahl?completed=9&next=10" class="btn btn-success px-4 ms-2">Nächstes Level →</a>
+    <div class="success-modal">
+        <div class="success-icon">🎉</div>
+        <h2 class="success-title">Familie gefunden!</h2>
+        <p class="success-message" id="successMessage">
+            Danke für deine Hilfe!
+        </p>
+        <div class="success-stats">
+            <div class="stat-box">
+                <div class="stat-label">Versuche</div>
+                <div class="stat-value" id="finalAttempts">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Familien eingetragen</div>
+                <div class="stat-value" id="finalOccupied">0</div>
+            </div>
+        </div>
+        <div class="success-buttons">
+            <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
+            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 10 →</button>
+        </div>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -539,7 +664,15 @@ $bewohner_liste = [
                 $('#house-' + currentHash).addClass('highlight-target');
                 gamePhase = "placement_click";
             } else if (gamePhase === "search_calc") {
-                currentHash = getHash(SEARCH_TARGET);
+                currentName = $('#nameInput').val().trimEnd();
+                if (currentName === '') return;
+                currentHash = getHash(currentName);
+                if (currentName !== 'Thomas'){
+                    $('#dialogueText').text(`Derzeit suchen wir nach ${SEARCH_TARGET} und nicht ${currentName}.`);
+                    return;
+                }else{
+                    $('#dialogueText').text(`Laut Rechner wohnt Thomas in Haus ${currentHash}. Klicke nun mehrmals auf das Haus, um jede Etage durchzugehen.`);
+                }
                 $('#hashResult').text(`Hausnummer: ${currentHash}`);
                 $(this).prop('disabled', true);
                 $('#house-' + currentHash).addClass('highlight-target');
@@ -647,8 +780,9 @@ $bewohner_liste = [
 
         function startSearchPhase() {
             gamePhase = "search_calc";
-            currentName = SEARCH_TARGET;
+            currentName = null;
             currentHash = null;
+            $('#nameInput').prop('readonly', false).val('');
             $('#hashButton').prop('disabled', false).text("Thomas suchen");
             $('#hashResult').text("?");
             $('.to-do-family').removeClass('active').css('opacity', '0.5');
