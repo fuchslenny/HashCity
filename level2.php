@@ -642,7 +642,7 @@ $prefilled_haeuser = [
             </div>
         </div>
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ Level 2: Erste Kollsionen</h2>
+            <h2 class="grid-title">🏘️ Level 2: Erste Kollisionen</h2>
             <div class="street-block">
                 <div class="houses-row">
                     <?php for ($i = 0; $i < $anzahl_haeuser; $i++):
