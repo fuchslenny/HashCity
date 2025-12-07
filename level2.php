@@ -803,7 +803,7 @@ $prefilled_haeuser = [
             if (gameCompleted) {
                 $('#hashResult').text(`Hausnummer: ${hash}`);
                 $('#dialogueText').html(
-                    "Siehst du das?! `h('Dieter')` ist 0 und `h('Chris')` ist auch 0! Zwei verschiedene Namen zeigen auf dasselbe Haus! DAS ist eine <strong>Kollision</strong>! Mein System ist nicht perfekt... Da muss ich mir was ausdenken."
+                    "Siehst du das?! Der Hash von <strong>Dieter</strong> ist 0... und der Hash von <strong>Chris</strong> ist AUCH 0! <br>Zwei verschiedene Namen führen zur gleichen Hausnummer. Das nennen wir eine <strong>Kollision</strong>! Mein System ist wohl doch nicht perfekt..."
                 );
                 $('#dialogueContinue').fadeIn();
                 waitingForCollisionConfirm = true;
@@ -860,8 +860,8 @@ $prefilled_haeuser = [
         function showCollisionModal(occupant, newcomer, houseNum) {
             const successMsg = `
                 <strong style="color: #667eea;">Major Mike sagt:</strong><br>
-                "Oh nein! Haus <strong>${houseNum}</strong> ist bereits von Familie <strong>${occupant}</strong> bewohnt!
-                Und Familie <strong>${newcomer}</strong> soll dort auch einziehen... Das funktioniert nicht!"
+                "Oh nein! Haus <strong>${houseNum}</strong> ist bereits von <strong>${occupant}</strong> bewohnt!
+                Und <strong>${newcomer}</strong> soll dort auch einziehen... Das funktioniert nicht!"
                 <br><br>
                 "Wir müssen im nächsten Level eine Lösung für diese <strong>Kollision</strong> finden."
             `;
