@@ -585,12 +585,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 scrollTop: $(`.list-group-item[data-family-index="${currentFamilyIdx}"]`).position().top
             }, 300);
             h1Value = calcHash(selectedFamily, 40);
-            $('.house').removeClass('highlight-target');
-            let msg = `Hash: ${h1Value}. Klicke auf das Haus.`;
-            if (selectedFamily === "Levi") {
-                msg = `Hash: ${h1Value}. Siehst du? Das Haus ist jetzt FREI! Vorher wohnte da Thomas.`;
-            }
-            showDialogue(msg);
             phase = 'find_spot';
         }
 
