@@ -1,9 +1,6 @@
 <?php
 /**
  * HashCity - Level 11: Rehashing (Final Polish)
- *
- * Lernziel: Erleben der Stadterweiterung und wie sich Positionen durch den neuen Modulo ändern.
- * Updates: Verbesserte "Wave"-Animation, differenzierte Load-Factor-Anzeige.
  */
 $anzahl_haeuser = 40;
 // Die 19 "Bestands-Bewohner" aus Level 10
@@ -175,6 +172,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             padding: 0 5px;
             overflow-y: auto;
         }
+
         .list-group-item.to-do-family {
             cursor: pointer;
             font-weight: 700;
@@ -195,15 +193,25 @@ $familien_liste = array_merge($old_residents, $new_residents);
             transform: scale(1.03);
             z-index: 10;
         }
-        .list-group-item.to-do-family.list-group-item-success {
-            opacity: 0.3;
+        /* Für bereits eingezogene Familien */
+        .list-group-item.done {
+            opacity: 1;
             background: #e0e0e0;
             cursor: not-allowed;
             text-decoration: line-through;
         }
-        .list-group-item.to-do-family.disabled {
+        /* Für Familien, die noch nicht dran sind */
+        .list-group-item.disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+        /* Aktive Familie */
+        .list-group-item.active {
+            background: #667eea;
+            color: #fff;
+            transform: scale(1.02);
+            z-index: 10;
+            opacity: 1;
         }
         /* Load Factor Display */
         .load-factor-box { text-align: center; padding: 0.5rem; background: #f0f0f0; border-radius: 10px; margin-bottom: 1rem; border: 2px solid #ccc; transition: all 0.5s ease; }
@@ -228,9 +236,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
         /* Expand Button Style */
         .expand-btn { background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%); font-size: 1.1rem; padding: 0.8rem; display: none; }
         .family-list-container { max-height: 200px; overflow-y: auto; overflow-x: hidden; }
-        .list-group-item { padding: 0.5rem 1rem; margin-bottom: 0.3rem; background: #f8f9fa; border-radius: 6px; cursor: pointer; font-weight: 700; color: #666; transition: all 0.2s; border: none; font-size: 0.9rem; display: block; }
-        .list-group-item.active { background: #667eea; color: #fff; transform: scale(1.02); z-index: 10; }
-        .list-group-item.done { background: #e9f5e9; color: #999; text-decoration: line-through; cursor: default; }
         /* Load Factor Display */
         .load-factor-box { text-align: center; padding: 0.5rem; background: #f0f0f0; border-radius: 10px; margin-bottom: 1rem; border: 2px solid #ccc; transition: all 0.5s ease; }
         .lf-value { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: bold; color: #333; }
@@ -330,7 +335,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
                     <div class="family-list-container">
                         <ul id="familienListe" class="list-group">
                             <?php foreach ($familien_liste as $index => $familie): ?>
-                                <li class="list-group-item to-do-family" data-family-index="<?php echo $index; ?>">
+                                <li class="list-group-item to-do-family <?php echo ($index < 19) ? 'done' : ''; ?>" data-family-index="<?php echo $index; ?>">
                                     <?php echo $familie; ?>
                                 </li>
                             <?php endforeach; ?>
@@ -439,7 +444,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 $text.text("Kritisch (Zu voll!)");
             }
         }
-
         $('.house').each(function() {
             const $house = $(this);
             const pair = getRandomHousePair();
@@ -447,7 +451,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
             $house.data('empty-asset', pair.empty);
             $house.data('filled-asset', pair.filled);
         });
-
         // Initiale Platzierung (Simuliert Level 10 - Chaos)
         function initCity() {
             for(let i=0; i<19; i++) {
@@ -473,6 +476,15 @@ $familien_liste = array_merge($old_residents, $new_residents);
             }
             $('#btnExpand').show();
             updateLoadFactor();
+            // Initial die ersten 19 Familien als "done" markieren
+            $('.list-group-item').each(function() {
+                const idx = $(this).data('family-index');
+                if (idx < 19) {
+                    $(this).addClass('done');
+                } else if (idx > currentFamilyIdx) {
+                    $(this).addClass('disabled');
+                }
+            });
         }
         // --- UI Logic ---
         function showDialogue(text, image = 'card_major.png') {
@@ -486,14 +498,20 @@ $familien_liste = array_merge($old_residents, $new_residents);
         function advanceDialogue() {
             if(isFading) return;
             if (dialogueIdx < dialogues.length) {
+                if(dialogueIdx === dialogues.length -1){
+                    $('#dialogueContinue').hide();
+                }
                 showDialogue(dialogues[dialogueIdx]);
                 dialogueIdx++;
             }
         }
-        $('#dialogueBox').click(() => { if (phase === 'intro') advanceDialogue(); });
+        $('#dialogueBox').click(() => {
+            if (phase === 'intro') advanceDialogue();
+        });
         $(document).keydown(e => { if((e.key === 'Enter') && phase === 'intro') advanceDialogue(); });
         // --- Expansion Logic ---
         $('#btnExpand').click(function() {
+            if(phase === "intro") return;
             $(this).prop('disabled', true).text("BAUE HÄUSER...");
             // 1. Visuelle Erweiterung
             $('#block-2, #block-3').removeClass('hidden');
@@ -549,43 +567,44 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 phase = 'select_family';
                 $('#calcContainer').css({opacity: 1, pointerEvents: 'all'});
                 showDialogue("Siehst du? Thomas (Hash 620) ist von Haus 0 auf Haus 20 gezogen. Jetzt ist Haus 0 endlich frei für Levi! Probier es aus.");
-                highlightNextFamily();
+                placeNextFamily();
             }, 40 * 30 + 1000);
         }
-        // --- User Play Logic ---
-        function highlightNextFamily() {
-            $('.list-group-item').removeClass('active');
-            $(`.list-group-item[data-index="${currentFamilyIdx}"]`).addClass('active');
-            let $el = $(`.list-group-item[data-index="${currentFamilyIdx}"]`);
-            if($el.length) $('.family-list-container').scrollTop($el.offset().top - $('.family-list-container').offset().top + $('.family-list-container').scrollTop());
-        }
-        $(document).on('click', '.list-group-item', function() {
-            if (phase !== 'select_family') return;
-            let idx = $(this).data('index');
-            if (idx < 19) return;
-            if (idx !== currentFamilyIdx) {
-                showDialogue("Bitte der Reihe nach.");
+
+        function placeNextFamily() {
+            if (currentFamilyIdx >= families.length) {
+                endLevel();
                 return;
             }
-            selectedFamily = families[idx];
-            $('#btnCalcH1').prop('disabled', false);
-            $('#h1Result').text('-');
-            phase = 'calc_h1';
-            showDialogue(`Berechne den neuen Hash für ${selectedFamily}.`);
-        });
-        $('#btnCalcH1').click(function() {
-            let val = calcHash(selectedFamily, 40);
-            h1Value = val;
-            $('#h1Result').text(val);
-            let msg = `Hash: ${val}. Klicke auf das Haus.`;
+            selectedFamily = families[currentFamilyIdx];
+            $('#nameInput').val(selectedFamily);
+            $('.list-group-item').removeClass('active');
+            $(`.list-group-item[data-family-index="${currentFamilyIdx}"]`).removeClass('disabled').addClass('active');
+            $('.family-list-container').animate({
+                scrollTop: $(`.list-group-item[data-family-index="${currentFamilyIdx}"]`).position().top
+            }, 300);
+            h1Value = calcHash(selectedFamily, 40);
+            $('.house').removeClass('highlight-target');
+            let msg = `Hash: ${h1Value}. Klicke auf das Haus.`;
             if (selectedFamily === "Levi") {
-                msg = `Hash: ${val}. Siehst du? Das Haus ist jetzt FREI! Vorher wohnte da Thomas.`;
+                msg = `Hash: ${h1Value}. Siehst du? Das Haus ist jetzt FREI! Vorher wohnte da Thomas.`;
+            }
+            showDialogue(msg);
+            phase = 'find_spot';
+        }
+
+
+        $('#hashButton').click(function() {
+            h1Value = calcHash(selectedFamily, 40);
+            $('#hashResult').text(`Hausnummer: ${h1Value}`);
+            let msg = `Hash: ${h1Value}. Klicke auf das Haus.`;
+            if (selectedFamily === "Levi") {
+                msg = `Hash: ${h1Value}. Siehst du? Das Haus ist jetzt FREI! Vorher wohnte da Thomas.`;
             }
             showDialogue(msg);
             $('.house').removeClass('highlight-target');
-            $(`#house-${val}`).addClass('highlight-target');
+            $(`#house-${h1Value}`).addClass('highlight-target');
             phase = 'find_spot';
-            $(this).prop('disabled', true);
         });
         $('.house').click(function() {
             if (phase !== 'find_spot') return;
@@ -605,20 +624,22 @@ $familien_liste = array_merge($old_residents, $new_residents);
             setHouseAsset($house, true);
             $house.addClass('found');
             setTimeout(() => $house.removeClass('found').addClass('checked'), 300);
-            $(`.list-group-item[data-index="${currentFamilyIdx}"]`).removeClass('active').addClass('done');
+            $(`.list-group-item[data-family-index="${currentFamilyIdx}"]`).removeClass('active').addClass('done');
             $('.house').removeClass('highlight-target');
-            $('#h1Result').text('-');
+            $('#hashResult').text('Ergebnis ...');
             showDialogue(`Super! ${selectedFamily} ist eingezogen.`);
+            $('#hashInput').val('');
             currentFamilyIdx++;
             if (currentFamilyIdx < families.length) {
                 phase = 'select_family';
-                highlightNextFamily();
+                placeNextFamily();
             } else {
                 endLevel();
             }
         });
         function endLevel() {
             showDialogue("Fantastisch! Load Factor 0.55 (Okay). Rehashing hat funktioniert. Jetzt bist du bereit für das große Finale!", 'wink_major.png');
+            $('.list-group-item').addClass('done');
             setTimeout(() => {
                 $('#successMessage').text("Du hast gelernt, wie man eine überfüllte Hashmap rettet!");
                 $('#successOverlay').css('display', 'flex');
