@@ -479,7 +479,7 @@ $neue_bewohner = ["Dieter", "Lars"];
         </p>
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
-            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 3.5 →</button>
+            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 4 →</button>
         </div>
     </div>
 </div>
