@@ -500,6 +500,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             if (dialogueIdx < dialogues.length) {
                 if(dialogueIdx === dialogues.length -1){
                     $('#dialogueContinue').hide();
+                    phase = "expand";
                 }
                 showDialogue(dialogues[dialogueIdx]);
                 dialogueIdx++;
