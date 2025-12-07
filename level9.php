@@ -449,7 +449,7 @@ $bewohner_liste = [
             </div>
         </div>
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ Double Hashing District (Praxis)</h2>
+            <h2 class="grid-title">🏘️ Level 9: Seperate Chaining</h2>
             <div class="street-block">
                 <div class="houses-row">
                     <?php for ($i = 0; $i < 5; $i++): ?>

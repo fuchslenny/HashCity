@@ -175,7 +175,7 @@ $final_residents = [
         </div>
 
         <div class="houses-grid">
-            <h2 class="grid-title" id="gridTitle">🏘️ HashCity Final District</h2>
+            <h2 class="grid-title" id="gridTitle">🏘️ Level 12: Finale</h2>
             <div class="mode-badge" id="modeBadge">Strategie wählen...</div>
 
             <div class="street-block" id="block-0">

@@ -668,7 +668,7 @@
         </div>
         <!-- Houses Grid -->
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ HashCity Neuer Stadtteil</h2>
+            <h2 class="grid-title">🏘️ Level 10: Load Factor</h2>
             <!-- 4 Straßen mit je 5 Häusern -->
             <?php
             // Paare der neuen Assets

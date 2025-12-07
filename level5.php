@@ -233,7 +233,7 @@
         </div>
         <!-- Houses Grid -->
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ HashCity Neuer Stadtteil</h2>
+            <h2 class="grid-title">🏘️ Level 5: Quadratic Probing</h2>
             <!-- Street Block: Houses 0-9 -->
             <?php
             // Paare der neuen Assets für PHP
