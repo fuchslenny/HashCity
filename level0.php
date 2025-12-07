@@ -674,7 +674,7 @@ $familien = [
         </div>
         <!-- Houses Grid -->
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ HashCity Stadtteil</h2>
+            <h2 class="grid-title">🏘️ Level 0: Einführung in HashCity</h2>
             <!-- First Street Block: Houses 1-10 -->
             <div class="street-block">
                 <div class="houses-row">
@@ -728,7 +728,7 @@ $familien = [
         </div>
         <!-- Info Panel -->
         <div class="info-panel">
-            <h3 class="info-title">📊 Spielinformationen</h3>
+            <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="search-target">
                 <div class="search-target-label">Gesuchte Familie:</div>
                 <div class="search-target-name">Müller</div>

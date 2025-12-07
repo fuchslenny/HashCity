@@ -233,7 +233,7 @@ $familien_liste = [
             </div>
         </div>
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ Stadtteil (Level 4)</h2>
+            <h2 class="grid-title">🏘️ Level 4: Linear Probing 2</h2>
             <div class="street-block">
                 <div class="houses-row">
                     <?php for ($i = 0; $i < 5; $i++): ?>

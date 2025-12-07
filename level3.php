@@ -424,7 +424,7 @@ $neue_bewohner = ["Dieter", "Lars"];
             </div>
         </div>
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ Stadtteil 3: Linear Probing</h2>
+            <h2 class="grid-title">🏘️ Level 3: Linear Probing</h2>
             <div class="street-block">
                 <div class="houses-row">
                     <?php

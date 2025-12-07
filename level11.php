@@ -286,7 +286,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             </div>
         </div>
         <div class="houses-grid">
-            <h2 class="grid-title" id="gridTitle">🏘️ Stadtteil (20 Häuser)</h2>
+            <h2 class="grid-title" id="gridTitle">🏘️ Level 11: Re-Hashing</h2>
             <?php for ($b = 0; $b < 4; $b++):
                 // Blöcke 2 und 3 (Häuser 20-39) sind anfangs hidden
                 $blockClass = ($b >= 2) ? 'hidden' : '';
