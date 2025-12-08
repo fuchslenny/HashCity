@@ -39,7 +39,7 @@ if (isset($_REQUEST["level"]) && $_REQUEST["level"] !== "") {
 $levelsDone = $_SESSION['levels_done'];
 
 $lastLevel = end($levelsDone);
-if ($lastLevel !== 7 && $_REQUEST["page"] === "2") {
+if ($lastLevel !== 7 && isset($_REQUEST["page"]) && $_REQUEST["page"] === "2") {
     $currentUrl = $_SERVER['REQUEST_URI'];
     $newUrl = str_replace('page=2', 'page=1', $currentUrl);
     header("Location: " . $newUrl);
@@ -48,20 +48,20 @@ if ($lastLevel !== 7 && $_REQUEST["page"] === "2") {
 
 // Alle verfügbaren Levels definieren
 $allLevels = [
-    ['title' => 'Einführung', 'description' => 'Lerne die Grundlagen von HashCity kennen'],
-    ['title' => 'Grundlagen Hashmaps', 'description' => 'Verstehe, wie Hash-Funktionen Werte auf Indizes abbilden'],
-    ['title' => 'Erste Kollision', 'description' => 'Was passiert, wenn zwei Werte denselben Index belegen?'],
-    ['title' => 'Linear Probing', 'description' => 'Suche linear nach dem nächsten freien Platz'],
-    ['title' => 'Linear Probing 2', 'description' => 'Wende Linear Probing in komplexeren Szenarien an'],
-    ['title' => 'Quadratic Probing', 'description' => 'Nutze quadratische Schritte zur Kollisionsauflösung'],
-    ['title' => 'Quadratic Probing 2', 'description' => 'Meistere quadratisches Sondieren mit mehr Kollisionen'],
-    ['title' => 'Double Hashing', 'description' => 'Verwende eine zweite Hash-Funktion für die Schrittweite'],
-    ['title' => 'Double-Hashing-2', 'description' => 'Perfektioniere Double Hashing bei hoher Auslastung'],
-    ['title' => 'Separate-Chaining', 'description' => 'Verkette Einträge mit gleichem Index in Listen'],
-    ['title' => 'Separate-Chaining-2', 'description' => 'Verwalte längere Ketten effizient'],
-    ['title' => 'Load-Factor', 'description' => 'Verstehe den Füllgrad und seine Auswirkungen'],
-    ['title' => 'Re-Hashing', 'description' => 'Vergrößere die Tabelle und ordne alle Elemente neu zu'],
-    ['title' => 'Finale', 'description' => 'Zeige dein Können in der finalen Herausforderung'],
+        ['title' => 'Einführung', 'description' => 'Lerne die Grundlagen von HashCity kennen'],
+        ['title' => 'Grundlagen Hashmaps', 'description' => 'Verstehe, wie Hash-Funktionen Werte auf Indizes abbilden'],
+        ['title' => 'Erste Kollision', 'description' => 'Was passiert, wenn zwei Werte denselben Index belegen?'],
+        ['title' => 'Linear Probing', 'description' => 'Suche linear nach dem nächsten freien Platz'],
+        ['title' => 'Linear Probing 2', 'description' => 'Wende Linear Probing in komplexeren Szenarien an'],
+        ['title' => 'Quadratic Probing', 'description' => 'Nutze quadratische Schritte zur Kollisionsauflösung'],
+        ['title' => 'Quadratic Probing 2', 'description' => 'Meistere quadratisches Sondieren mit mehr Kollisionen'],
+        ['title' => 'Double Hashing', 'description' => 'Verwende eine zweite Hash-Funktion für die Schrittweite'],
+        ['title' => 'Double-Hashing-2', 'description' => 'Perfektioniere Double Hashing bei hoher Auslastung'],
+        ['title' => 'Separate-Chaining', 'description' => 'Verkette Einträge mit gleichem Index in Listen'],
+        ['title' => 'Separate-Chaining-2', 'description' => 'Verwalte längere Ketten effizient'],
+        ['title' => 'Load-Factor', 'description' => 'Verstehe den Füllgrad und seine Auswirkungen'],
+        ['title' => 'Re-Hashing', 'description' => 'Vergrößere die Tabelle und ordne alle Elemente neu zu'],
+        ['title' => 'Finale', 'description' => 'Zeige dein Können in der finalen Herausforderung'],
 ];
 
 $totalLevels = count($allLevels);
@@ -93,10 +93,8 @@ $hasNextPage = $currentPage < $totalPages;
     <title>HashCity - Level Auswahl</title>
     <link rel="icon" type="image/png" sizes="32x32" href="./assets/icons8-hash-scribby-32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="./assets/icons8-hash-scribby-96.png">
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
 
     <style>
@@ -123,6 +121,8 @@ $hasNextPage = $currentPage < $totalPages;
             height: 55%;
             background: linear-gradient(180deg, #87CEEB 0%, #B0D4E3 100%);
             z-index: 1;
+            /* Wichtig: Dies schneidet die Hochhäuser oben ab, wenn sie zu groß sind */
+            overflow: hidden;
         }
 
         /* Grass Section */
@@ -308,127 +308,6 @@ $hasNextPage = $currentPage < $totalPages;
             padding: 0 20px;
         }
 
-        /* Level Nodes */
-        /*
-        .level-node {
-            position: relative;
-            width: 130px;
-            height: 130px;
-            background: rgba(185, 244, 188, 0.95);
-            border: 4px solid rgba(76, 175, 80, 0.8);
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 5;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            flex-shrink: 0;
-        }
-
-        .level-node:hover:not(.locked):not(.active) {
-            transform: scale(1.15);
-            background: rgba(185, 244, 188, 1);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
-        }
-
-        .level-node.active {
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 235, 59, 0.98);
-            border-color: #FFC107;
-            border-width: 6px;
-            box-shadow: 0 0 50px rgba(255, 193, 7, 0.9),
-            0 15px 50px rgba(0,0,0,0.4);
-            z-index: 10;
-            transform: translateY(70px);
-        }
-
-        .level-node.active:hover {
-            transform: translateY(70px) scale(1.03);
-        }
-
-        .level-node.locked {
-            background: rgba(200, 200, 200, 0.7);
-            border-color: #999;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        .level-node.locked:hover {
-            transform: scale(1);
-        }
-
-        .level-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #2E7D32;
-            margin-bottom: 0;
-            transition: all 0.5s ease;
-        }
-
-        .level-node.active .level-title {
-            font-size: 4rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .level-number {
-            font-size: 1rem;
-            color: #666;
-            font-weight: 600;
-            transition: all 0.5s ease;
-        }
-
-        .level-node.active .level-number {
-            font-size: 1.5rem;
-            margin-bottom: 0.3rem;
-        }
-
-        .level-status {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            font-size: 1.8rem;
-            transition: all 0.5s ease;
-        }
-
-        .level-node.active .level-status {
-            top: 15px;
-            right: 15px;
-            font-size: 2.5rem;
-        }
-
-        .level-details {
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.5s ease;
-            text-align: center;
-            padding: 0 1.5rem;
-            max-height: 0;
-            overflow: hidden;
-        }
-
-        .level-node.active .level-details {
-            opacity: 1;
-            transform: translateY(0);
-            max-height: 200px;
-        }
-
-        .level-subtitle {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #2E7D32;
-            margin-bottom: 0.5rem;
-        }
-
-        .level-description {
-            font-size: 0.95rem;
-            color: #333;
-            line-height: 1.4;
-        }*/
         .level-node {
             position: relative;
             width: 130px;
@@ -641,36 +520,6 @@ $hasNextPage = $currentPage < $totalPages;
             opacity: 0.8;
         }
 
-        /*.back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 0.7rem 1.3rem;
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid rgba(102, 126, 234, 0.5);
-            border-radius: 30px;
-            font-weight: 700;
-            color: #667eea;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 100;
-            font-family: 'Orbitron', sans-serif;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 0.9rem;
-        }
-
-        .back-button:hover {
-            background: #667eea;
-            color: #fff;
-            transform: scale(1.05);
-        }
-
-        .back-button::before {
-            content: '← ';
-            margin-right: 5px;
-        }*/
-
         /* Start Button */
         .start-level-btn {
             position: absolute;
@@ -678,7 +527,7 @@ $hasNextPage = $currentPage < $totalPages;
             left: 50%;
             transform: translateX(-50%);
             padding: 0.8rem 2rem;
-            background: linear-gradient(135deg, #FF8C00 0%, #FF6347 100%); /*#667eea*/
+            background: linear-gradient(135deg, #FF8C00 0%, #FF6347 100%);
             color: #fff;
             border: none;
             border-radius: 30px;
@@ -693,7 +542,6 @@ $hasNextPage = $currentPage < $totalPages;
         }
 
         .start-level-btn:hover {
-            /*background: #764ba2;*/
             box-shadow:
                     0 20px 80px rgba(0, 0, 0, 0.6),
                     0 0 80px rgba(255, 140, 0, 1),
@@ -704,8 +552,6 @@ $hasNextPage = $currentPage < $totalPages;
         .level-node.active .start-level-btn {
             opacity: 1;
         }
-
-
 
         /* Navigation Arrows */
         .nav-arrow {
@@ -805,21 +651,10 @@ $hasNextPage = $currentPage < $totalPages;
             border-radius: 100px;
         }
 
-        /* Houses */
-        .house {
-            position: absolute;
-            top: auto;
-            bottom: 60px;
-            width: 120px;
-            height: auto;
-            z-index: 2;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
-            animation: houseMove linear;
-        }
-
+        /* Houses & City Animation (General) */
         @keyframes houseMove {
             0% {
-                right: -200px;
+                right: -800px; /* Start weiter rechts, da die Städte jetzt viel breiter sind */
                 opacity: 0;
             }
             5% {
@@ -834,159 +669,123 @@ $hasNextPage = $currentPage < $totalPages;
             }
         }
 
+        /* Single House/Tree (Bleiben normal groß) */
+        .house {
+            position: absolute;
+            top: auto;
+            bottom: 60px;
+            width: 120px;
+            height: auto;
+            z-index: 2;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+            animation: houseMove linear;
+        }
+
         .house img {
             width: 100%;
             height: auto;
             display: block;
         }
 
+        /* --- CITY CSS (MASSIV VERGRÖSSERT) --- */
+        .city-group {
+            position: absolute;
+            bottom: 60px;
+            z-index: 1; /* Hinter dem LKW/Straße */
+            display: flex;
+            align-items: flex-end;
+            gap: 5px;
+            animation: houseMove linear;
+            pointer-events: none;
+        }
+
+        .stacked-house-container {
+            position: relative;
+            display: flex;
+            flex-direction: column-reverse; /* WICHTIG: Stapelt von unten nach oben */
+            align-items: center;
+            /* HIER: Viel breiter als normale Häuser */
+            width: 220px;
+            line-height: 0; /* WICHTIG: Entfernt Whitespace zwischen Bildern */
+        }
+
+        .img-house-base {
+            width: 100%;
+            height: auto;
+            display: block;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+
+        .img-house-extension {
+            width: 100%;
+            height: auto;
+            display: block;
+            position: relative;
+            z-index: 10;
+            margin-bottom: -10px; /* STARKER NEGATIVER MARGIN gegen den weißen Strich */
+        }
+
         /* Responsive */
         @media (max-width: 1400px) {
-            .level-node {
-                width: 110px;
-                height: 110px;
-            }
+            .level-node { width: 110px; height: 110px; }
+            .level-node.active { width: 260px; height: 260px; }
+            .level-title { font-size: 2rem; }
+            .level-node.active .level-title { font-size: 3.5rem; }
 
-            .level-node.active {
-                width: 260px;
-                height: 260px;
-            }
-
-            .level-title {
-                font-size: 2rem;
-            }
-
-            .level-node.active .level-title {
-                font-size: 3.5rem;
-            }
+            /* Anpassung der Riesenhäuser für kleinere Screens, aber immer noch groß */
+            .stacked-house-container { width: 180px; }
         }
 
         @media (max-width: 1024px) {
-            .levels-container {
-                gap: 10px;
-            }
+            .levels-container { gap: 10px; }
+            .level-node { width: 90px; height: 90px; }
+            .level-node.active { width: 220px; height: 220px; }
+            .level-title { font-size: 1.8rem; }
+            .level-node.active .level-title { font-size: 3rem; }
 
-            .level-node {
-                width: 90px;
-                height: 90px;
-            }
+            .house { width: 60px; }
+            .stacked-house-container { width: 140px; } /* Immer noch deutlich größer als .house */
 
-            .level-node.active {
-                width: 220px;
-                height: 220px;
-            }
-
-            .level-title {
-                font-size: 1.8rem;
-            }
-
-            .level-node.active .level-title {
-                font-size: 3rem;
-            }
-
-            .house {
-                width: 90px;
-            }
-
-            .nav-arrow {
-                width: 50px;
-                height: 50px;
-                font-size: 1.6rem;
-            }
+            .nav-arrow { width: 50px; height: 50px; font-size: 1.6rem; }
         }
 
         @media (max-width: 768px) {
-            .header-title {
-                font-size: 1.6rem;
-            }
+            .header-title { font-size: 1.6rem; }
+            .header-subtitle { font-size: 0.9rem; }
+            .levels-container { flex-wrap: wrap; height: auto; gap: 15px; padding: 20px; }
+            .level-node { width: 80px; height: 80px; }
+            .level-node.active { width: 180px; height: 180px; }
+            .level-title { font-size: 1.5rem; }
+            .level-node.active .level-title { font-size: 2.5rem; }
+            .truck { width: 100px; }
 
-            .header-subtitle {
-                font-size: 0.9rem;
-            }
+            .house { width: 50px; }
+            .stacked-house-container { width: 100px; }
 
-            .levels-container {
-                flex-wrap: wrap;
-                height: auto;
-                gap: 15px;
-                padding: 20px;
-            }
-
-            .level-node {
-                width: 80px;
-                height: 80px;
-            }
-
-            .level-node.active {
-                width: 180px;
-                height: 180px;
-            }
-
-            .level-title {
-                font-size: 1.5rem;
-            }
-
-            .level-node.active .level-title {
-                font-size: 2.5rem;
-            }
-
-            .truck {
-                width: 100px;
-            }
-
-            .house {
-                width: 70px;
-            }
-
-            .nav-arrow {
-                width: 45px;
-                height: 45px;
-                font-size: 1.4rem;
-                top: 50%;
-            }
-
-            .nav-arrow-left {
-                left: 10px;
-            }
-
-            .nav-arrow-right {
-                right: 10px;
-            }
+            .nav-arrow { width: 45px; height: 45px; font-size: 1.4rem; top: 50%; }
+            .nav-arrow-left { left: 10px; }
+            .nav-arrow-right { right: 10px; }
         }
 
         @media (max-width: 480px) {
-            .truck {
-                width: 80px;
-            }
-
-            .nav-arrow {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem;
-            }
-
-            .nav-arrow-left {
-                left: 5px;
-            }
-
-            .nav-arrow-right {
-                right: 5px;
-            }
+            .truck { width: 80px; }
+            .nav-arrow { width: 40px; height: 40px; font-size: 1.2rem; }
+            .nav-arrow-left { left: 5px; }
+            .nav-arrow-right { right: 5px; }
         }
     </style>
 </head>
 <body>
-<!-- Sky Section -->
 <div class="sky-section" id="skySection">
-    <!-- Clouds -->
     <div class="cloud" style="width: 100px; height: 50px; top: 10%; animation-delay: 0s;"></div>
     <div class="cloud" style="width: 120px; height: 60px; top: 20%; animation-delay: 8s;"></div>
     <div class="cloud" style="width: 90px; height: 45px; top: 30%; animation-delay: 16s;"></div>
 </div>
 
-<!-- Grass Section -->
 <div class="grass-section" id="grassSection"></div>
 
-<!-- Header -->
 <div class="level-select-header">
     <h1 class="header-title">#CITY - Level Auswahl</h1>
     <p class="header-subtitle">Wähle dein Level und starte deine Hash-Map Reise</p>
@@ -995,10 +794,8 @@ $hasNextPage = $currentPage < $totalPages;
     <?php endif; ?>
 </div>
 
-<!-- Back Button -->
 <a href="Start" class="back-button">Zurück</a>
 
-<!-- Progress Bar -->
 <div class="progress-bar-container">
     <div class="progress-text">Fortschritt: <span id="progressText">0/<?php echo $totalLevels; ?> Levels abgeschlossen</span></div>
     <div class="progress">
@@ -1006,12 +803,11 @@ $hasNextPage = $currentPage < $totalPages;
     </div>
 </div>
 
-<!-- Navigation Arrows -->
 <div class="nav-arrow nav-arrow-left <?php echo !$hasPrevPage ? 'disabled' : ''; ?>"
      id="prevPageArrow"
-    <?php if ($hasPrevPage): ?>
-        onclick="window.location.href='Level-Auswahl?page=<?php echo $currentPage - 1; ?>'"
-    <?php endif; ?>>
+        <?php if ($hasPrevPage): ?>
+            onclick="window.location.href='Level-Auswahl?page=<?php echo $currentPage - 1; ?>'"
+        <?php endif; ?>>
     ◀
 </div>
 
@@ -1030,36 +826,51 @@ if ($lastLevel !== 7 || !$hasNextPage) {
 </div>
 
 
-<!-- Road Container -->
 <div class="road-container">
-    <!-- Main Road -->
     <div class="main-road">
-        <!-- Road Lines -->
         <div class="road-line" style="animation-delay: 0s;"></div>
         <div class="road-line" style="animation-delay: 0.5s;"></div>
         <div class="road-line" style="animation-delay: 1s;"></div>
         <div class="road-line" style="animation-delay: 1.5s;"></div>
     </div>
 
-    <!-- Truck -->
     <div id="truck" class="truck">
         <img src="./assets/Postauto.svg" alt="Postauto">
     </div>
 </div>
 
-<!-- Levels Container -->
 <div class="levels-container" id="levelsContainer">
-    <!-- Levels will be generated by JavaScript -->
 </div>
 
-<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     $(document).ready(function() {
+
+        // --- SOUND SETUP START ---
+        const audioBg = new Audio('./sounds/background.wav');
+        audioBg.loop = true;
+        audioBg.volume = 0.9; // 30% Lautstärke
+
+        const audioDrive = new Audio('./sounds/drive.mp3');
+        const audioStop = new Audio('./sounds/stop.mp3');
+
+        // Versuch: Sofort abspielen
+        var playPromise = audioBg.play();
+
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                // Browser Autoplay Policy hat das Abspielen verhindert
+                console.log("Autoplay blockiert, warte auf Interaktion.");
+                // Fallback: Beim ersten Klick/Tastendruck/Touch starten
+                $(document).one('click keydown touchstart', function() {
+                    audioBg.play();
+                });
+            });
+        }
+        // --- SOUND SETUP END ---
 
         let currentLevel = 0;
 
@@ -1086,6 +897,8 @@ if ($lastLevel !== 7 || !$hasNextPage) {
         }
         }
         ?>
+
+        let previousLevelIndex = currentLevel; // Initiale Position merken
 
         // Level Data - dynamisch aus PHP generiert
         const levelData = [
@@ -1198,7 +1011,7 @@ if ($lastLevel !== 7 || !$hasNextPage) {
         }
 
         const trees = ["Baum1.svg", "Baum2.svg", "Baum3.svg"];
-        const houses = [
+        const singleHouses = [
             "WohnhauBlauBraunBesetztNeu.svg",
             "WohnhauBlauGrauBesetztNeu.svg",
             "WohnhauBlauRotBesetztNeu.svg",
@@ -1210,9 +1023,19 @@ if ($lastLevel !== 7 || !$hasNextPage) {
             "WohnhauRotRotBesetztNeu.svg",
             "WohnhausRotBraunBesetztNeu.svg"
         ];
+
+        // --- LEVEL 9 ASSETS für Städte ---
+        const stackedHousePairs = [
+            { base: "Wohnhaus2BlauBraun.svg", extension: "WohnhausBlauBraunErweiterung.svg" },
+            { base: "Wohnhaus2BlauGrau.svg", extension: "WohnhausBlauGrauErweiterung.svg" },
+            { base: "Wohnhaus2BlauRot.svg", extension: "WohnhausBlauRotErweiterung.svg" },
+            { base: "Wohnhaus2GrauBraun.svg", extension: "WohnhausGrauBraunErweiterung.svg" },
+        ];
+
         const fence = "Zaun1.svg";
 
         let consecutiveHouses = 0;
+        let stepsSinceLastCity = 5; // Initialwert, damit schnell eine Stadt kommen kann
 
         function createObject(objectType) {
             const duration = 15 + 1 * 1;
@@ -1240,25 +1063,70 @@ if ($lastLevel !== 7 || !$hasNextPage) {
             }, duration * 1000);
         }
 
+        // --- City Spawner ---
+        function createCity() {
+            const duration = 15; // SCHNELLER: Angepasst an die anderen Objekte (vorher 20)
+            const numberOfHouses = 3 + Math.floor(Math.random() * 4); // 3-6 Häuser pro Cluster
+
+            // Container für die Stadt-Gruppe
+            const cityGroup = $(`<div class="city-group" style="animation-duration: ${duration}s;"></div>`);
+
+            for(let i = 0; i < numberOfHouses; i++) {
+                // HIER GEÄNDERT: Viel höher (3-9 Stockwerke), damit sie oben raus ragen
+                const stories = 3 + Math.floor(Math.random() * 7);
+                const pair = stackedHousePairs[Math.floor(Math.random() * stackedHousePairs.length)];
+
+                // Container für einzelnes gestapeltes Haus (flex-direction: column-reverse)
+                const houseContainer = $(`<div class="stacked-house-container"></div>`);
+
+                // Basis-Haus
+                houseContainer.append(`<img src="./assets/${pair.base}" alt="Haus Basis" class="img-house-base">`);
+
+                // Erweiterungen (Stockwerke)
+                for(let j = 1; j < stories; j++) {
+                    houseContainer.append(`<img src="./assets/${pair.extension}" alt="Haus Erweiterung" class="img-house-extension">`);
+                }
+
+                cityGroup.append(houseContainer);
+            }
+
+            $('#skySection').append(cityGroup);
+
+            setTimeout(() => {
+                cityGroup.remove();
+            }, duration * 1000);
+        }
+
         function spawnNext() {
+            stepsSinceLastCity++; // Zähler erhöhen
+
             // Nach 3 Häusern muss ein Baum kommen
             if (consecutiveHouses >= 3) {
                 spawnTree();
                 consecutiveHouses = 0;
             } else {
-                // 70% Chance für Haus, 30% für Baum
-                if (Math.random() < 0.7) {
-                    spawnHouse();
+                // Entscheidung: Stadt, Einzelhaus oder Baum?
+                const rand = Math.random();
+
+                // Cooldown: 5 Schritte. Chance: 20%
+                if (stepsSinceLastCity > 5 && rand < 0.20) {
+                    createCity();
+                    consecutiveHouses++;
+                    stepsSinceLastCity = 0; // Reset Cooldown
+                } else if (rand < 0.60) {
+                    // Chance für Einzelhaus (wenn keine Stadt)
+                    spawnSingleHouse();
                     consecutiveHouses++;
                 } else {
+                    // Chance für Baum (Rest)
                     spawnTree();
                     consecutiveHouses = 0;
                 }
             }
         }
 
-        function spawnHouse() {
-            const houseType = houses[Math.floor(Math.random() * houses.length)];
+        function spawnSingleHouse() {
+            const houseType = singleHouses[Math.floor(Math.random() * singleHouses.length)];
             createObject(houseType);
         }
 
@@ -1329,10 +1197,29 @@ if ($lastLevel !== 7 || !$hasNextPage) {
             });
         }
 
-        // Move truck to level
+        // Move truck to level (MODIFIED FOR SOUND DIRECTION)
         function moveTruckToLevel(level) {
             const truck = $('#truck');
             const position = (100 / 8) * level + (100 / 16);
+
+            // 1. Alle Bewegungssounds stoppen/resetten
+            audioDrive.pause();
+            audioDrive.currentTime = 0;
+            audioStop.pause();
+            audioStop.currentTime = 0;
+
+            // 2. Richtung bestimmen
+            if (level > previousLevelIndex) {
+                // Vorwärts -> Drive Sound
+                audioDrive.play().catch(e => {});
+            } else if (level < previousLevelIndex) {
+                // Rückwärts -> Stop Sound
+                audioStop.play().catch(e => {});
+            }
+            // (Bei level == previousLevelIndex passiert nichts, z.B. initiales Laden)
+
+            // 3. Position aktualisieren
+            previousLevelIndex = level;
 
             truck.css({
                 'left': position + '%',
