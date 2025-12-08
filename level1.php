@@ -752,6 +752,7 @@
         let gameCompleted = false;
         let searchMode = false;
         let selectedFamily = null;
+        let hash = null;
         // Paare der neuen Assets für JavaScript
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
@@ -875,7 +876,7 @@
             if (gameCompleted) return;
             const family = $('#hashInput').val().trim();
             if (!family) return;
-            const hash = getHash(family, HASH_SIZE);
+            hash = getHash(family, HASH_SIZE);
             $('#hashResult').text(`Initial-Hash: ${hash}`);
             if (searchMode) {
                 if (family === 'Sophie' && hash === 4) {
@@ -925,7 +926,10 @@
                     if(gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
                     return;
                 }
-                const targetHash = getHash(selectedFamily, HASH_SIZE);
+                if(hash === null){
+                    $('#dialogueText').text(`Berechne erst den Hash mit dem Hashrechner!`);
+                    return;
+                }
                 if (houseNumber !== targetHash) {
                     $('#dialogueText').text(`Halt! Der Rechner hat Haus ${targetHash} für Familie ${selectedFamily} berechnet, nicht Haus ${houseNumber}.`);
                     return;
@@ -951,6 +955,7 @@
                         $('#hashButton').prop('disabled', true);
                     }
                     selectedFamily = null;
+                    hash = null;
                     $('#hashInput').val('');
                     $('#hashResult').text('Ergebnis ...');
                 }
