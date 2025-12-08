@@ -1,21 +1,20 @@
 <?php
 /**
- * HashCity - Level 12: Das Finale (Hardcore Mode)
+ * HashCity - Level 12: Das Finale (Hardcore Mode + Smart Probing + Level 7/11 Features)
  *
  * Updates:
- * - 30 Residents (Random Names)
- * - Strict Probing Limits (Max 5 Steps)
- * - NO Visual Guides (User must calculate positions)
- * - Search Phase at the end
+ * - "Stadtplanung" statt "Verwaltung"
+ * - Smart Probing: Erlaubt direktes Klicken des Zielhauses ODER Kollisions-Feedback beim Klicken besetzter Häuser.
+ * - Integration Level 11 Animation & Level 7 Double Hashing Design.
  */
 
 $final_residents = [
-    "Julia", "Max", "Sven", "Lara", "Tom",
-    "Sarah", "Ben", "Lea", "Paul", "Anna",
-    "Jan", "Tim", "Lisa", "Kevin", "Eva",
-    "Nico", "Maja", "Olaf", "Nina", "Kai",
-    "Ute", "Roy", "Pia", "Ali", "Zoe",
-    "Leo", "Amy", "Ian", "Rex", "Sam"
+        "Julia", "Max", "Sven", "Lara", "Tom",
+        "Sarah", "Ben", "Lea", "Paul", "Anna",
+        "Jan", "Tim", "Lisa", "Kevin", "Eva",
+        "Nico", "Maja", "Olaf", "Nina", "Kai",
+        "Ute", "Roy", "Pia", "Ali", "Zoe",
+        "Leo", "Amy", "Ian", "Rex", "Sam"
 ];
 ?>
 <!DOCTYPE html>
@@ -37,11 +36,11 @@ $final_residents = [
         @keyframes cloudFloat { 0% { left: -200px; } 100% { left: 110%; } }
 
         .game-header { background: transparent; padding: 1rem 2rem; position: relative; top: 0; z-index: 1000; backdrop-filter: blur(5px); }
-        .back-btn { padding: 0.7rem 1.3rem; background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 30px; font-weight: 700; color: #667eea; text-decoration: none; display: inline-block; transition: all 0.3s; }
+        .back-btn { padding: 0.7rem 1.3rem; background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 30px; font-weight: 700; color: #667eea; text-decoration: none; display: inline-block; transition: all 0.3s; font-family: 'Orbitron'; }
         .back-btn:hover { background: #667eea; color: #fff; transform: scale(1.05); }
 
         .game-container { max-width: 1800px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-        .game-area { display: grid; grid-template-columns: 280px 1fr 320px; gap: 2rem; min-height: 70vh; }
+        .game-area { display: grid; grid-template-columns: 280px 1fr 350px; gap: 2rem; min-height: 70vh; }
 
         /* Mike Section */
         .major-mike-section { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); height: fit-content; position: sticky; top: 100px; border: 4px solid #FFD700; }
@@ -64,15 +63,25 @@ $final_residents = [
         .street { width: 100%; height: 60px; background-image: url('./assets/Strasse.svg'); background-size: cover; background-position: center; position: relative; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 1; margin-top: -15px; }
         .street::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%); border-radius: 8px; z-index: -1; }
         .street::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px); transform: translateY(-50%); z-index: 2; }
+        .street.hidden { display: none; }
 
         /* House Logic */
         .house { position: relative; cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column-reverse; align-items: center; width: 100%; }
+        .house.hidden { display: none; }
         .house:hover { transform: translateY(-5px) scale(1.05); z-index: 10; }
-        /* .highlight-target ENTFERNT - Keine visuellen Hilfen mehr! */
+
         .house.collision-highlight { box-shadow: 0 0 15px 5px rgba(211, 47, 47, 0.8); border-radius: 50%; animation: shake 0.4s; }
         .house.found-highlight { box-shadow: 0 0 25px 10px #4CAF50; border-radius: 50%; transform: scale(1.2) !important; z-index: 20; }
 
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        /* Pop-In Animation (from Level 11) */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .house.pop-in { animation: popIn 0.4s ease-out forwards; }
 
         /* Images */
         .house-icon { width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2)); }
@@ -81,32 +90,44 @@ $final_residents = [
         @keyframes fallDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
         .house-number { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: 900; color: white; background: #333; padding: 2px 6px; border-radius: 4px; z-index: 20; }
-
-        /* HOVER DISABLED */
         .house-occupant { display: none !important; }
 
         /* Info Panel */
-        .info-panel { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 1.5rem; position: sticky; top: 100px; border: 4px solid #fff; }
-        .info-item { background: #fff; padding: 1rem; border-radius: 15px; margin-bottom: 1rem; border: 3px solid #4CAF50; }
+        .info-panel { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); height: fit-content; position: sticky; top: 100px; border: 4px solid #fff; }
+        .info-title { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; color: #2E7D32; margin-bottom: 1.2rem; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+        .info-item { background: #fff; padding: 1rem; border-radius: 15px; margin-bottom: 1rem; border: 3px solid #4CAF50; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15); }
+        .info-label { font-weight: 700; color: #666; font-size: 0.95rem; margin-bottom: 0.4rem; }
 
-        .load-factor-box { text-align: center; padding: 0.5rem; background: #f0f0f0; border-radius: 10px; margin-bottom: 1rem; border: 2px solid #ccc; transition: all 0.3s ease; }
-        .lf-bad { background: #FFEBEE; border-color: #D32F2F; color: #D32F2F; animation: pulseRed 2s infinite; }
+        .load-factor-box { text-align: center; padding: 0.5rem; background: #f0f0f0; border-radius: 10px; margin-bottom: 1rem; border: 2px solid #ccc; transition: all 0.5s ease; }
+        .lf-value { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: bold; color: #333; }
+        .lf-label { font-size: 0.8rem; color: #666; }
+        .lf-good { color: #4CAF50; border-color: #4CAF50; background: #e8f5e9; }
+        .lf-medium { color: #FF9800; border-color: #FF9800; background: #fff3e0; }
+        .lf-bad { color: #D32F2F; border-color: #D32F2F; background: #FFEBEE; animation: pulseRed 2s infinite; }
         @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(211, 47, 47, 0); } 100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); } }
 
-        .calc-button { width: 100%; padding: 0.6rem; border: none; border-radius: 30px; font-weight: 700; cursor: pointer; color: white; margin-top: 5px; font-family: 'Orbitron'; transition: all 0.2s; }
-        .btn-calc { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .btn-calc-2 { background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); display: none; margin-top: 10px; }
-        .btn-expand { background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%); font-size: 1.1rem; }
-        .btn-expand:disabled { background: #ccc; cursor: not-allowed; }
-        .btn-expand:hover:not(:disabled) { transform: scale(1.05); }
+        .hash-calculator { background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%); border-color: #2196F3; }
+        .calculator-result { margin-top: 0.5rem; padding: 0.8rem; background: #f8f9fa; border: 2px dashed #4CAF50; border-radius: 10px; text-align: center; font-family: 'Orbitron', sans-serif; font-weight: 700; color: #2E7D32; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .calculator-button { width: 100%; padding: 0.8rem; background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%); color: white; border: none; border-radius: 10px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3); margin-top: 0.5rem; }
+        .calculator-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4); }
+        .calculator-button:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; transform: none; }
 
+        .expand-btn { background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%); font-size: 1.1rem; margin-bottom: 1.5rem; }
+
+        /* --- LEVEL 7 SPECIAL STYLES --- */
+        .step-calculator { background: linear-gradient(135deg, #fff3e0 0%, #fff 100%); border-color: #FF9800; opacity: 0.5; pointer-events: none; transition: opacity 0.3s; display: none; }
+        .step-calculator.active { opacity: 1; pointer-events: all; }
+        .btn-secondary-calc { background: linear-gradient(135deg, #FF9800 0%, #FFB74D 100%); }
+        .calc2-button { padding: 0.6rem 1.5rem; border: none; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: white; width: 100%; margin-top: 0.5rem; }
+        .hash-result-value { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 900; color: #667eea; text-align: center; margin: 0.5rem 0; }
+
+        .family-list-container { max-height: 250px; padding: 0 5px; overflow-y: auto; }
         .list-group-item { cursor: pointer; font-weight: bold; transition: 0.2s; border: 1px solid #ddd; margin-bottom: 4px; border-radius: 6px; }
         .list-group-item.active { background: #667eea; color: white; transform: scale(1.02); border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .list-group-item.done { text-decoration: line-through; opacity: 0.5; background: #eee; color: #888; cursor: default; }
         .list-group-item.search-target { background: #FF9800; color: white; animation: pulseSearch 2s infinite; border: 2px solid #E65100; }
         @keyframes pulseSearch { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
 
-        /* Mode Selection Modal */
         .mode-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 3000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .mode-box { background: white; padding: 3rem; border-radius: 30px; max-width: 800px; width: 90%; text-align: center; border: 5px solid #667eea; animation: zoomIn 0.4s ease; }
         @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -114,9 +135,7 @@ $final_residents = [
         .mode-card { background: #f8f9fa; padding: 1.5rem; border-radius: 15px; border: 2px solid #ddd; cursor: pointer; transition: all 0.3s; }
         .mode-card:hover { transform: translateY(-5px); border-color: #667eea; box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2); }
         .mode-card h4 { color: #667eea; font-weight: 900; font-family: 'Orbitron'; }
-        .mode-card p { font-size: 0.9rem; color: #666; margin-bottom: 0; }
 
-        /* Success/Fail Overlays */
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 4000; }
         .modal-box { background: white; border-radius: 30px; padding: 3rem; text-align: center; border: 5px solid; max-width: 600px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
         .modal-win { border-color: #4CAF50; }
@@ -144,7 +163,8 @@ $final_residents = [
             <div class="mode-card" onclick="selectMode('double')">
                 <h4>Double Hashing</h4>
                 <p>Kollision? 2. Hash berechnet Schrittweite.</p>
-                <small class="text-muted">(Level 8 - Advanced)</small>
+                <small class="text-muted">(Level 7/8)</small>
+
             </div>
             <div class="mode-card" onclick="selectMode('chaining')">
                 <h4>Separate Chaining</h4>
@@ -193,52 +213,58 @@ $final_residents = [
             <div class="street-block hidden" id="block-1">
                 <div class="houses-row">
                     <?php for ($i = 10; $i < 20; $i++): ?>
-                        <div class="house" id="house-<?php echo $i; ?>" data-index="<?php echo $i; ?>">
+                        <div class="house hidden" id="house-<?php echo $i; ?>" data-index="<?php echo $i; ?>">
                             <div class="house-number"><?php echo $i; ?></div>
                             <div class="house-occupant"></div>
                         </div>
                     <?php endfor; ?>
                 </div>
-                <div class="street"></div>
+                <div class="street hidden"></div>
             </div>
 
             <?php for ($b = 2; $b < 4; $b++): ?>
                 <div class="street-block hidden" id="block-<?php echo $b; ?>">
                     <div class="houses-row">
                         <?php for ($i = 0; $i < 10; $i++): $hNum = $b*10 + $i; ?>
-                            <div class="house" id="house-<?php echo $hNum; ?>" data-index="<?php echo $hNum; ?>">
+                            <div class="house hidden" id="house-<?php echo $hNum; ?>" data-index="<?php echo $hNum; ?>">
                                 <div class="house-number"><?php echo $hNum; ?></div>
                                 <div class="house-occupant"></div>
                             </div>
                         <?php endfor; ?>
                     </div>
-                    <div class="street"></div>
+                    <div class="street hidden"></div>
                 </div>
             <?php endfor; ?>
         </div>
 
         <div class="info-panel">
-            <h3 style="text-align:center; color:#2E7D32; font-family:'Orbitron';">📊 Verwaltung</h3>
+            <h3 class="info-title">📊 Stadtplanung</h3>
 
             <div class="load-factor-box" id="lfBox">
-                <div style="font-size:0.8rem">Load Factor</div>
-                <div style="font-size:1.5rem; font-weight:bold" id="lfValue">0.00</div>
-                <div style="font-size:0.7rem">Limit: <span id="lfLimit">0.75</span></div>
+                <div class="lf-label">Load Factor</div>
+                <div class="lf-value" id="lfValue">0.00</div>
+                <div class="lf-label" id="lfText">Limit: 0.75</div>
             </div>
 
-            <button id="btnExpand" class="calc-button btn-expand" disabled>🏗️ STADT ERWEITERN</button>
+            <button id="btnExpand" class="calculator-button expand-btn" disabled>🏗️ STADT ERWEITERN</button>
 
-            <div class="info-item">
+            <div class="info-item hash-calculator">
                 <div class="info-label">Rechner <span style="float:right; font-size:0.8rem">Mod <span id="modBase">10</span></span></div>
-                <div style="text-align:center; font-size:1.8rem; color:#667eea; font-weight:bold; margin:5px 0;" id="calcResult">-</div>
 
-                <button id="btnCalc1" class="calc-button btn-calc" disabled>1. Hash Berechnen</button>
-                <button id="btnCalc2" class="calc-button btn-calc-2" disabled>⚠️ Kollision! Step berechnen</button>
+                <div class="calculator-result" id="calcResult">-</div>
+                <button id="btnCalc1" class="calculator-button" disabled>1. Hash Berechnen</button>
+            </div>
+
+            <div class="info-item step-calculator" id="stepCalcBox">
+                <div class="info-label">2. Hash (Schrittweite)</div>
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;" id="stepFormula">(ASCII) % 5 + 1</div>
+                <div class="hash-result-value" id="h2Result">-</div>
+                <button id="btnCalcH2" class="calc2-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
             </div>
 
             <div class="info-item">
                 <div class="info-label">Warteschlange (<span id="queueCount">30</span>):</div>
-                <div style="max-height:200px; overflow-y:auto">
+                <div class="family-list-container">
                     <ul class="list-group" id="resList">
                         <?php foreach($final_residents as $idx => $name): ?>
                             <li class="list-group-item" id="res-<?php echo $idx; ?>" data-name="<?php echo $name; ?>">
@@ -265,9 +291,9 @@ $final_residents = [
 <script>
     // --- Configuration ---
     const residents = <?php echo json_encode($final_residents); ?>;
-    const MAX_PROBE_STEPS = 5; // Reduced from 12 to 5 for HARD difficulty
+    const MAX_PROBE_STEPS = 5;
 
-    // Probing-Mode Häuser
+    // Assets
     const housePairsProbing = [
         { base: "WohnhauBlauBraunLeerNeu.svg", fill: "WohnhauBlauBraunBesetztNeu.svg" },
         { base: "WohnhauBlauGrauLeerNeu.svg", fill: "WohnhauBlauGrauBesetztNeu.svg" },
@@ -275,8 +301,6 @@ $final_residents = [
         { base: "WohnhauGelbBraunLeerNeu.svg", fill: "WohnhauGelbBraunBesetztNeu.svg" },
         { base: "WohnhauGruenBraunLeerNeu.svg", fill: "WohnhauGruenBraunBesetztNeu.svg" },
     ];
-
-    // Chaining-Mode Häuser
     const housePairsChaining = [
         { base: "Wohnhaus2BlauBraun.svg", extension: "WohnhausBlauBraunErweiterung.svg" },
         { base: "Wohnhaus2BlauGrau.svg", extension: "WohnhausBlauGrauErweiterung.svg" },
@@ -292,11 +316,7 @@ $final_residents = [
     let isSearchPhase = false;
     let searchQueue = [];
     let currentSearchTarget = null;
-
-    // Step State
-    let h1 = null;
-    let h2 = null;
-    let stepCount = 0;
+    let h1 = null, h2 = null;
     let expansionCount = 0;
     const maxExpansions = 2;
 
@@ -304,44 +324,47 @@ $final_residents = [
     function selectMode(mode) {
         gameMode = mode;
         $('#modeOverlay').fadeOut();
-
         let modeName = "";
+
+        // UI Reset
+        $('.step-calculator').hide();
+
         if (mode === 'linear') modeName = "Linear Probing";
         if (mode === 'quadratic') modeName = "Quadratic Probing";
-        if (mode === 'double') modeName = "Double Hashing";
-        if (mode === 'chaining') {
-            modeName = "Separate Chaining";
-            $('#lfLimit').text("∞");
+        if (mode === 'double') {
+            modeName = "Double Hashing";
+            $('.step-calculator').show();
+            updateStepFormula();
         }
+        if (mode === 'chaining') { modeName = "Separate Chaining"; $('#lfText').text("∞ (Kein Limit)"); }
 
         $('#modeBadge').text(modeName);
         $('#dialogueText').text(`Modus: ${modeName}. Keine Hilfen. Viel Erfolg!`);
-
         initVisuals();
         updateStats();
         highlightNextResident();
     }
 
+    function updateStepFormula() {
+        let h2Mod = Math.floor(currentCapacity / 2);
+        $('#stepFormula').text(`(ASCII) % ${h2Mod} + 1`);
+    }
+
     function initVisuals() {
-        if (gameMode === 'chaining') {
-            $('.house').each(function() {
-                const pair = housePairsChaining[Math.floor(Math.random() * housePairsChaining.length)];
-                $(this).data('pair', pair);
-                $(this).empty();
-                $(this).append(`<img src="./assets/${pair.base}" class="img-house-base">`);
-                $(this).append(`<div class="house-number">${$(this).data('index')}</div>`);
-                $(this).append(`<div class="house-occupant"></div>`);
-            });
-        } else {
-            $('.house').each(function() {
-                const pair = housePairsProbing[Math.floor(Math.random() * housePairsProbing.length)];
-                $(this).data('pair', pair);
-                $(this).empty();
-                $(this).append(`<img src="./assets/${pair.base}" class="house-icon">`);
-                $(this).append(`<div class="house-number">${$(this).data('index')}</div>`);
-                $(this).append(`<div class="house-occupant"></div>`);
-            });
-        }
+        $('.house:lt(10)').each(function() {
+            assignRandomAsset($(this));
+        });
+    }
+
+    function assignRandomAsset($el) {
+        const arr = (gameMode === 'chaining') ? housePairsChaining : housePairsProbing;
+        const pair = arr[Math.floor(Math.random() * arr.length)];
+        $el.data('pair', pair);
+        $el.empty();
+        $el.append(`<div class="house-number">${$el.data('index')}</div>`);
+        $el.append(`<div class="house-occupant"></div>`);
+        if(gameMode === 'chaining') $el.append(`<img src="./assets/${pair.base}" class="img-house-base">`);
+        else $el.append(`<img src="./assets/${pair.base}" class="house-icon">`);
     }
 
     function updateHouseVisual($el, count) {
@@ -374,30 +397,33 @@ $final_residents = [
         }
     }
 
-    // --- Math Helpers ---
     function getAsciiSum(name) {
         let sum = 0;
         for(let i=0; i<name.length; i++) sum += name.charCodeAt(i);
         return sum;
     }
 
-    // --- Game Logic ---
+    // --- Game Flow ---
     function highlightNextResident() {
         if(currentResIdx >= residents.length) {
             initSearchPhase();
             return;
         }
-
         $('.list-group-item').removeClass('active');
         $(`#res-${currentResIdx}`).addClass('active');
 
-        h1 = null;
-        h2 = null;
-        stepCount = 0;
+        let container = $('.family-list-container');
+        let scrollTo = $(`#res-${currentResIdx}`);
+        if(scrollTo.length) {
+            container.animate({ scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop() - 50 });
+        }
 
+        h1 = null; h2 = null;
         $('#calcResult').text('-');
+        $('#h2Result').text('-');
+        $('#stepCalcBox').removeClass('active');
         $('#btnCalc1').prop('disabled', false).text('1. Hash Berechnen');
-        $('#btnCalc2').hide().prop('disabled', true);
+        $('#btnCalcH2').prop('disabled', true);
 
         $('.house').removeClass('collision-highlight found-highlight');
         updateStats();
@@ -415,9 +441,22 @@ $final_residents = [
         $('#lfValue').text(lf.toFixed(2));
         $('#modBase').text(currentCapacity);
 
-        if(gameMode !== 'chaining') {
-            if(lf > 0.75) $('#lfBox').addClass('lf-bad');
-            else $('#lfBox').removeClass('lf-bad');
+        let $lfBox = $('#lfBox');
+        $lfBox.removeClass('lf-good lf-medium lf-bad');
+
+        if (gameMode !== 'chaining') {
+            if(lf > 0.75) {
+                $lfBox.addClass('lf-bad');
+                $('#lfText').text("Limit: 0.75 (Kritisch!)");
+            } else if (lf > 0.5) {
+                $lfBox.addClass('lf-medium');
+                $('#lfText').text("Limit: 0.75 (Mittel)");
+            } else {
+                $lfBox.addClass('lf-good');
+                $('#lfText').text("Limit: 0.75 (Gut)");
+            }
+        } else {
+            $lfBox.addClass('lf-good');
         }
 
         if(!isSearchPhase && expansionCount < maxExpansions && h1 === null) {
@@ -426,263 +465,60 @@ $final_residents = [
             $('#btnExpand').prop('disabled', true);
         }
 
-        if(isSearchPhase) {
-            $('#queueCount').text(searchQueue.length);
-        } else {
-            $('#queueCount').text(residents.length - currentResIdx);
-        }
+        $('#queueCount').text(isSearchPhase ? searchQueue.length : residents.length - currentResIdx);
     }
 
-    // --- SEARCH PHASE LOGIC ---
-    function initSearchPhase() {
-        isSearchPhase = true;
-        let shuffled = [...placedResidents].sort(() => 0.5 - Math.random());
-        searchQueue = shuffled.slice(0, 3);
-
-        $('#dialogueText').text("Alle platziert! Finde nun die 3 gesuchten Personen ohne Hilfe!");
-        $('#mmAvatar').attr('src', './assets/wink_major.png');
-        $('#btnExpand').prop('disabled', true);
-
-        $('#resList').empty();
-        searchQueue.forEach((p, index) => {
-            $('#resList').append(`<li class="list-group-item search-item" id="search-${index}">${p.name}</li>`);
-        });
-
-        startNextSearch();
-    }
-
-    function startNextSearch() {
-        if(searchQueue.length === 0) {
-            winGame();
-            return;
-        }
-
-        currentSearchTarget = searchQueue[0];
-        $('.list-group-item').removeClass('search-target');
-        $(`#search-0`).addClass('search-target');
-
-        h1 = null;
-        h2 = null;
-        stepCount = 0;
-
-        $('#calcResult').text('-');
-        $('#btnCalc1').prop('disabled', false).text('1. Hash (Suche)');
-        $('#btnCalc2').hide().prop('disabled', true);
-        $('.house').removeClass('collision-highlight found-highlight');
-
-        $('#dialogueText').text(`Suche: ${currentSearchTarget.name}. Berechne den Hash!`);
-    }
-
-    // --- Button Handlers ---
-    $('#btnCalc1').click(function() {
-        let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
-        let sum = getAsciiSum(name);
-        h1 = sum % currentCapacity;
-
-        $('#calcResult').text(`H1: ${h1}`);
-
-        // NO HAND HOLDING: Nur das Ergebnis zeigen
-        let msg = isSearchPhase
-            ? `Suche ${name}: 1. Hash ist ${h1}. Finde das richtige Haus!`
-            : `1. Hash ist ${h1}. Wähle das richtige Haus!`;
-
-        $('#dialogueText').text(msg);
-        $('#btnCalc1').prop('disabled', true);
-        // KEIN .addClass('highlight-target')
-    });
-
-    $('#btnCalc2').click(function() {
-        let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
-        let sum = getAsciiSum(name);
-        let hashSize2 = Math.floor(currentCapacity / 2);
-        h2 = (sum % hashSize2) + 1;
-
-        $('#calcResult').text(`H1: ${h1} | H2: ${h2}`);
-
-        if(stepCount === 0) stepCount = 1;
-
-        // NO HAND HOLDING: Nur die Schrittweite zeigen
-        $('#dialogueText').html(`Sprungweite (H2) ist <b>${h2}</b>.<br>Wende die Strategie an um das Ziel zu finden!`);
-        $('#btnCalc2').prop('disabled', true);
-        // KEIN .addClass('highlight-target')
-    });
-
-    // --- Click House Logic ---
-    $('.house').click(function() {
-        if(h1 === null) return;
-
-        let clickedIndex = $(this).data('index');
-        let $el = $(this);
-        let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
-
-        // --- Zielvalidierung (Im Hintergrund) ---
-        let expectedIndex = -1;
-
-        if (gameMode === 'chaining') {
-            expectedIndex = h1;
-        } else if (gameMode === 'linear') {
-            expectedIndex = (h1 + stepCount) % currentCapacity;
-        } else if (gameMode === 'quadratic') {
-            expectedIndex = (h1 + (stepCount * stepCount)) % currentCapacity;
-        } else if (gameMode === 'double') {
-            if (h2 === null) expectedIndex = h1;
-            else expectedIndex = (h1 + (stepCount * h2)) % currentCapacity;
-        }
-
-        if (clickedIndex !== expectedIndex) {
-            failFeedback("Falsches Haus! Rechne nochmal nach.");
-            return;
-        }
-
-        // --- Logik Weiche: Search vs Place ---
-        if(isSearchPhase) {
-            handleSearchClick(clickedIndex, $el, name);
-        } else {
-            handlePlaceClick(clickedIndex, $el, name);
-        }
-    });
-
-    function handlePlaceClick(clickedIndex, $el, name) {
-        let occupants = placedResidents.filter(r => r.houseIndex === clickedIndex);
-        let isOccupied = occupants.length > 0;
-
-        if (gameMode === 'chaining') {
-            placeResident(clickedIndex, name);
-            return;
-        }
-
-        // Kollision
-        if (isOccupied) {
-            $el.addClass('collision-highlight');
-            setTimeout(() => $el.removeClass('collision-highlight'), 500);
-
-            if (gameMode === 'double' && h2 === null) {
-                $('#dialogueText').html(`Haus ${clickedIndex} belegt! Kollision.<br>Berechne die Sprungweite (Step).`);
-                $('#btnCalc2').show().prop('disabled', false).addClass('btn-pulse');
-                return;
-            }
-
-            stepCount++;
-
-            // STRICT FAIL CONDITION (5 Steps)
-            if (stepCount > MAX_PROBE_STEPS) {
-                failGame(`Zu viele Kollisionen (${stepCount})! Die Performance ist im Keller. Du hättest erweitern müssen.`);
-                return;
-            }
-
-            // KEIN Hinweis auf das nächste Haus. User muss selbst rechnen.
-            $('#dialogueText').text(`Haus belegt! Kollision Nr. ${stepCount}. Wo musst du als nächstes hin?`);
-        }
-        else {
-            let futureLF = (placedResidents.length + 1) / currentCapacity;
-            if (futureLF > 0.76) {
-                failGame("Load Factor Limit (0.75) überschritten! Das System ist zu langsam.");
-                return;
-            }
-            placeResident(clickedIndex, name);
-        }
-    }
-
-    function handleSearchClick(clickedIndex, $el, targetName) {
-        let residentsHere = placedResidents.filter(r => r.houseIndex === clickedIndex).map(r => r.name);
-
-        if (residentsHere.includes(targetName)) {
-            $el.addClass('found-highlight');
-            $('#dialogueText').text(`Gefunden! ${targetName} wohnt in Haus ${clickedIndex}.`);
-
-            searchQueue.shift();
-            $(`#search-0`).remove();
-            setTimeout(() => startNextSearch(), 1500);
-
-        } else {
-            $el.addClass('collision-highlight');
-            setTimeout(() => $el.removeClass('collision-highlight'), 500);
-
-            if (gameMode === 'double' && h2 === null) {
-                $('#dialogueText').text(`${targetName} ist nicht hier. Berechne den Step für die Suche!`);
-                $('#btnCalc2').show().prop('disabled', false);
-                return;
-            }
-
-            stepCount++;
-            $('#dialogueText').text(`${targetName} nicht hier. Rechne weiter... Wo ist das nächste Haus?`);
-        }
-    }
-
-    function placeResident(idx, name) {
-        placedResidents.push({ name: name, houseIndex: idx });
-
-        let count = placedResidents.filter(r => r.houseIndex === idx).length;
-        updateHouseVisual($(`#house-${idx}`), count);
-
-        $(`#res-${currentResIdx}`).addClass('done');
-        currentResIdx++;
-
-        $('#dialogueText').text(`${name} wohnt jetzt in Haus ${idx}.`);
-
-        setTimeout(() => {
-            highlightNextResident();
-        }, 800);
-    }
-
-    function failFeedback(msg) {
-        $('#dialogueText').html(`<span style="color:red">⛔ ${msg}</span>`);
-        $('#mmAvatar').attr('src', './assets/sad_major.png');
-        setTimeout(() => $('#mmAvatar').attr('src', './assets/card_major.png'), 1500);
-    }
-
-    // --- Expansion Logic ---
+    // --- EXPANSION LOGIC ---
     $('#btnExpand').click(function() {
-        $(this).prop('disabled', true);
-
         if(placedResidents.length === 0) {
             $('#dialogueText').text("Niemand da zum Umziehen!");
-            setTimeout(() => updateStats(), 1000);
             return;
         }
 
+        $(this).prop('disabled', true).text("BAUE HÄUSER...");
         expansionCount++;
         let oldCap = currentCapacity;
         currentCapacity *= 2;
+        updateStepFormula();
 
         $('#dialogueText').text(`Erweitere Stadt auf ${currentCapacity}. Rehashing...`);
 
-        if(currentCapacity >= 20) $('#block-1').removeClass('hidden');
-        if(currentCapacity >= 40) { $('#block-2').removeClass('hidden'); $('#block-3').removeClass('hidden'); }
+        if(currentCapacity >= 20) {
+            $('#block-1').removeClass('hidden');
+            $('#block-1 .street').removeClass('hidden');
+        }
+        if(currentCapacity >= 40) {
+            $('#block-2, #block-3').removeClass('hidden');
+            $('#block-2 .street, #block-3 .street').removeClass('hidden');
+        }
 
-        $('.house').each(function() {
-            updateHouseVisual($(this), 0);
-            $(this).removeClass('collision-highlight found-highlight');
-            if($(this).data('index') >= oldCap) {
-                let arr = (gameMode === 'chaining') ? housePairsChaining : housePairsProbing;
-                let pair = arr[Math.floor(Math.random() * arr.length)];
-                $(this).data('pair', pair);
-                $(this).empty();
-                if(gameMode === 'chaining') $(this).append(`<img src="./assets/${pair.base}" class="img-house-base">`);
-                else $(this).append(`<img src="./assets/${pair.base}" class="house-icon">`);
-                $(this).append(`<div class="house-number">${$(this).data('index')}</div>`);
-                $(this).append(`<div class="house-occupant"></div>`);
-            }
+        $('.house.hidden').each(function(i) {
+            let $el = $(this);
+            assignRandomAsset($el);
+            setTimeout(() => {
+                $el.removeClass('hidden').addClass('pop-in');
+            }, i * 30);
         });
 
+        setTimeout(() => {
+            performRehashLogics(oldCap);
+        }, 1500);
+    });
+
+    function performRehashLogics(oldCap) {
         let newPlacement = [];
-
         placedResidents.forEach(person => {
+            // Re-calc logic for placement array only
             let sum = getAsciiSum(person.name);
-
+            let pos = -1;
             if (gameMode === 'chaining') {
-                let pos = sum % currentCapacity;
+                pos = sum % currentCapacity;
                 newPlacement.push({ name: person.name, houseIndex: pos });
             } else {
+                // Calculate position simulation
                 let localH1 = sum % currentCapacity;
-                let localH2 = 0;
-                if(gameMode === 'double') {
-                    localH2 = (sum % Math.floor(currentCapacity/2)) + 1;
-                }
-
+                let localH2 = (gameMode === 'double') ? (sum % Math.floor(currentCapacity/2)) + 1 : 0;
                 let step = 0;
-                let pos = -1;
-
                 while(step < currentCapacity * 2) {
                     let attemptPos = -1;
                     if (gameMode === 'linear') attemptPos = (localH1 + step) % currentCapacity;
@@ -690,33 +526,228 @@ $final_residents = [
                     else if (gameMode === 'double') attemptPos = (localH1 + step*localH2) % currentCapacity;
 
                     if (!newPlacement.some(r => r.houseIndex === attemptPos)) {
-                        pos = attemptPos;
-                        break;
+                        pos = attemptPos; break;
                     }
                     step++;
                 }
-                if(pos !== -1) {
-                    newPlacement.push({ name: person.name, houseIndex: pos });
-                }
+                if(pos !== -1) newPlacement.push({ name: person.name, houseIndex: pos });
             }
         });
-
         placedResidents = newPlacement;
 
-        setTimeout(() => {
-            $('.house').each(function() {
-                let idx = $(this).data('index');
-                let count = placedResidents.filter(r => r.houseIndex === idx).length;
-                updateHouseVisual($(this), count);
-            });
+        for (let i = 0; i < currentCapacity; i++) {
+            let $house = $(`#house-${i}`);
+            $house.removeClass('pop-in');
+            setTimeout(() => {
+                $house.addClass('pop-in');
+                let count = placedResidents.filter(r => r.houseIndex === i).length;
+                updateHouseVisual($house, count);
+            }, i * 30);
+        }
 
-            $('#dialogueText').text("Umzug fertig! Weiter geht's.");
+        setTimeout(() => {
+            $('#dialogueText').text("Umzug fertig! Alle Positionen neu berechnet.");
+            $('#btnExpand').text("🏗️ STADT ERWEITERN");
             updateStats();
             highlightNextResident();
-        }, 1000);
+        }, currentCapacity * 30 + 500);
+    }
+
+    // --- Calc Logic ---
+    $('#btnCalc1').click(function() {
+        let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
+        let sum = getAsciiSum(name);
+        h1 = sum % currentCapacity;
+        $('#calcResult').text(`H1: ${h1}`);
+        let msg = isSearchPhase ? `Suche ${name}: 1. Hash ist ${h1}.` : `1. Hash ist ${h1}.`;
+        $('#dialogueText').text(msg);
+        $('#btnCalc1').prop('disabled', true);
     });
 
-    // --- Win/Fail ---
+    $('#btnCalcH2').click(function() {
+        let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
+        let sum = getAsciiSum(name);
+        let hashSize2 = Math.floor(currentCapacity / 2);
+        h2 = (sum % hashSize2) + 1;
+        $('#h2Result').text(h2);
+        $('#dialogueText').html(`Sprungweite (H2) ist <b>${h2}</b>.`);
+        $('#btnCalcH2').prop('disabled', true);
+    });
+
+    // --- INTELLIGENT PROBING LOGIC ---
+    // Returns { path: [indices], target: int, stepsNeeded: int }
+    function calculateProbingPath(startH1, name) {
+        let path = [];
+        let limit = currentCapacity * 2; // Safety break
+        let step = 0;
+        let sum = getAsciiSum(name);
+
+        // Calculate H2 locally if needed (auto-calc for validation if not yet done)
+        let localH2 = 1;
+        if(gameMode === 'double') {
+            let hashSize2 = Math.floor(currentCapacity / 2);
+            localH2 = (sum % hashSize2) + 1;
+        }
+
+        while (step < limit) {
+            let idx = -1;
+            if (gameMode === 'linear') idx = (startH1 + step) % currentCapacity;
+            else if (gameMode === 'quadratic') idx = (startH1 + step*step) % currentCapacity;
+            else if (gameMode === 'double') idx = (startH1 + step*localH2) % currentCapacity;
+
+            // Check occupancy (ignoring current person if in search mode logic, but here we place)
+            // Note: placedResidents check
+            let isOccupied = placedResidents.some(r => r.houseIndex === idx);
+
+            if (!isOccupied) {
+                // Found empty spot
+                return { path: path, target: idx, steps: step };
+            }
+            path.push(idx); // Add occupied spot to path
+            step++;
+        }
+        return { path: path, target: -1, steps: step }; // Should not happen in solvable game
+    }
+
+    // --- Click Handler ---
+    $('.house').click(function() {
+        if(h1 === null) return;
+        let clickedIndex = $(this).data('index');
+        let $el = $(this);
+        let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
+
+        // 1. Chaining (Simple)
+        if (gameMode === 'chaining') {
+            if (clickedIndex === h1) {
+                if(isSearchPhase) handleSearchClick(clickedIndex, $el, name);
+                else placeResident(clickedIndex, name);
+            } else {
+                failFeedback("Falsches Haus! Modulo Rechnen!");
+            }
+            return;
+        }
+
+        // 2. Probing Modes (Linear, Quad, Double)
+        // Calculate the "Truth" path
+        let result = calculateProbingPath(h1, name);
+        let validPath = result.path; // Indices that are correct but occupied
+        let correctTarget = result.target; // The final empty spot
+
+        // --- LOGIC: Direct Hit or Path Clicking ---
+
+        // Case A: User clicked the FINAL CORRECT EMPTY spot directly
+        if (clickedIndex === correctTarget) {
+            // Check strict limit
+            if (result.steps > MAX_PROBE_STEPS) {
+                failGame(`Zu viele Schritte (${result.steps}) nötig! Erweiterung war überfällig.`);
+                return;
+            }
+
+            // Check Load Factor Limit
+            let futureLF = (placedResidents.length + 1) / currentCapacity;
+            if (futureLF > 0.76) {
+                failGame("Load Factor Limit (0.75) überschritten! Das System ist zu langsam.");
+                return;
+            }
+
+            if(isSearchPhase) handleSearchClick(clickedIndex, $el, name);
+            else placeResident(clickedIndex, name);
+            return;
+        }
+
+        // Case B: User clicked a Valid but Occupied spot (Collision path)
+        if (validPath.includes(clickedIndex)) {
+            $el.addClass('collision-highlight');
+            setTimeout(() => $el.removeClass('collision-highlight'), 500);
+
+            // Unlock Double Hashing Calc if appropriate
+            if (gameMode === 'double') {
+                $('#dialogueText').html(`Haus ${clickedIndex} belegt! Kollision.<br>Rechne weiter (Step).`);
+                $('#stepCalcBox').addClass('active');
+                if($('#h2Result').text() === '-') $('#btnCalcH2').prop('disabled', false);
+            } else {
+                $('#dialogueText').text(`Haus belegt! Kollision. Wo musst du als nächstes hin?`);
+            }
+            return;
+        }
+
+        // Case C: Wrong House
+        failFeedback("Falsches Haus! Rechne nochmal nach.");
+    });
+
+    function handleSearchClick(clickedIndex, $el, targetName) {
+        // Simplified search logic reusing the placement check
+        // In search phase, we just check if person is there
+        let residentsHere = placedResidents.filter(r => r.houseIndex === clickedIndex).map(r => r.name);
+
+        if (residentsHere.includes(targetName)) {
+            $el.addClass('found-highlight');
+            $('#dialogueText').text(`Gefunden! ${targetName} wohnt in Haus ${clickedIndex}.`);
+            searchQueue.shift();
+            $(`#search-0`).remove();
+            setTimeout(() => startNextSearch(), 1500);
+        } else {
+            // If empty or wrong person
+            // If it was part of the valid probe path (calculated in click handler), we gave hint.
+            // If it's the correct target but empty (should not happen if logic matches)
+            $el.addClass('collision-highlight');
+            setTimeout(() => $el.removeClass('collision-highlight'), 500);
+            if (gameMode === 'double') {
+                $('#dialogueText').text(`${targetName} nicht hier. Berechne Step!`);
+                $('#stepCalcBox').addClass('active');
+                if($('#h2Result').text() === '-') $('#btnCalcH2').prop('disabled', false);
+            } else {
+                $('#dialogueText').text(`${targetName} nicht hier. Rechne weiter...`);
+            }
+        }
+    }
+
+    function placeResident(idx, name) {
+        placedResidents.push({ name: name, houseIndex: idx });
+        let count = placedResidents.filter(r => r.houseIndex === idx).length;
+        updateHouseVisual($(`#house-${idx}`), count);
+        $(`#res-${currentResIdx}`).addClass('done');
+        currentResIdx++;
+        $('#dialogueText').text(`${name} wohnt jetzt in Haus ${idx}.`);
+        setTimeout(() => { highlightNextResident(); }, 800);
+    }
+
+    // --- Search Phase Init ---
+    function initSearchPhase() {
+        isSearchPhase = true;
+        let shuffled = [...placedResidents].sort(() => 0.5 - Math.random());
+        searchQueue = shuffled.slice(0, 3);
+        $('#dialogueText').text("Alle platziert! Finde nun die 3 gesuchten Personen!");
+        $('#mmAvatar').attr('src', './assets/wink_major.png');
+        $('#btnExpand').prop('disabled', true);
+        $('#resList').empty();
+        searchQueue.forEach((p, index) => {
+            $('#resList').append(`<li class="list-group-item search-item" id="search-${index}">${p.name}</li>`);
+        });
+        startNextSearch();
+    }
+
+    function startNextSearch() {
+        if(searchQueue.length === 0) { winGame(); return; }
+        currentSearchTarget = searchQueue[0];
+        $('.list-group-item').removeClass('search-target');
+        $(`#search-0`).addClass('search-target');
+        h1 = null; h2 = null;
+        $('#calcResult').text('-');
+        $('#h2Result').text('-');
+        $('#stepCalcBox').removeClass('active');
+        $('#btnCalc1').prop('disabled', false).text('1. Hash (Suche)');
+        $('.house').removeClass('collision-highlight found-highlight');
+        $('#dialogueText').text(`Suche: ${currentSearchTarget.name}. Berechne den Hash!`);
+    }
+
+    // --- Helpers ---
+    function failFeedback(msg) {
+        $('#dialogueText').html(`<span style="color:red">⛔ ${msg}</span>`);
+        $('#mmAvatar').attr('src', './assets/sad_major.png');
+        setTimeout(() => $('#mmAvatar').attr('src', './assets/card_major.png'), 1500);
+    }
+
     function winGame() {
         $('#endModal').removeClass('modal-fail').addClass('modal-win');
         $('#endIcon').text("🎓");
@@ -734,7 +765,6 @@ $final_residents = [
         $('.btn-primary').text("Neustart").attr('onclick', 'location.reload()');
         $('#endOverlay').fadeIn();
     }
-
 </script>
 </body>
 </html>

@@ -647,9 +647,6 @@
                 <div class="dialogue-text" id="dialogueText">
                     Das sieht ja schon richtig gut aus. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür quadratic probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest.
                 </div>
-                <div class="dialogue-continue" id="dialogueContinue">
-                    Klicken oder Enter ↵
-                </div>
             </div>
         </div>
         <!-- Houses Grid -->
@@ -799,7 +796,7 @@
         let stadt = new Array(HASH_SIZE).fill(null);
         let occupiedHouses = 0;
         let attempts = 0;
-        let gameStarted = false;
+        let gameStarted = true;
         let gameCompleted = false;
         let searchMode = false;
         let selectedFamily = null;
@@ -863,19 +860,8 @@
             }
             return position;
         }
-        // --- Dialog-Steuerung ---
-        function showNextDialogue() {
-            if (currentDialogue >= dialogues.length) {
-                $('#dialogueContinue').fadeOut();
-                gameStarted = true;
-                initFamilyList();
-                return;
-            }
-            $('#dialogueText').fadeOut(200, function() {
-                $(this).text(dialogues[currentDialogue]).fadeIn(200);
-            });
-            currentDialogue++;
-        }
+
+
         // Familienliste initialisieren
         function initFamilyList() {
             $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
@@ -883,6 +869,7 @@
             $(`.to-do-family[data-family="${currentFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick);
             selectedFamily = currentFamily;
         }
+        initFamilyList();
         // Familie anklicken
         function handleFamilyClick() {
             const $item = $(this);
@@ -895,17 +882,7 @@
             $item.addClass('active');
             $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
         }
-        // --- Listener für Dialoge ---
-        $(document).keydown(function(e) {
-            if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
-                showNextDialogue();
-            }
-        });
-        $('.dialogue-box').click(function() {
-            if (!gameStarted) {
-                showNextDialogue();
-            }
-        });
+
         // --- Level 6 Spielmechanik ---
         // Aktivieren des Buttons, sobald etwas eingegeben ist
         $('#nameInput').on('input', function() {

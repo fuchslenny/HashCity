@@ -686,12 +686,6 @@
         <!-- Info Panel -->
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-            <div class="info-item hash-calculator">
-                <label for="hashInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
-                <input type="text" id="hashInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
-                <button id="hashButton" class="calculator-button" disabled>Berechne Haus-Nr.</button>
-                <div class="calculator-result" id="hashResult">Ergebnis ...</div>
-            </div>
             <!-- Bewerber-Liste -->
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
@@ -705,6 +699,13 @@
                     </ul>
                 </div>
             </div>
+            <div class="info-item hash-calculator">
+                <label for="hashInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
+                <input type="text" id="hashInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="hashButton" class="calculator-button" disabled>Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">Ergebnis ...</div>
+            </div>
+
             <div class="info-item">
                 <div class="info-label">Eingetragene Familien:</div>
                 <div class="info-value" id="occupiedCount">0 / 5</div>
@@ -751,6 +752,7 @@
         let gameCompleted = false;
         let searchMode = false;
         let selectedFamily = null;
+        let hash = null;
         // Paare der neuen Assets für JavaScript
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
@@ -874,7 +876,7 @@
             if (gameCompleted) return;
             const family = $('#hashInput').val().trim();
             if (!family) return;
-            const hash = getHash(family, HASH_SIZE);
+            hash = getHash(family, HASH_SIZE);
             $('#hashResult').text(`Initial-Hash: ${hash}`);
             if (searchMode) {
                 if (family === 'Sophie' && hash === 4) {
@@ -901,6 +903,7 @@
             const $house = $(this);
             const houseNumber = $house.data('house');
             if (searchMode) {
+                if(hash === null) return;
                 const occupant = stadt[houseNumber];
                 if (occupant) {
                     $house.addClass('show-family');
@@ -924,9 +927,13 @@
                     if(gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
                     return;
                 }
-                const targetHash = getHash(selectedFamily, HASH_SIZE);
-                if (houseNumber !== targetHash) {
-                    $('#dialogueText').text(`Halt! Der Rechner hat Haus ${targetHash} für Familie ${selectedFamily} berechnet, nicht Haus ${houseNumber}.`);
+                console.log(hash);
+                if(hash === null){
+                    $('#dialogueText').text(`Berechne erst den Hash mit dem Hashrechner!`);
+                    return;
+                }
+                if (houseNumber !== hash) {
+                    $('#dialogueText').text(`Halt! Der Rechner hat Haus ${hash} für Familie ${selectedFamily} berechnet, nicht Haus ${houseNumber}.`);
                     return;
                 }
                 const currentOccupant = stadt[houseNumber];
@@ -950,6 +957,7 @@
                         $('#hashButton').prop('disabled', true);
                     }
                     selectedFamily = null;
+                    hash = null;
                     $('#hashInput').val('');
                     $('#hashResult').text('Ergebnis ...');
                 }
