@@ -449,7 +449,7 @@ $neue_bewohner = ["Dieter", "Lars"];
             <div class="info-item hash-calculator">
                 <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
                 <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
-                <button id="hashButton" class="calculator-button" style="background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);">Berechne Initial-Hash</button>
+                <button id="hashButton" class="calculator-button" style="background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);">Berechne Haus-Nr.</button>
                 <div class="calculator-result" id="hashResult">
                     Ergebnis: ...
                 </div>

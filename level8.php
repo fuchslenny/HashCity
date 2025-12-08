@@ -22,77 +22,603 @@ $familien_liste = [
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        /* --- Basis Styles --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Rajdhani', sans-serif; overflow-x: hidden; min-height: 100vh; position: relative; background: #4CAF50; }
-        .sky-section { position: fixed; top: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(180deg, #87CEEB 0%, #B0D4E3 100%); z-index: 0; }
-        .grass-section { position: fixed; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(180deg, #76B947 0%, #4CAF50 100%); z-index: 0; }
-        .cloud { position: absolute; background: rgba(255, 255, 255, 0.7); border-radius: 100px; opacity: 0.8; animation: cloudFloat 40s linear infinite; }
-        @keyframes cloudFloat { 0% { left: -200px; } 100% { left: 110%; } }
-        .game-header { background: transparent; padding: 1rem 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
-        .back-btn { padding: 0.7rem 1.3rem; background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 30px; font-weight: 700; color: #667eea; cursor: pointer; transition: all 0.3s ease; font-family: 'Orbitron', sans-serif; text-decoration: none; display: inline-block; font-size: 0.9rem; }
-        .back-btn:hover { background: #667eea; color: #fff; transform: scale(1.05); }
-        .back-btn::before { content: '← '; margin-right: 5px; }
-        .game-container { max-width: 1600px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-        .game-area { display: grid; grid-template-columns: 280px 1fr 320px; gap: 2rem; min-height: 70vh; }
-        .major-mike-section { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); height: fit-content; position: sticky; top: 100px; border: 4px solid #fff; }
-        .major-mike-avatar { width: 100%; height: 240px; background: transparent; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; overflow: hidden; position: relative; }
-        .major-mike-avatar img { width: 100%; height: 100%; object-fit: contain; }
-        .major-mike-name { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 900; color: #667eea; text-align: center; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-        .dialogue-box { background: #fff; border: 3px solid #667eea; border-radius: 20px; padding: 1.5rem; min-height: 180px; position: relative; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2); cursor: pointer; }
-        .dialogue-box::before { content: ''; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 15px solid #667eea; }
-        .dialogue-text { font-size: 1.05rem; line-height: 1.7; color: #333; font-weight: 500; }
-        .dialogue-continue { position: absolute; bottom: 10px; right: 15px; font-size: 0.85rem; color: #667eea; font-style: italic; font-weight: 700; animation: blink 1.5s infinite; }
-        @keyframes blink { 0%, 50%, 100% { opacity: 1; } 25%, 75% { opacity: 0.5; } }
-        .houses-grid { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 4px solid #fff; overflow: hidden; }
-        .grid-title { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; color: #2E7D32; text-align: center; margin-bottom: 2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-        .street-block { position: relative; margin-bottom: 2.5rem; }
-        .street-block:last-child { margin-bottom: 0; }
-        .houses-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 0.5rem; padding: 0 1rem; position: relative; z-index: 2; }
-        .street { width: 100%; height: 60px; background-image: url('./assets/Strasse.svg'); background-size: cover; background-position: center; position: relative; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 1; }
-        .street::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%); border-radius: 8px; z-index: -1; }
-        .street::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px); transform: translateY(-50%); z-index: 2; }
-        .house { aspect-ratio: 1; background: transparent; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; position: relative; border-radius: 10px; padding: 0.3rem; }
-        .house:hover:not(.checked):not(.found) { transform: translateY(-8px) scale(1.08); z-index: 10; }
-        .house.highlight-target { transform: translateY(-10px) scale(1.15) !important; box-shadow: 0 0 35px 12px rgba(255, 215, 0, 0.9); z-index: 11; }
-        .house-icon { width: 100%; height: 100%; object-fit: contain; transition: all 0.3s ease; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); }
-        .house.found .house-icon { animation: pulse 1.5s infinite; filter: drop-shadow(0 8px 16px rgba(76, 175, 80, 0.8)); }
-        .house-number { position: absolute; top: 25%; left: 50%; transform: translateX(-50%); font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 900; color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.7); z-index: 10; background: rgba(0, 0, 0, 0.3); padding: 0.1rem 0.4rem; border-radius: 6px; }
-        .house-family { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: white; font-weight: 700; text-align: center; opacity: 0; transition: opacity 0.3s ease; background: rgba(0, 0, 0, 0.7); padding: 0.3rem 0.6rem; border-radius: 8px; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); pointer-events: none; }
-        .info-panel { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); height: fit-content; position: sticky; top: 100px; border: 4px solid #fff; }
-        .info-title { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; color: #2E7D32; margin-bottom: 1.2rem; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-        .info-item { background: #fff; padding: 1rem; border-radius: 15px; margin-bottom: 1rem; border: 3px solid #4CAF50; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15); }
-        .info-label { font-weight: 700; color: #666; font-size: 0.95rem; margin-bottom: 0.4rem; }
-        .hash-calculator { background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%); border-color: #2196F3; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+            background: #4CAF50;
+        }
+        /* Sky and Grass Background */
+        .sky-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(180deg, #87CEEB 0%, #B0D4E3 100%);
+            z-index: 0;
+        }
+        .grass-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(180deg, #76B947 0%, #4CAF50 100%);
+            z-index: 0;
+        }
+        /* Clouds */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 100px;
+            opacity: 0.8;
+            animation: cloudFloat 40s linear infinite;
+        }
+        @keyframes cloudFloat {
+            0% { left: -200px; }
+            100% { left: 110%; }
+        }
+        /* Header */
+        .game-header {
+            background: transparent;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        .back-btn {
+            padding: 0.7rem 1.3rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(102, 126, 234, 0.5);
+            border-radius: 30px;
+            font-weight: 700;
+            color: #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+        .back-btn:hover {
+            background: #667eea;
+            color: #fff;
+            transform: scale(1.05);
+        }
+        .back-btn::before {
+            content: '← ';
+            margin-right: 5px;
+        }
+        /* Game Container */
+        .game-container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        /* Main Game Area */
+        .game-area {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            gap: 2rem;
+            min-height: 70vh;
+        }
+        /* Major Mike Section */
+        .major-mike-section {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            border: 4px solid #fff;
+        }
+        .major-mike-avatar {
+            width: 100%;
+            height: 240px;
+            background: transparent;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+        .major-mike-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .major-mike-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .dialogue-box {
+            background: #fff;
+            border: 3px solid #667eea;
+            border-radius: 20px;
+            padding: 1.5rem;
+            min-height: 180px;
+            position: relative;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+        }
+        .dialogue-box::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 15px solid #667eea;
+        }
+        .dialogue-text {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #333;
+            font-weight: 500;
+        }
+        .dialogue-continue {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.85rem;
+            color: #667eea;
+            font-style: italic;
+            font-weight: 700;
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.5; }
+        }
+        /* Houses Grid */
+        .houses-grid {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            border: 4px solid #fff;
+            overflow: hidden;
+        }
+        .grid-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #2E7D32;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        /* Street Block Container */
+        .street-block {
+            position: relative;
+            margin-bottom: 2.5rem;
+        }
+        /* Houses Row */
+        .houses-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
+        }
+        /* Straße */
+        .street {
+            width: 100%;
+            height: 60px;
+            background-image: url('./assets/Strasse.svg');
+            Background-size: cover;
+            background-position: center;
+            background-repeat: repeat-x;
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            z-index: 1;
+        }
+        .street::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
+            border-radius: 8px;
+            z-index: -1;
+        }
+        .street::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: repeating-linear-gradient(
+                    90deg,
+                    #fff 0px,
+                    #fff 30px,
+                    transparent 30px,
+                    transparent 50px
+            );
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+        .house {
+            aspect-ratio: 1;
+            background: transparent;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 10px;
+            padding: 0.3rem;
+        }
+        .house:hover:not(.checked):not(.found) {
+            transform: translateY(-8px) scale(1.08);
+            z-index: 10;
+        }
+        .house.highlight-target {
+            transform: translateY(-10px) scale(1.15) !important;
+            box-shadow: 0 0 35px 12px rgba(255, 215, 0, 0.9);
+            z-index: 11;
+        }
+        .house-icon {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+        .house.checked .house-icon {
+            filter: drop-shadow(0 4px 8px rgba(255, 167, 38, 0.5));
+        }
+        .house.found .house-icon {
+            animation: pulse 1.5s infinite;
+            filter: drop-shadow(0 8px 16px rgba(255, 215, 0, 0.8));
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        .house-number {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.1rem 0.4rem;
+            border-radius: 6px;
+        }
+        .house-family {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: white;
+            font-weight: 700;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+            white-space: nowrap;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .house.show-family .house-family {
+            opacity: 1;
+        }
+        /* Info Panel */
+        .info-panel {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            border: 4px solid #fff;
+        }
+        .info-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 1.2rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .info-item {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border: 3px solid #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15);
+        }
+        .info-label {
+            font-weight: 700;
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+        }
+        .info-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #2E7D32;
+        }
+        .hash-calculator {
+            background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
+            border-color: #2196F3;
+        }
+        .calculator-input {
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 0.7rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            transition: border-color 0.3s ease;
+        }
+        .calculator-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .calculator-button {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            margin-top: 0.5rem;
+        }
+        .calculator-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+        .calculator-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .calculator-result {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #2E7D32;
+            font-size: 1.1rem;
+        }
+        .family-list-container {
+            max-height: 250px;
+            padding: 0 5px;
+            overflow-y: auto;
+        }
+        .list-group-item.to-do-family {
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+            border: 2px solid #aab8c2;
+            margin-bottom: 0.5rem;
+            border-radius: 10px !important;
+        }
+        .list-group-item.to-do-family:hover:not(.placed) {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+        .list-group-item.to-do-family.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.03);
+            z-index: 10;
+        }
+        .list-group-item.to-do-family.done {
+            opacity: 1;
+            background: #e0e0e0;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        .list-group-item.to-do-family.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        /* Success Modal */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .success-modal {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 650px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: slideUp 0.5s ease;
+            border: 5px solid #4CAF50;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .success-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #4CAF50;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .success-message {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+        .success-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-box {
+            background: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 15px;
+            border: 3px solid #4CAF50;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+        }
+        .stat-label {
+            font-size: 0.95rem;
+            color: #666;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #2E7D32;
+        }
+        .success-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-primary, .btn-secondary {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 3px solid #667eea;
+        }
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .game-area {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .major-mike-section,
+            .info-panel {
+                position: static;
+            }
+        }
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+            .houses-grid {
+                padding: 1.5rem 1rem;
+            }
+            .houses-row {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.6rem;
+            }
+        }
         .step-calculator { background: linear-gradient(135deg, #fff3e0 0%, #fff 100%); border-color: #FF9800; opacity: 0.5; pointer-events: none; transition: opacity 0.3s; }
         .step-calculator.active { opacity: 1; pointer-events: all; }
-        .hash-result-value { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 900; color: #667eea; text-align: center; margin: 0.5rem 0; }
-        .calc-button { padding: 0.6rem 1.5rem; border: none; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: white; width: 100%; margin-top: 0.5rem; }
-        .btn-primary-calc { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .btn-secondary-calc { background: linear-gradient(135deg, #FF9800 0%, #FFB74D 100%); }
-        .calc-button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
-        .calc-button:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
-        .family-list-container { max-height: 200px; overflow-y: auto; overflow-x: hidden; }
-        .list-group-item { padding: 0.7rem 1rem; margin-bottom: 0.5rem; background: #f8f9fa; border-radius: 8px; cursor: pointer; font-weight: 700; color: #666; transition: all 0.2s; border: none; font-size: 1rem; display: block; }
-        .list-group-item.active { background: #667eea; color: #fff; transform: scale(1.02); z-index: 10; }
-        .list-group-item.done { background: #e9f5e9; color: #999; text-decoration: line-through; cursor: default; }
-        .success-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 2000; animation: fadeIn 0.3s ease; backdrop-filter: blur(5px); }
-        .success-modal { background: white; border-radius: 30px; padding: 3rem; max-width: 650px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4); animation: slideUp 0.5s ease; border: 5px solid #4CAF50; }
-        .success-icon { font-size: 5rem; margin-bottom: 1rem; animation: bounce 1s infinite; }
-        .success-title { font-family: 'Orbitron', sans-serif; font-size: 2.8rem; font-weight: 900; color: #4CAF50; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-        .success-message { font-size: 1.2rem; color: #666; line-height: 1.7; margin-bottom: 2rem; font-weight: 500; }
-        .success-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-        .btn-primary, .btn-secondary { padding: 1rem 2.5rem; border: none; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
-        .btn-secondary { background: white; color: #667eea; border: 3px solid #667eea; }
-        .btn-secondary:hover { background: #667eea; color: white; transform: translateY(-2px); }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-        @media (max-width: 1200px) { .game-area { grid-template-columns: 1fr; gap: 1.5rem; } .major-mike-section, .info-panel { position: static; } }
-        @media (max-width: 768px) { .houses-row { grid-template-columns: repeat(3, 1fr); } }
+        .calc2-button { padding: 0.6rem 1.5rem; border: none; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: white; width: 100%; margin-top: 0.5rem; }
+        .hash-result-value { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 900; color: #667eea; text-align: center; margin: 0.5rem 0; }
     </style>
 </head>
 <body>
@@ -146,23 +672,23 @@ $familien_liste = [
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
-                <div class="info-label">1. Hash (Startposition)</div>
-                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 20</div>
-                <div class="hash-result-value" id="h1Result">-</div>
-                <button id="btnCalcH1" class="calc-button btn-primary-calc" disabled>Berechnen</button>
+                <div class="info-label">Bewohnername:</div>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="btnCalcH1" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="h1Result">Ergebnis ...</div>
             </div>
             <div class="info-item step-calculator" id="stepCalcBox">
                 <div class="info-label">2. Hash (Schrittweite)</div>
-                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 10 + 1</div>
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 5 + 1</div>
                 <div class="hash-result-value" id="h2Result">-</div>
-                <button id="btnCalcH2" class="calc-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
+                <button id="btnCalcH2" class="calc2-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
             </div>
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
                 <div class="family-list-container">
                     <ul id="familienListe" class="list-group" style="padding-left: 0; list-style: none;">
                         <?php foreach ($familien_liste as $idx => $familie): ?>
-                            <li class="list-group-item" data-index="<?php echo $idx; ?>">
+                            <li class="list-group-item to-do-family disabled" data-index="<?php echo $idx; ?>">
                                 <?php echo $familie; ?>
                             </li>
                         <?php endforeach; ?>
@@ -246,15 +772,18 @@ $familien_liste = [
         let h1Value = null;
         let h2Value = null;
         let currentProbeIndex = null;
-        // WICHTIG: Suchziel ist jetzt PAUL
         const SEARCH_TARGET = "Paul";
         let searchH1 = null;
         let searchH2 = null;
+        // Sperr-Variable für Animationen
         let isFading = false;
+        // Dialoge
         const dialogues = [
-            "Das sieht ja schon richtig gut aus! Du darfst jetzt diesen neuen Stadtteil allein bearbeiten.",
-            "Verwende dafür Double Hashing, falls es zu Kollisionen kommt. Beachte dabei, dass du die Liste von oben nach unten abarbeitest.",
-            "Denk dran: Hinten rechnen wir immer **+1**, damit die Schrittweite nie 0 ist. Viel Erfolg!"
+            "Quadratic Probing war schon ein guter Anfang, führt aber leider oft zu 'Clustern'. Das sind Ketten von belegten Häusern, die das Suchen langsam machen.",
+            "Chris und ich haben deswegen ein neues System entwickelt: Double Hashing (Doppelter Hash). Damit verteilen wir die Bewohner noch besser.",
+            "Der Trick ist: Bei einer Kollision springen wir nicht einfach ein Haus weiter (+1), sondern nutzen eine zweite Formel, um die Schrittweite zu berechnen.",
+            "Diese zweite Formel lautet: (Summe ASCII) % 5 + 1. Den Rechner dafür habe ich dir unten rechts freigeschaltet.",
+            "Leg los! Berechne immer erst die normale Hausnummer. Nur wenn das Haus voll ist, berechnest du die Sprungweite mit dem zweiten Hash."
         ];
         let dialogueIdx = 0;
         // --- Helper Functions ---
@@ -288,12 +817,13 @@ $familien_liste = [
             } else {
                 if (phase === 'intro') {
                     $('#dialogueContinue').fadeOut();
-                    phase = 'select_family';
-                    highlightNextFamily();
+                    phase = 'calc_h1';
+                    selectNextFamily();
                     showDialogue("Klicke auf " + families[currentFamilyIdx] + " in der Liste, um zu starten.", 'wink_major.png');
                 }
             }
         }
+        // Interaktion
         $('#dialogueBox').click(function() {
             if (phase === 'intro') advanceDialogue();
         });
@@ -302,81 +832,72 @@ $familien_liste = [
                 if (phase === 'intro') advanceDialogue();
             }
         });
-        // --- Game Logic ---
-        function highlightNextFamily() {
+
+        function selectNextFamily() {
+            if (currentFamilyIdx >= families.length) {
+                endLevel();
+                return;
+            }
+            selectedFamily = families[currentFamilyIdx];
+            $('#nameInput').val(selectedFamily);
             $('.list-group-item').removeClass('active');
-            $(`.list-group-item[data-index="${currentFamilyIdx}"]`).addClass('active');
+            $(`.list-group-item[data-index="${currentFamilyIdx}"]`).removeClass('disabled').addClass('active');
         }
+
         // 1. Liste Klicken
         $(document).on('click', '.list-group-item', function() {
-            if ((phase === 'collision_mode') || (phase === 'probing_step')) return;
+            if (isFading || phase !== 'select_family') return;
             let idx = $(this).data('index');
-            let text = $(this).text().trim();
-            if (phase === 'select_family') {
-                if (idx !== currentFamilyIdx) {
-                    showDialogue("Bitte arbeite die Liste von oben nach unten ab.");
-                    return;
-                }
-                selectedFamily = families[idx];
-                phase = 'calc_h1';
-                showDialogue(`Platziere jetzt: ${selectedFamily}. Berechne den 1. Hash.`);
+            if (idx !== currentFamilyIdx) {
+                showDialogue("Bitte arbeite die Liste von oben nach unten ab.");
+                return;
             }
-            else if (phase === 'search_intro' || phase === 'search_calc') {
-                selectedFamily = text;
-                if (selectedFamily !== 'Paul'){
-                    showDialogue(`Das ist nicht Paul, sondern ${selectedFamily}. Klicke bitte auf Paul.`);
-                }else{
-                    showDialogue(`Okay, wir suchen ${selectedFamily}. Berechne seinen 1. Hash.`);
-                }
-                phase = 'search_calc';
-                $('.list-group-item').removeClass('active');
-                $(this).addClass('active');
-            }
+            selectedFamily = families[idx];
             $('#btnCalcH1').prop('disabled', false);
-            $('#btnCalcH2').prop('disabled', true);
-            $('#h1Result').text('-');
+            $('#h1Result').text('Ergebnis ...');
             $('#h2Result').text('-');
             $('#stepCalcBox').removeClass('active');
+            phase = 'calc_h1';
+            showDialogue(`Okay, wir platzieren ${selectedFamily}. Berechne zuerst die Startposition (1. Hash).`);
         });
         // 2. H1 Berechnen
         $('#btnCalcH1').click(function() {
+            console.log(phase);
             if (isFading) return;
-            if (phase !== 'calc_h1' && phase !== 'search_calc') return;
-            let name = selectedFamily;
+            if (phase !== 'calc_h1' && phase !== 'search_calc_h1') return;
+            let name = (phase === 'search_calc_h1') ? SEARCH_TARGET : selectedFamily;
             let val = calcH1(name);
-            if (phase === 'search_calc') {
+            if (phase === 'search_calc_h1') {
                 searchH1 = val;
-                $('#h1Result').text(val);
-                if(name !== `Paul`){
-                    showDialogue(`${val} ist der Hash von ${name}. Den Suche ich aber nicht, berechne stattdessen den Wert von Paul!`);
-                    return;
-                }else{
-                    showDialogue(`Initial-Hash: ${val}. Klicke auf Haus ${val}.`);
-                }
-                phase = 'search_find';
+                $('#h1Result').text(`Hausnummer: ${val}`);
+                showDialogue(`Der Start-Hash für Paul ist ${val}. Klicke auf Haus ${val} um nachzusehen.`);
+                $('.house').removeClass('highlight-target');
+                $(`#house-${val}`).addClass('highlight-target');
+                phase = 'search_check_h1';
                 $(this).prop('disabled', true);
                 return;
             }
             h1Value = val;
-            $('#h1Result').text(val);
-            showDialogue(`Hash 1 ist ${val}. Klicke auf das entsprechende Haus.`);
-            phase = 'find_spot';
-            $(this).prop('disabled', true);
+            $('#h1Result').text(`Hausnummer: ${val}`);
+            showDialogue(`Der 1. Hash ergibt ${val}. Klicke auf Haus ${val}, um zu prüfen, ob es frei ist.`);
+            $('.house').removeClass('highlight-target');
+            $(`#house-${val}`).addClass('highlight-target');
+            phase = 'place_h1';
+
         });
         // 3. Haus Klicken
         $('.house').click(function() {
             if (isFading) return;
             let houseIdx = $(this).data('index');
             let $house = $(this);
-            // --- Search Logic ---
-            if (phase === 'search_find') {
+            if (phase.startsWith('search_')) {
                 handleSearchClick(houseIdx, $house);
                 return;
             }
-            // --- Placement Logic ---
-            if (phase === 'find_spot') {
+            console.log("phase: " + phase);
+            if (phase === 'place_h1') {
                 if (houseIdx !== h1Value) {
-                    showDialogue("Das war das falsche Haus. (Rechner beachten!)");
+                    showDialogue("Das war das falsche Haus. Der Rechner sagt " + h1Value + ".");
                     return;
                 }
                 if (city[houseIdx] === null) {
@@ -385,20 +906,20 @@ $familien_liste = [
                     handleCollision(houseIdx);
                 }
             }
-            else if (phase === 'collision_mode') {
-                showDialogue("Berechne erst die Sprungweite (2. Hash)!");
-            }
-            else if (phase === 'probing_step') {
+            else if (phase === 'place_apply_step') {
                 let expectedIdx = (currentProbeIndex + h2Value) % HASH_SIZE;
                 if (houseIdx !== expectedIdx) {
-                    showDialogue(`Falsch! ${currentProbeIndex} + ${h2Value} (modulo 20) = ${expectedIdx}.`);
+                    showDialogue(`Falsch! Wir waren bei ${currentProbeIndex}. Plus Schrittweite ${h2Value} (modulo 10) ist Haus ${expectedIdx}.`);
                     return;
                 }
                 if (city[houseIdx] === null) {
                     placeFamily(houseIdx);
                 } else {
                     currentProbeIndex = houseIdx;
-                    showDialogue(`Haus ${houseIdx} ist auch voll! Springe nochmal weiter (+${h2Value}).`);
+                    showDialogue(`Oha! Haus ${houseIdx} ist AUCH besetzt. Wir müssen NOCHMAL springen. Addiere wieder ${h2Value}!`, 'sad_major.png');
+                    $('.house').removeClass('highlight-target');
+                    let nextTarget = (currentProbeIndex + h2Value) % HASH_SIZE;
+                    $(`#house-${nextTarget}`).addClass('highlight-target');
                 }
             }
         });
@@ -409,123 +930,129 @@ $familien_liste = [
             $house.addClass('found');
             setTimeout(() => $house.removeClass('found').addClass('checked'), 500);
             $(`.list-group-item[data-index="${currentFamilyIdx}"]`).removeClass('active').addClass('done');
-            $('#h1Result').text('-');
+            $('.house').removeClass('highlight-target');
+            $('#h1Result').text('Ergebnis ...');
             $('#h2Result').text('-');
             $('#stepCalcBox').removeClass('active');
-            // LOAD FACTOR Hinweis (10. Person)
-            let msg = `Sehr gut! ${selectedFamily} wohnt jetzt in Haus ${idx}.`;
-            if (currentFamilyIdx === 9) {
-                msg += " Puh, es wird voll! Das nennt man einen hohen **Load Factor**. Da kracht es oft!";
-            }
-            showDialogue(msg);
+            showDialogue(`Sehr gut! ${selectedFamily} wohnt jetzt in Haus ${idx}.`);
             currentFamilyIdx++;
             if (currentFamilyIdx < families.length) {
-                phase = 'select_family';
-                highlightNextFamily();
+                phase = "calc_h1";
+                $('#btnCalcH1').prop('disabled', false);
+                selectNextFamily();
                 setTimeout(() => {
-                    if(!isFading) showDialogue("Wähle den nächsten Bewohner aus der Liste.");
-                }, 1500);
+                    if(!isFading) showDialogue("Okay, nächster Bewohner.");
+                }, 1000);
             } else {
                 startSearchPhase();
             }
         }
         function handleCollision(idx) {
-            showDialogue(`Haus ${idx} ist belegt! Nutze Double Hashing (2. Hash).`);
-            currentProbeIndex = idx;
+            showDialogue(`Mist! Haus ${idx} ist schon belegt. Eine Kollision! Wir brauchen Double Hashing. Klicke auf den 2. Hash Rechner!`, 'sad_major.png');
             $('#stepCalcBox').addClass('active');
+            $('#btnCalcH1').prop('disabled', true);
             $('#btnCalcH2').prop('disabled', false);
-            phase = 'collision_mode';
+            currentProbeIndex = idx;
+            phase = 'calc_h2';
             let $house = $(`#house-${idx}`);
             $house.addClass('found');
-            setTimeout(() => $house.removeClass('found'), 300);
+            setTimeout(() => $house.removeClass('found'), 500);
         }
         // 4. H2 Berechnen
         $('#btnCalcH2').click(function() {
             if (isFading) return;
-            let name = selectedFamily;
+            if (phase !== 'calc_h2' && phase !== 'search_calc_h2') return;
+            let name = (phase.startsWith('search')) ? SEARCH_TARGET : selectedFamily;
             let step = calcH2(name);
-            // Search Phase H2
-            if (phase === 'search_find') {
-                searchH2 = step;
-                $('#h2Result').text(step);
-                let next = (searchH1 + step) % HASH_SIZE;
-                showDialogue(`Schrittweite: ${step}. Rechne: ${searchH1} + ${step} = ${next}. Klicke darauf.`);
-                $(this).prop('disabled', true);
-                return;
-            }
-            if (phase !== 'collision_mode') return;
             h2Value = step;
             $('#h2Result').text(step);
             $(this).prop('disabled', true);
+            if (phase === 'search_calc_h2') {
+                searchH2 = step;
+                let nextHouse = (searchH1 + step) % HASH_SIZE;
+                showDialogue(`Der 2. Hash ergibt Schrittweite ${step}. Rechne: ${searchH1} + ${step}. Klicke auf das Ergebnis.`);
+                $('.house').removeClass('highlight-target');
+                $(`#house-${nextHouse}`).addClass('highlight-target');
+                phase = 'search_check_step';
+                return;
+            }
             let nextHouse = (currentProbeIndex + step) % HASH_SIZE;
-            showDialogue(`Schrittweite: ${step}. Rechne: ${currentProbeIndex} + ${step} = ?. Klicke auf das Haus.`);
-            phase = 'probing_step';
+            showDialogue(`Der 2. Hash ergibt Schrittweite ${step}! Aktuelles Haus (${currentProbeIndex}) + ${step} = Haus ${nextHouse}. Klicke darauf.`);
+            $('.house').removeClass('highlight-target');
+            $(`#house-${nextHouse}`).addClass('highlight-target');
+            phase = 'place_apply_step';
         });
         // --- Search Phase ---
         function startSearchPhase() {
-            phase = 'search_intro';
-            showDialogue("Sehr gut! Alle Bewohner sind im richtigen Haus.", 'wink_major.png');
-            $('.list-group-item').removeClass('done').css('cursor', 'pointer').addClass('list-group-item');
+            phase = 'intro_search';
+            showDialogue("Alle Bewohner sind untergebracht! Super Arbeit.", 'wink_major.png');
+            $('.list-group-item').removeClass('done').css('cursor', 'default');
             $('#btnCalcH1').prop('disabled', true);
             $('#btnCalcH2').prop('disabled', true);
             setTimeout(() => {
-                showDialogue("Danke für deine Hilfe! ... Warte, wo wohnt Paul? Klicke auf ihn in der Liste.");
-            }, 3000);
+                showDialogue("Ich bin heute Abend bei Sarah eingeladen. Kannst du mir ihre Hausnummer sagen? (Nutze den Rechner!)");
+                $('#h1Result').text('Ergebnis ...');
+                $('#h2Result').text('-');
+                $('#stepCalcBox').removeClass('active');
+                $('#nameInput').val('').prop('readonly',false);
+                $('#btnCalcH1').prop('disabled', false);
+                phase = 'search_calc_h1';
+            }, 2000);
         }
         function handleSearchClick(houseIdx, $house) {
-            // Namen anzeigen
             let occupant = city[houseIdx];
             if (occupant) {
                 $house.find('.house-family').text(occupant).css('opacity', 1);
             }
-            // 1. Versuch (nur H1)
-            if (!searchH2) {
+            if (phase === 'search_check_h1') {
                 if (houseIdx !== searchH1) {
-                    showDialogue(`Das ist nicht Haus ${searchH1}.`);
+                    showDialogue(`Das ist nicht der Start-Hash (${searchH1}).`);
                     return;
                 }
-                if (occupant === SEARCH_TARGET) {
-                    endLevel();
+                if (city[houseIdx] === SEARCH_TARGET) {
+                    endLevel(); // Sollte nicht passieren, da Sarah kollidiert
                 } else {
-                    // Kollision! -> User muss H2 nutzen
-                    showDialogue(`Das ist ${occupant}. Falsch! Berechne den 2. Hash (Sprungweite).`, 'sad_major.png');
+                    showDialogue(`Das ist ${city[houseIdx]}, nicht Sarah! Wir brauchen den 2. Hash für die Suche. Klicke unten auf 'Sprungweite berechnen'.`, 'sad_major.png');
                     $('#stepCalcBox').addClass('active');
                     $('#btnCalcH2').prop('disabled', false);
+                    phase = 'search_calc_h2';
                 }
             }
-            // 2. Versuch (mit H2 / Step)
-            else {
+            else if (phase === 'search_check_step') {
                 let expected = (searchH1 + searchH2) % HASH_SIZE;
                 if (houseIdx !== expected) {
-                    showDialogue(`Falsch. ${searchH1} + ${searchH2} = ${expected}.`);
+                    showDialogue(`Falsch. Start (${searchH1}) + Schritt (${searchH2}) = ${expected}.`);
                     return;
                 }
-                if (occupant === SEARCH_TARGET) {
+                if (city[houseIdx] === SEARCH_TARGET) {
                     $house.addClass('found');
-                    // Finaler Dialog
-                    showDialogue("Super! Paul gefunden. Double Hashing erzeugt längere Ketten, aber verteilt besser!", 'wink_major.png');
-                    setTimeout(endLevel, 3000);
+                    endLevel();
                 } else {
                     searchH1 = houseIdx;
-                    showDialogue(`Das ist ${occupant}. Weiter springen (+${searchH2})!`);
+                    showDialogue(`Das ist ${city[houseIdx]}! Immer noch nicht. Addiere nochmal die Schrittweite ${searchH2}.`);
+                    let next = (searchH1 + searchH2) % HASH_SIZE;
+                    $('.house').removeClass('highlight-target');
+                    $(`#house-${next}`).addClass('highlight-target');
                 }
             }
         }
         function endLevel() {
-            $('#successMessage').text("Danke für deine Hilfe!");
+            $('#successMessage').text("Danke für deine Hilfe, so funktioniert alles viel besser!");
             $('#successOverlay').css('display', 'flex');
         }
-        // Global Functions
-        window.restartLevel = function() { location.reload(); };
+        // Start
+        advanceDialogue();
+        // Globale Funktionen für Modal-Buttons
+        window.restartLevel = function() {
+            location.reload();
+        };
         window.nextLevel = function() {
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'Level-Auswahl?completed=8&next=9';
+                window.location.href = 'level-select.php?completed=7&next=8';
             }, 500);
         };
-        // Start
-        advanceDialogue();
     });
 </script>
 </body>

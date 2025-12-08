@@ -689,7 +689,6 @@ $prefilled_haeuser = [
         <h2 class="success-title">🚨 KOLLISION!</h2>
         <p class="success-message" id="successMessage"></p>
         <div class="success-buttons">
-            <button class="btn-secondary" onclick="restartLevel()">↻ Level neustarten</button>
             <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 3 →</button>
         </div>
     </div>
