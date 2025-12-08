@@ -469,6 +469,7 @@ $familien_liste = [
         $('#hashButton').click(function() {
             if (!selectedFamily) return;
             const name = $('#nameInput').val().trim();
+            if (name==='') return;
             if (name !== selectedFamily) {
                 if ('search_sara_calc' || 'search_tina_calc'){
                     $('#dialogueText').text(`Derzeit wird nicht nach ${name} gesucht, sondern nach ${selectedFamily}`);
