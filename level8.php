@@ -125,7 +125,7 @@ $familien_liste = [
             </div>
         </div>
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ Double Hashing District (Praxis)</h2>
+            <h2 class="grid-title">🏘️ Level 8: Double-Hashing 2</h2>
             <?php for ($b = 0; $b < 4; $b++): ?>
                 <div class="street-block">
                     <div class="houses-row">

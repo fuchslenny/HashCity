@@ -467,42 +467,7 @@ $familien = [
             color: #999;
             transform: none;
         }
-        /* Load Factor Display */
-        .load-factor-box {
-            text-align: center;
-            padding: 0.5rem;
-            background: #f0f0f0;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            border: 2px solid #ccc;
-            transition: all 0.5s ease;
-        }
-        .lf-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
-        .lf-label {
-            font-size: 0.8rem;
-            color: #666;
-        }
-        /* Ampel-Farben für Load Factor */
-        .lf-good {
-            color: #4CAF50;
-            border-color: #4CAF50;
-            background: #e8f5e9;
-        } /* <= 0.5 */
-        .lf-medium {
-            color: #FF9800;
-            border-color: #FF9800;
-            background: #fff3e0;
-        } /* 0.5 - 0.75 */
-        .lf-bad {
-            color: #D32F2F;
-            border-color: #D32F2F;
-            background: #FFEBEE;
-        } /* > 0.75 */
+
         /* Success Modal */
         .success-overlay {
             position: fixed;
@@ -700,10 +665,7 @@ $familien = [
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">
-                    Willkommen in HashCity! Ich bin Major Mike, der Bürgermeister.
-                    Ich habe leider meinen Stadtplan verloren und brauche deine Hilfe!
-                    Ich muss dringend mit Familie Müller sprechen.
-                    Kannst du mir helfen, sie zu finden?
+                    Willkommen in HashCity! Ich bin Major Mike, der Bürgermeister!
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
                     Klicken oder Enter ↵
@@ -712,7 +674,7 @@ $familien = [
         </div>
         <!-- Houses Grid -->
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ HashCity Stadtteil</h2>
+            <h2 class="grid-title">🏘️ Level 0: Einführung in HashCity</h2>
             <!-- First Street Block: Houses 1-10 -->
             <div class="street-block">
                 <div class="houses-row">
@@ -766,7 +728,7 @@ $familien = [
         </div>
         <!-- Info Panel -->
         <div class="info-panel">
-            <h3 class="info-title">📊 Spielinformationen</h3>
+            <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="search-target">
                 <div class="search-target-label">Gesuchte Familie:</div>
                 <div class="search-target-name">Müller</div>

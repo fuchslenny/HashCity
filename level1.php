@@ -433,6 +433,7 @@
         }
         .family-list-container {
             max-height: 250px;
+            padding: 0 5px;
             overflow-y: auto;
         }
         .list-group-item.to-do-family {
@@ -461,42 +462,7 @@
             cursor: not-allowed;
             text-decoration: line-through;
         }
-        /* Load Factor Display */
-        .load-factor-box {
-            text-align: center;
-            padding: 0.5rem;
-            background: #f0f0f0;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            border: 2px solid #ccc;
-            transition: all 0.5s ease;
-        }
-        .lf-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
-        .lf-label {
-            font-size: 0.8rem;
-            color: #666;
-        }
-        /* Ampel-Farben für Load Factor */
-        .lf-good {
-            color: #4CAF50;
-            border-color: #4CAF50;
-            background: #e8f5e9;
-        }
-        .lf-medium {
-            color: #FF9800;
-            border-color: #FF9800;
-            background: #fff3e0;
-        }
-        .lf-bad {
-            color: #D32F2F;
-            border-color: #D32F2F;
-            background: #FFEBEE;
-        }
+
         /* Success Modal */
         .success-overlay {
             position: fixed;
@@ -637,7 +603,6 @@
                 grid-template-columns: repeat(3, 1fr);
                 gap: 0.6rem;
             }
-        }
     </style>
 </head>
 <body>
@@ -682,7 +647,7 @@
         </div>
         <!-- Houses Grid -->
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ HashCity Neuer Stadtteil</h2>
+            <h2 class="grid-title">🏘️ Level 1: Grundlagen HashMaps</h2>
             <!-- Street Block: Houses 0-4 -->
             <?php
             // Paare der neuen Assets für PHP
@@ -723,8 +688,8 @@
             <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
                 <label for="hashInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
-                <input type="text" id="hashInput" class="calculator-input" placeholder="Namen eingeben...">
-                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <input type="text" id="hashInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="hashButton" class="calculator-button" disabled>Berechne Haus-Nr.</button>
                 <div class="calculator-result" id="hashResult">Ergebnis ...</div>
             </div>
             <!-- Bewerber-Liste -->
@@ -797,15 +762,12 @@
             { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
             { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
             { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
-            { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
         ];
         // Funktion zum Setzen des Haus-Assets
         function setHouseAsset(houseElement, isFilled) {
-            // Aktuelles Asset des Hauses auslesen
             const currentAsset = houseElement.find('.house-icon').attr('src');
             const assetName = currentAsset.split('/').pop();
-            // Passendes Paar in housePairs finden
             let matchingPair = null;
             for (const pair of housePairs) {
                 if (pair.empty === assetName || pair.filled === assetName) {
@@ -813,7 +775,6 @@
                     break;
                 }
             }
-            // Neues Asset basierend auf isFilled setzen
             const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
             houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
         }
@@ -823,6 +784,7 @@
         ];
         const sophieDialogue = "Ich sehe, du hast für alle Bewohner ein Haus gefunden. Ich habe noch einen Termin mit Sophie, kannst du mir helfen sie zu finden? Nutze den Hash-Rechner, um ihre Hausnummer zu berechnen.";
         let currentDialogue = 0;
+        let isFading = 0;
         // --- Hash-Funktion (identisch zur PHP-Logik) ---
         function getHash(key, size) {
             let sum = 0;
@@ -832,27 +794,56 @@
             return (sum % size);
         }
         // --- Dialog-Steuerung ---
-        function showNextDialogue() {
-            if (currentDialogue >= dialogues.length) {
-                $('#dialogueContinue').fadeOut();
-                gameStarted = true;
-                $('#dialogueText').text('Okay, lass uns anfangen! Wähle die erste Familie aus der Liste.');
-                return;
-            }
+        // Funktion zum Anzeigen des Textes
+        function showDialogue() {
+            if (isFading) return;
+            isFading = true;
+
             $('#dialogueText').fadeOut(200, function() {
-                $(this).text(dialogues[currentDialogue]).fadeIn(200);
+                $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
+                    isFading = false;
+                });
             });
-            currentDialogue++;
         }
+
+        // Funktion zum Weiterschalten
+        function nextStep() {
+            // Blockieren, wenn Spiel schon läuft oder gerade eine Animation läuft
+            if (gameStarted || isFading) return;
+
+            // Sind wir noch innerhalb der Dialog-Liste?
+            if (currentDialogue < dialogues.length - 1) {
+                currentDialogue++;
+                showDialogue(); // Normaler Fade für Dialoge
+            } else {
+                // Intro ist zu Ende -> Sanfter Übergang zum Spielstart
+                isFading = true; // Klicks sperren während der Transition
+                $('#dialogueContinue').fadeOut();
+
+                $('#dialogueText').fadeOut(200, function() {
+                    $(this).text('Okay, lass uns anfangen! Wähle die erste Familie aus der Liste.');
+                    $(this).fadeIn(200, function() {
+                        gameStarted = true; // Spiel jetzt freigeben
+                        isFading = false;   // Sperre aufheben
+                    });
+                });
+            }
+        }
+
+        // Initialisierung (Text 1 sofort setzen ohne Animation)
+        $('#dialogueText').text(dialogues[0]);
+        $('#dialogueContinue').show();
+
         // --- Listener für Dialoge ---
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
-                showNextDialogue();
+                nextStep();
             }
         });
+
         $('.dialogue-box').click(function() {
             if (!gameStarted) {
-                showNextDialogue();
+                nextStep();
             }
         });
         // --- Level 1 Spielmechanik ---
@@ -872,9 +863,9 @@
         });
         // Aktivieren des Buttons, sobald etwas eingegeben ist
         $('#hashInput').on('input', function() {
-            if ($(this).val().trim() !== '') {
+            if ($(this).val().trim() !== '' && searchMode) {
                 $('#hashButton').prop('disabled', false);
-            } else {
+            } else if (!searchMode) {
                 $('#hashButton').prop('disabled', true);
             }
         });
@@ -940,7 +931,6 @@
                 }
                 const currentOccupant = stadt[houseNumber];
                 if (currentOccupant === null) {
-                    // --- HAUS IST FREI ---
                     stadt[houseNumber] = selectedFamily;
                     setHouseAsset($house, true);
                     $house.addClass('checked');
@@ -956,12 +946,12 @@
                     } else {
                         $('#dialogueText').text(sophieDialogue);
                         searchMode = true;
-                        $('#hashInput').prop('readonly', false).val('');
+                        $('#hashInput').prop('readonly', false).val('').focus();
+                        $('#hashButton').prop('disabled', true);
                     }
                     selectedFamily = null;
                     $('#hashInput').val('');
                     $('#hashResult').text('Ergebnis ...');
-                    $('#hashButton').prop('disabled', true);
                 }
             }
         });
@@ -973,10 +963,9 @@
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-select.php?completed=1&next=2';
+                window.location.href = 'Level-Auswahl?completed=1&next=2';
             }, 500);
         };
-
     });
 </script>
 </body>
