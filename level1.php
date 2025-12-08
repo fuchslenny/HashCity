@@ -926,12 +926,13 @@
                     if(gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
                     return;
                 }
+                console.log(hash);
                 if(hash === null){
                     $('#dialogueText').text(`Berechne erst den Hash mit dem Hashrechner!`);
                     return;
                 }
-                if (houseNumber !== targetHash) {
-                    $('#dialogueText').text(`Halt! Der Rechner hat Haus ${targetHash} für Familie ${selectedFamily} berechnet, nicht Haus ${houseNumber}.`);
+                if (houseNumber !== hash) {
+                    $('#dialogueText').text(`Halt! Der Rechner hat Haus ${hash} für Familie ${selectedFamily} berechnet, nicht Haus ${houseNumber}.`);
                     return;
                 }
                 const currentOccupant = stadt[houseNumber];
