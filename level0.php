@@ -289,11 +289,27 @@ $familien = [
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             border-radius: 10px;
             padding: 0.3rem;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .house.clickable {
+            cursor: pointer;
+            opacity: 1;
+            border: 3px solid #FFD700; /* Goldener Rahmen als Hinweis */
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            transform: scale(1.05);
+            z-index: 20;
+        }
+        .house.checked {
+            opacity: 1;
+            border: none;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
         }
         .house:hover:not(.checked):not(.found) {
             transform: translateY(-8px) scale(1.08);
@@ -768,13 +784,13 @@ $familien = [
         </div>
     </div>
 </div>
-<!-- jQuery -->
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // --- Haus-Paare für Assets ---
+        // --- 1. Konfiguration & Assets ---
+
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
             { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
@@ -786,160 +802,165 @@ $familien = [
             { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
             { empty: "WohnhauGrauBraunLeerNeu.svg", filled: "WohnhauGrauBraunBesetztNeu.svg" },
             { empty: "WohnhauRotBraunLeerNeu.svg", filled: "WohnhauRotBraunBesetztNeu.svg" },
-            { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
+            { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
         ];
 
-        // --- Zufällige Auswahl der Assets für die Häuser ---
-        function getRandomHousePair() {
-            const randomIndex = Math.floor(Math.random() * housePairs.length);
-            return housePairs[randomIndex];
-        }
-
-        // --- Initialisierung der Häuser mit zufälligen Assets (als leer) ---
-        $('.house').each(function() {
-            const $house = $(this);
-            const pair = getRandomHousePair();
-            $house.find('.house-icon').attr('src', `./assets/${pair.filled}`);
-            $house.data('empty-asset', pair.empty);
-            $house.data('filled-asset', pair.filled);
-        });
-
-        // --- Spielvariablen ---
-        let checkedHouses = 0;
+        // --- 2. State Variablen ---
+        let currentHouseIndex = 0;
         let attempts = 0;
         let gameStarted = false;
         let gameCompleted = false;
-        const dialogues = [
-            "Hallo! Willkommen in HashCity! Ich bin Major Mike, der Bürgermeister dieser wunderschönen Stadt. Schön, dass du hier bist!",
-            "Ich habe ein kleines Problem... Ich habe meinen Stadtplan verloren und weiß nicht mehr genau, wo welche Familie wohnt. 😅",
-            "Ich muss dringend mit Familie Müller sprechen! Kannst du mir helfen, sie zu finden? Klicke einfach die Häuser an, um zu sehen, wer dort wohnt.",
-            "Perfekt! Dann fangen wir an. Viel Erfolg beim Suchen! 🔍"
-        ];
         let currentDialogue = 0;
 
-        // --- Dialoge anzeigen ---
+        // --- 3. Dialoge ---
+        const dialogues = [
+            "Hallo! Willkommen in HashCity! Ich bin Major Mike, der Bürgermeister.",
+            "Ich habe ein riesiges Problem: Ich habe meinen Stadtplan verloren!",
+            "Ich muss Familie Müller finden. Da wir keine Hashmap haben, müssen wir <strong>linear suchen</strong>.",
+            "Das heißt: Wir fangen bei Haus 0 an und prüfen jedes einzelne Haus nacheinander. Es gibt keine Abkürzung!",
+            "Klicke jetzt auf das erste Haus (Haus 0), um zu starten."
+        ];
+
+        // --- 4. Helper Funktionen ---
+
+        function getRandomHousePair() {
+            return housePairs[Math.floor(Math.random() * housePairs.length)];
+        }
+
+        // --- 5. Initialisierung der Häuser ---
+        $('.house').each(function() {
+            const $house = $(this);
+            const pair = getRandomHousePair();
+
+            // Standardmäßig "Besetzt"-Bild anzeigen
+            $house.find('.house-icon').attr('src', `./assets/${pair.filled}`);
+
+            $house.data('filled-asset', pair.filled);
+            $house.data('empty-asset', pair.empty);
+        });
+
+        // --- 6. Spiellogik ---
+
+        function activateNextHouse() {
+            $('.house').removeClass('clickable');
+            let $next = $(`.house[data-house="${currentHouseIndex}"]`);
+            $next.addClass('clickable');
+        }
+
+        function updateStats() {
+            $('#checkedCount').text(currentHouseIndex + ' / 20');
+            $('#attemptsCount').text(attempts);
+        }
+
+        // --- 7. Event Handler ---
+
         function showNextDialogue() {
             currentDialogue++;
             if (currentDialogue < dialogues.length) {
                 $('#dialogueText').fadeOut(200, function() {
-                    $(this).text(dialogues[currentDialogue]).fadeIn(200);
-                    if (currentDialogue === 1) {
-                        $('#majorMikeImage').attr('src', './assets/sad_major.png');
-                    } else if (currentDialogue === 2) {
-                        $('#majorMikeImage').attr('src', './assets/card_major.png');
-                    } else if (currentDialogue === 3) {
-                        $('#majorMikeImage').attr('src', './assets/card_major.png');
-                    }
+                    $(this).html(dialogues[currentDialogue]).fadeIn(200);
+
+                    if (currentDialogue === 1) $('#majorMikeImage').attr('src', './assets/sad_major.png');
+                    if (currentDialogue === 2) $('#majorMikeImage').attr('src', './assets/card_major.png');
+
                     if (currentDialogue === dialogues.length - 1) {
                         $('#dialogueContinue').fadeOut();
                         gameStarted = true;
-                        $('.house').css('cursor', 'pointer');
+                        activateNextHouse();
                     }
                 });
             }
         }
 
-        // --- Event-Listener für Dialoge ---
-        setTimeout(function() {
-            $('#dialogueContinue').fadeIn();
-        }, 1000);
+        setTimeout(function() { $('#dialogueContinue').fadeIn(); }, 1000);
 
         $(document).keydown(function(e) {
-            if ((e.key === 'Enter' || e.key === ' ') && currentDialogue < dialogues.length - 1) {
+            if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
                 showNextDialogue();
             }
         });
-
         $('.dialogue-box').click(function() {
-            if (currentDialogue < dialogues.length - 1) {
+            if (!gameStarted) {
                 showNextDialogue();
             }
         });
 
-        // --- Haus-Klick-Handler ---
+        // --- KLICK-LOGIK (Hier ist die Änderung) ---
         $('.house').click(function() {
             if (!gameStarted || gameCompleted) return;
 
             const $house = $(this);
-            if ($house.hasClass('checked') || $house.hasClass('found')) {
+            const clickedIndex = $house.data('house');
+            const family = $house.data('family');
+
+            // FALL 1: Bereits geprüftes Haus (Rückwärts)
+            if (clickedIndex < currentHouseIndex) {
+                $('#majorMikeImage').attr('src', './assets/card_major.png'); // Neutrales Gesicht
+                $('#dialogueText').html(
+                    `Haus ${clickedIndex} haben wir doch schon geprüft! Da wohnt Familie ${family}.<br>` +
+                    `Konzentrier dich bitte auf das nächste <strong>ungeprüfte</strong> Haus (Haus ${currentHouseIndex})!`
+                );
                 return;
             }
 
-            attempts++;
-            checkedHouses++;
-            const houseNumber = $house.data('house');
-            const family = $house.data('family');
+            // FALL 2: Zu weit gesprungen (Vorwärts)
+            if (clickedIndex > currentHouseIndex) {
+                $('#majorMikeImage').attr('src', './assets/sad_major.png');
+                $('#dialogueText').html(
+                    `Halt! Ein Computer kann nicht raten. Er muss linear vorgehen.<br>` +
+                    `Wir haben Haus ${currentHouseIndex} noch nicht geprüft. Klicke bitte darauf!`
+                );
+                // Wackel-Animation beim korrekten Haus
+                $(`.house[data-house="${currentHouseIndex}"]`)
+                    .fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+                return;
+            }
 
-            // Haus als "geprüft" markieren
-            $house.find('.house-icon').attr('src', `./assets/${$house.data('filled-asset')}`);
+            // FALL 3: Korrektes Haus (clickedIndex === currentHouseIndex)
+            attempts++;
             $house.addClass('checked show-family');
+            $house.removeClass('clickable');
 
             if (family === 'Müller') {
+                // GEWONNEN
+                gameCompleted = true;
                 $house.addClass('found');
                 $('#majorMikeImage').attr('src', './assets/wink_major.png');
+
                 $('#dialogueText').html(
-                    '🎉 <strong>Ausgezeichnet!</strong> Du hast Familie Müller gefunden! ' +
-                    'Aber warte mal... du musstest <strong>' + attempts + ' Häuser</strong> durchsuchen. ' +
-                    'Das ist viel zu ineffizient! Es muss eine bessere Methode geben!'
+                    `🎉 <strong>Gefunden!</strong> Familie Müller wohnt in Haus ${clickedIndex}!<br>` +
+                    `Aber uff... wir mussten ${attempts} Häuser durchsuchen. Das ist ineffizient!`
                 );
-                gameCompleted = true;
-                setTimeout(function() {
-                    showSuccessModal();
-                }, 1500);
+
+                setTimeout(showSuccessModal, 2500);
             } else {
-                $('#majorMikeImage').attr('src', './assets/sad_major.png');
-                const responses = [
-                    `Nein, in Haus ${houseNumber} wohnt Familie ${family}. Weiter suchen!`,
-                    `Das ist Familie ${family} in Haus ${houseNumber}. Das sind nicht die Müllers!`,
-                    `Haus ${houseNumber}: Familie ${family}. Falsche Familie, versuch's weiter!`,
-                    `Hmm, Familie ${family}... nicht die Richtigen. Probier ein anderes Haus!`,
-                    `Familie ${family}? Nein, das sind nicht die Müllers. Mach weiter!`
-                ];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                $('#dialogueText').text(randomResponse);
-                setTimeout(function() {
-                    if (!gameCompleted) {
-                        $('#majorMikeImage').attr('src', './assets/card_major.png');
-                    }
-                }, 2000);
+                // FALSCHE FAMILIE -> WEITER
+                $('#majorMikeImage').attr('src', './assets/card_major.png');
+                $('#dialogueText').text(`Haus ${clickedIndex}: Hier wohnt Familie ${family}. Nicht Müller. Weiter zum nächsten!`);
+
+                currentHouseIndex++;
+                activateNextHouse();
             }
 
             updateStats();
         });
 
-        // --- Statistiken aktualisieren ---
-        function updateStats() {
-            $('#checkedCount').text(checkedHouses + ' / 20');
-            $('#attemptsCount').text(attempts);
-            const progress = (checkedHouses / 20) * 100;
-            $('#progressBar').css('width', progress + '%').text(Math.round(progress) + '%');
-        }
+        // --- 8. Modal & Global ---
 
-        // --- Erfolg-Modal anzeigen ---
         function showSuccessModal() {
             $('#finalAttempts').text(attempts);
-            $('#finalChecked').text(checkedHouses);
-            let performanceMsg = '';
-            if (attempts <= 5) {
-                performanceMsg = 'Wow, du hattest Glück! Aber ';
-            } else if (attempts <= 10) {
-                performanceMsg = 'Nicht schlecht! Aber ';
-            } else if (attempts <= 16) {
-                performanceMsg = 'Das hat eine Weile gedauert! ';
-            } else {
-                performanceMsg = 'Oh je, das hat wirklich lange gedauert! ';
-            }
-            const successMsg = `
+            $('#finalChecked').text(attempts);
+
+            const msg = `
                 <strong style="color: #667eea;">Major Mike sagt:</strong><br>
-                "${performanceMsg}Stell dir vor, wir hätten 1000 Häuser in unserer Stadt!
-                Das lineare Durchsuchen ist viel zu langsam. Es <em>muss</em> eine bessere Methode geben!
-                Lass uns im nächsten Level etwas Neues lernen: <strong>Hash-Funktionen!</strong>"
+                "Stell dir vor, die Stadt hätte 1.000.000 Häuser. Wir müssten im schlimmsten Fall ALLE durchsuchen!<br>
+                Das nennt man <strong>linearen Aufwand O(n)</strong>.<br>
+                Lass uns im nächsten Level lernen, wie Hashmaps das lösen!"
             `;
-            $('#successMessage').html(successMsg);
+            $('#successMessage').html(msg);
             $('#successOverlay').css('display', 'flex');
         }
 
-        // --- Globale Funktionen ---
         window.restartLevel = function() {
             location.reload();
         };
@@ -948,7 +969,7 @@ $familien = [
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'Level-Auswahl?page=1&completed=0&level=1';
+                window.location.href = 'level-select.php?completed=0&next=1';
             }, 500);
         };
     });
