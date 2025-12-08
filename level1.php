@@ -903,6 +903,7 @@
             const $house = $(this);
             const houseNumber = $house.data('house');
             if (searchMode) {
+                if(hash === null) return;
                 const occupant = stadt[houseNumber];
                 if (occupant) {
                     $house.addClass('show-family');
