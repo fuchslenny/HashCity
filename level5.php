@@ -285,14 +285,6 @@
         <div class="info-panel">
             <!-- Stadtplaner (Hash-Rechner) -->
             <h3 class="info-title">📊 Stadtplanung</h3>
-            <div class="info-item hash-calculator">
-                <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
-                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
-                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
-                <div class="calculator-result" id="hashResult">
-                    Ergebnis ...
-                </div>
-            </div>
             <!-- Bewerber-Liste -->
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
@@ -304,6 +296,14 @@
                         <li class="list-group-item to-do-family" data-family="Thomas">Thomas</li>
                         <li class="list-group-item to-do-family" data-family="Noah">Noah</li>
                     </ul>
+                </div>
+            </div>
+            <div class="info-item hash-calculator">
+                <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">
+                    Ergebnis ...
                 </div>
             </div>
             <div class="info-item">
