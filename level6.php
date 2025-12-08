@@ -437,6 +437,7 @@
         }
         .family-list-container {
             max-height: 250px;
+            padding: 0 5px;
             overflow-y: auto;
         }
         .list-group-item.to-do-family {
@@ -469,42 +470,7 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-        /* Load Factor Display */
-        .load-factor-box {
-            text-align: center;
-            padding: 0.5rem;
-            background: #f0f0f0;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            border: 2px solid #ccc;
-            transition: all 0.5s ease;
-        }
-        .lf-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
-        .lf-label {
-            font-size: 0.8rem;
-            color: #666;
-        }
-        /* Ampel-Farben für Load Factor */
-        .lf-good {
-            color: #4CAF50;
-            border-color: #4CAF50;
-            background: #e8f5e9;
-        } /* <= 0.5 */
-        .lf-medium {
-            color: #FF9800;
-            border-color: #FF9800;
-            background: #fff3e0;
-        } /* 0.5 - 0.75 */
-        .lf-bad {
-            color: #D32F2F;
-            border-color: #D32F2F;
-            background: #FFEBEE;
-        } /* > 0.75 */
+
         /* Success Modal */
         .success-overlay {
             position: fixed;
@@ -688,7 +654,7 @@
         </div>
         <!-- Houses Grid -->
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ HashCity Neuer Stadtteil</h2>
+            <h2 class="grid-title">🏘️ Level 6: Quadratic Probing 2</h2>
             <!-- Street Blocks: 2 Straßen mit je 10 Häusern (2 × 5 Häuser pro Reihe) -->
             <?php
             // Paare der neuen Assets für PHP
@@ -764,7 +730,7 @@
             <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
                 <div class="info-label">Bewohnername:</div>
-                <input type="text" id="hashInput" class="calculator-input" placeholder="Namen eingeben...">
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
                 <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
                 <div class="calculator-result" id="hashResult">Ergebnis ...</div>
             </div>
@@ -922,7 +888,7 @@
             const $item = $(this);
             if ($item.hasClass('disabled') || $item.hasClass('list-group-item-success') || !gameStarted) return;
             selectedFamily = $item.data('family');
-            $('#hashInput').val(selectedFamily);
+            $('#nameInput').val(selectedFamily);
             $('#hashResult').text('Ergebnis ...');
             $('#hashButton').prop('disabled', false);
             $('.to-do-family').removeClass('active');
@@ -942,7 +908,7 @@
         });
         // --- Level 6 Spielmechanik ---
         // Aktivieren des Buttons, sobald etwas eingegeben ist
-        $('#hashInput').on('input', function() {
+        $('#nameInput').on('input', function() {
             if ($(this).val().trim() !== '') {
                 $('#hashButton').prop('disabled', false);
             } else {
@@ -951,16 +917,20 @@
         });
         // 2. Hash-Wert berechnen
         $('#hashButton').click(function() {
-            if (gameCompleted) return;
-            const family = $('#hashInput').val().trim();
+            if (gameCompleted || !gameStarted) return;
+            const family = $('#nameInput').val().trim();
             if (!family) return;
             const anzeige = getHash(family, HASH_SIZE);
             $('#hashResult').text(`Hausnummer: ${anzeige}`);
             if (searchMode) {
-                if (family === 'Levi') {
-                    $('#dialogueText').text(`Laut Rechner wohnt Levi in Haus ${anzeige}. Vollziehe die Schritte von vorher nach!`);
-                } else if (family === 'Chris') {
-                    $('#dialogueText').text(`Laut Rechner wohnt Chris in Haus ${anzeige}. Vollziehe die Schritte von vorher nach!`);
+                if (searchTarget !== family){
+                    $('#dialogueText').text(`Derzeit suchen wir nach ${searchTarget} und nicht ${family}.`);
+                }else{
+                    if (family === 'Levi') {
+                        $('#dialogueText').text(`Laut Rechner wohnt Levi in Haus ${anzeige}. Vollziehe die Schritte von vorher nach!`);
+                    } else if (family === 'Chris') {
+                        $('#dialogueText').text(`Laut Rechner wohnt Chris in Haus ${anzeige}. Vollziehe die Schritte von vorher nach!`);
+                    }
                 }
             } else {
                 $('#dialogueText').text(`Laut Rechner gehört Familie ${family} in Haus ${anzeige}. Lasse sie nach dem Prinzip des Quadratic Probing einziehen!`);
@@ -979,7 +949,6 @@
                         attempts++;
                         $('#dialogueText').text(chrisSearchDialogue);
                         searchTarget = 'Chris';
-                        $('#hashInput').val('Chris');
                         $('#hashButton').prop('disabled', false);
                     } else if (searchTarget === 'Chris' && occupant === 'Chris') {
                         attempts++;
@@ -1040,13 +1009,13 @@
                         $('.to-do-family').removeClass('active');
                         $(`.to-do-family[data-family="${nextFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick).addClass('active');
                         selectedFamily = nextFamily;
-                        $('#hashInput').val(selectedFamily);
+                        $('#nameInput').val(selectedFamily);
                         $('#hashButton').prop('disabled', false);
                     } else {
                         $('#dialogueText').text(leviSearchDialogue);
+                        $('#nameInput').prop('readonly', false).val('');
                         searchMode = true;
                         searchTarget = 'Levi';
-                        $('#hashInput').prop('readonly', false).val('Levi');
                     }
                     $('#hashResult').text('Ergebnis ...');
                     $('#hashButton').prop('disabled', false);
@@ -1061,7 +1030,7 @@
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-auswahl.php?completed=6&next=7';
+                window.location.href = 'Level-Auswahl?completed=6&next=7';
             }, 500);
         };
     });
