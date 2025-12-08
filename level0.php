@@ -885,7 +885,7 @@ $familien = [
                 gameCompleted = true;
                 setTimeout(function() {
                     showSuccessModal();
-                }, 1500);
+                }, 4000);
             } else {
                 $('#majorMikeImage').attr('src', './assets/sad_major.png');
                 const responses = [
