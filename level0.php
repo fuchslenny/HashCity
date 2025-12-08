@@ -877,15 +877,8 @@ $familien = [
             if (family === 'Müller') {
                 $house.addClass('found');
                 $('#majorMikeImage').attr('src', './assets/wink_major.png');
-                $('#dialogueText').html(
-                    '🎉 <strong>Ausgezeichnet!</strong> Du hast Familie Müller gefunden! ' +
-                    'Aber warte mal... du musstest <strong>' + attempts + ' Häuser</strong> durchsuchen. ' +
-                    'Das ist viel zu ineffizient! Es muss eine bessere Methode geben!'
-                );
                 gameCompleted = true;
-                setTimeout(function() {
-                    showSuccessModal();
-                }, 1500);
+                showSuccessModal();
             } else {
                 $('#majorMikeImage').attr('src', './assets/sad_major.png');
                 const responses = [
