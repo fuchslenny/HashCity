@@ -504,7 +504,7 @@ $bewohner_liste = [
         </div>
     </div>
 </div>
-<div class="success-overlay" id="successOverlay">
+<div class="success-overlay" id="successOverlay" style="display: none">
     <div class="success-modal">
         <div class="success-icon">🎉</div>
         <h2 class="success-title">Familie gefunden!</h2>
