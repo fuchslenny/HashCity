@@ -234,7 +234,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             background: #FFEBEE;
         } /* > 0.75 */
         /* Expand Button Style */
-        .expand-btn { background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%); font-size: 1.1rem; padding: 0.8rem; display: none; }
+        .expand-btn { background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%); font-size: 1.1rem; padding: 0.8rem; display: none; margin-bottom: 1.5rem;}
         .family-list-container { max-height: 200px; overflow-y: auto; overflow-x: hidden; }
         /* Load Factor Display */
         .load-factor-box { text-align: center; padding: 0.5rem; background: #f0f0f0; border-radius: 10px; margin-bottom: 1rem; border: 2px solid #ccc; transition: all 0.5s ease; }
@@ -321,7 +321,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
             </div>
             <button id="btnExpand" class="calculator-button expand-btn">🏗️ STADT ERWEITERN</button>
             <div class="info-panel">
-                <h3 class="info-title">📊 Stadtplanung</h3>
                 <div class="info-item hash-calculator">
                     <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
                     <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
@@ -396,7 +395,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
         const dialogues = [
             "Puh, das war knapp in Level 10! Wir haben 19 von 20 Häusern belegt (Load Factor 0.95).",
             "Der arme Levi passt nirgendwo mehr rein. Wenn wir ihn jetzt noch reinquetschen (Linear Probing), dauert das ewig.",
-            "Die einzige Lösung: **Rehashing**! Wir verdoppeln die Stadt auf 40 Häuser und berechnen alle Positionen neu.",
+            "Die einzige Lösung: <strong>Rehashing</strong>! Wir verdoppeln die Stadt auf 40 Häuser und berechnen alle Positionen neu.",
             "Klicke auf 'STADT ERWEITERN', um das Problem zu lösen!"
         ];
         let dialogueIdx = 0;
@@ -492,7 +491,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             isFading = true;
             $('#majorMikeImage').attr('src', './assets/' + image);
             $('#dialogueText').fadeOut(150, function() {
-                $(this).text(text).fadeIn(150, function() { isFading = false; });
+                $(this).html(text).fadeIn(150, function() { isFading = false; });
             });
         }
         function advanceDialogue() {
@@ -526,7 +525,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             setTimeout(() => {
                 // 2. Logik Update
                 currentHashSize = 40;
-                $('#gridTitle').text("🏘️ Mega-City (40 Häuser)");
+                $('#gridTitle').text("🏘️ Level 11: Re-Hashing");
                 updateLoadFactor(); // Load Factor halbiert sich (19/40)
                 $(this).hide();
                 showDialogue("Platz ist da! Aber alle wohnen noch an den 'alten' Adressen. Achtung, ich ordne jetzt ALLE neu an!", 'wink_major.png');
