@@ -546,11 +546,58 @@ $bewohner_liste = [
 
         // --- Haus-Paare für Assets ---
         const housePairs = [
-            { base: "Wohnhaus2BlauBraun.svg", extension: "WohnhausBlauBraunErweiterung.svg" },
-            { base: "Wohnhaus2BlauGrau.svg", extension: "WohnhausBlauGrauErweiterung.svg" },
-            { base: "Wohnhaus2BlauRot.svg", extension: "WohnhausBlauRotErweiterung.svg" },
-            { base: "Wohnhaus2GrauBraun.svg", extension: "WohnhausGrauBraunErweiterung.svg" },
+            {
+                empty: "WH2BlauBraunLeer.svg",
+                filled: "WH2BlauBraun.svg",
+                extension: "WHBlauBraunErweiterung.svg"
+            },
+            {
+                empty: "WH2BlauGrauLeer.svg",
+                filled: "WH2BlauGrau.svg", // Annahme: WH2BlauGrau.svg ist die besetzte Variante
+                extension: "WHBlauGrauErweiterung.svg"
+            },
+            {
+                empty: "WH2BlauRotLeer.svg",
+                filled: "WH2BlauRot.svg", // Annahme: WH2BlauRot.svg ist die besetzte Variante
+                extension: "WHBlauRotErweiterung.svg"
+            },
+            {
+                empty: "WH2GrauBraunLeer.svg",
+                filled: "WH2GrauBraun.svg", // Annahme: WH2GrauBraun.svg ist die besetzte Variante
+                extension: "WHGrauBraunErweiterung.svg"
+            },
+            {
+                empty: "WH2GruenBraunLeer.svg",
+                filled: "WH2GruenBraun.svg", // Annahme: WH2GruenBraun.svg ist die besetzte Variante
+                extension: "WHGruenBraunErweiterung.svg" // Falls nicht vorhanden, weglassen
+            },
+            {
+                empty: "WH2GruenGrauLeer.svg",
+                filled: "WH2GruenGrau.svg", // Annahme: WH2GruenGrau.svg ist die besetzte Variante
+                extension: "WHGruenGrauErweiterung.svg"
+            },
+            {
+                empty: "WH2GelbBraunLeer.svg",
+                filled: "WH2GelbBraun.svg", // Annahme: WH2GelbBraun.svg ist die besetzte Variante
+                extension: "WHGelbBraunErweiterung.svg" // Keine Erweiterungsdatei vorhanden
+            },
+            {
+                empty: "WH2GelbRotLeer.svg",
+                filled: "WH2GelbRot.svg", // Annahme: WH2GelbRot.svg ist die besetzte Variante
+                extension: "WHGelbRotErweiterung.svg"
+            },
+            {
+                empty: "WH2RotBraunLeer.svg",
+                filled: "WH2RotBraun.svg",
+                extension: "WHRotBraunErweiterung.svg"
+            },
+            {
+                empty: "WH2RotRotLeer.svg",
+                filled: "WH2RotRot.svg", // Annahme: WH2RotRot.svg ist die besetzte Variante
+                extension: "WHRotRotErweiterung.svg"
+            }
         ];
+
         const families = [
             "Franz",    // Hash 3
             "Heinrich", // Hash 0
@@ -582,7 +629,7 @@ $bewohner_liste = [
         function setHouseAsset(houseElement, isExtension) {
             const pair = getRandomHousePair();
             if (!isExtension) {
-                houseElement.find('.img-house-base').attr('src', `./assets/${pair.base}`);
+                houseElement.find('.img-house-base').attr('src', `./assets/${pair.empty}`);
             } else {
                 return `./assets/${pair.extension}`;
             }
@@ -693,8 +740,9 @@ $bewohner_liste = [
         $('.house-container').click(function(e) {
             e.stopPropagation();
             var clickedHouse = $(this).data('house');
-            var $houseElement = $(this);
+            var $houseContainer = $(this);
             var $nameContainer = $('#names-' + clickedHouse);
+            var $houseElement = $(`#house-${clickedHouse}`);
 
             // Andere Häuser schließen (nur in Search Phase sichtbar)
             $('.house-container').not(this).find('.resident-name').removeClass('revealed');
@@ -720,22 +768,34 @@ $bewohner_liste = [
                     var bewohnerAnzahl = stadt[clickedHouse].length;
                     var nameTag = $('<div class="resident-name">' + currentName + '</div>');
                     $nameContainer.append(nameTag);
-
-                    if (bewohnerAnzahl > 1) {
-                        const currentAsset = $(`#house-${clickedHouse}`).find('.img-house-base').attr('src');
+                    if(bewohnerAnzahl === 1){
+                        const currentAsset = $houseElement.find('.img-house-base').attr('src');
                         const assetName = currentAsset.split('/').pop();
                         let matchingPair = null;
                         for (const pair of housePairs) {
-                            if (pair.base === assetName || pair.extension === assetName) {
+                            if (pair.empty === assetName || pair.filled === assetName) {
+                                matchingPair = pair;
+                                break;
+                            }
+                        }
+                        var newAsset = matchingPair.filled;
+                        $houseElement.find('.img-house-base').attr('src', `./assets/${newAsset}`);
+
+                    }else if (bewohnerAnzahl > 1) {
+                        const currentAsset = $houseElement.find('.img-house-base').attr('src');
+                        const assetName = currentAsset.split('/').pop();
+                        let matchingPair = null;
+                        for (const pair of housePairs) {
+                            if (pair.filled === assetName || pair.extension === assetName) {
                                 matchingPair = pair;
                                 break;
                             }
                         }
                         var extensionImg = matchingPair.extension;
-                        $houseElement.append($('<img>', {src: `./assets/${extensionImg}`, alt: "Erweiterung", class: "img-house-extension"}));
+                        $houseContainer.append($('<img>', {src: `./assets/${extensionImg}`, alt: "Erweiterung", class: "img-house-extension"}));
                     }
 
-                    $houseElement.removeClass('highlight-target');
+                    $houseContainer.removeClass('highlight-target');
                     $('.to-do-family[data-family-index=' + currentIdx + ']').removeClass('active').addClass('list-group-item-success').css('opacity', '1');
                     currentIdx++;
                     setTimeout(function() {
@@ -783,9 +843,9 @@ $bewohner_liste = [
             currentName = null;
             currentHash = null;
             $('#nameInput').prop('readonly', false).val('');
-            $('#hashButton').prop('disabled', false).text("Thomas suchen");
             $('#hashResult').text("?");
             $('.to-do-family').removeClass('active').css('opacity', '0.5');
+            $('#hashButton').prop('disabled', false);
             $('.to-do-family[data-family-index=' + currentIdx + ']').addClass('active').css('opacity', '1');
             $('#dialogueText').text("Thomas hat noch eine Idee. Kannst du seine Hausnummer suchen?");
             $('#majorMikeImage').attr('src', './assets/card_major.png');
