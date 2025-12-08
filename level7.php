@@ -466,8 +466,8 @@ $familien_liste = [
             transform: scale(1.03);
             z-index: 10;
         }
-        .list-group-item.to-do-family.list-group-item-success {
-            opacity: 0.3;
+        .list-group-item.to-do-family.done {
+            opacity: 1;
             background: #e0e0e0;
             cursor: not-allowed;
             text-decoration: line-through;
@@ -876,8 +876,7 @@ $familien_liste = [
         $('#btnCalcH1').click(function() {
             if (isFading) return;
             if (phase !== 'calc_h1' && phase !== 'search_calc_h1') return;
-            let name = (phase === 'search_calc_h1') ? SEARCH_TARGET : selectedFamily;
-            let val = calcH1(name);
+            let val = calcH1(selectedFamily);
             if (phase === 'search_calc_h1') {
                 searchH1 = val;
                 $('#h1Result').text(`Hausnummer: ${val}`);
