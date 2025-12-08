@@ -874,14 +874,13 @@ $familien_liste = [
         });
         // 2. H1 Berechnen
         $('#btnCalcH1').click(function() {
-            console.log(phase);
             if (isFading) return;
             if (phase !== 'calc_h1' && phase !== 'search_calc_h1') return;
             let name = (phase === 'search_calc_h1') ? SEARCH_TARGET : selectedFamily;
             let val = calcH1(name);
             if (phase === 'search_calc_h1') {
                 searchH1 = val;
-                $('#h1Result').text(val);
+                $('#h1Result').text(`Hausnummer: ${val}`);
                 showDialogue(`Der Start-Hash für Sarah ist ${val}. Klicke auf Haus ${val} um nachzusehen.`);
                 $('.house').removeClass('highlight-target');
                 $(`#house-${val}`).addClass('highlight-target');
@@ -890,7 +889,7 @@ $familien_liste = [
                 return;
             }
             h1Value = val;
-            $('#h1Result').text(val);
+            $('#h1Result').text(`Hausnummer: ${val}`);
             showDialogue(`Der 1. Hash ergibt ${val}. Klicke auf Haus ${val}, um zu prüfen, ob es frei ist.`);
             $('.house').removeClass('highlight-target');
             $(`#house-${val}`).addClass('highlight-target');
@@ -906,7 +905,6 @@ $familien_liste = [
                 handleSearchClick(houseIdx, $house);
                 return;
             }
-            console.log("phase: " + phase);
             if (phase === 'place_h1') {
                 if (houseIdx !== h1Value) {
                     showDialogue("Das war das falsche Haus. Der Rechner sagt " + h1Value + ".");
