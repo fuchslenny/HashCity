@@ -27,7 +27,6 @@ $hash_werte = [
 ];
 // Aufgaben für die Liste
 $neue_bewohner = ["Dieter", "Lars"];
-$suchbare_bewohner = ["Jannes"];
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -287,6 +286,7 @@ $suchbare_bewohner = ["Jannes"];
         /* Familien-Liste (Stil von L2) */
         .family-list-container {
             max-height: 250px;
+            padding: 0 5px;
             overflow-y: auto;
         }
         .list-group-item.family-to-assign {
@@ -310,10 +310,18 @@ $suchbare_bewohner = ["Jannes"];
             z-index: 10;
         }
         li.family-to-assign.placed {
-            opacity: 0.3;
+            opacity: 1;
             background: #e0e0e0;
             cursor: not-allowed;
             text-decoration: line-through;
+        }
+        /* Lars-Box am Anfang gesperrt */
+        .list-group-item.family-to-assign.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f0f0f0;
+            border-color: #ccc;
+            pointer-events: none;
         }
         /* Success Modal (von L3) */
         .success-overlay {
@@ -416,7 +424,7 @@ $suchbare_bewohner = ["Jannes"];
             </div>
         </div>
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ Stadtteil 3: Linear Probing</h2>
+            <h2 class="grid-title">🏘️ Level 3: Linear Probing</h2>
             <div class="street-block">
                 <div class="houses-row">
                     <?php
@@ -440,7 +448,7 @@ $suchbare_bewohner = ["Jannes"];
             <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
                 <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
-                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben...">
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
                 <button id="hashButton" class="calculator-button" style="background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);">Berechne Initial-Hash</button>
                 <div class="calculator-result" id="hashResult">
                     Ergebnis: ...
@@ -455,9 +463,6 @@ $suchbare_bewohner = ["Jannes"];
                         </li>
                         <li class="list-group-item family-to-assign" data-family="Lars">
                             Lars
-                        </li>
-                        <li class="list-group-item family-to-assign" data-family="Jannes-Suche" data-name="Jannes">
-                            Jannes
                         </li>
                     </ul>
                 </div>
@@ -474,7 +479,7 @@ $suchbare_bewohner = ["Jannes"];
         </p>
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
-            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 3.5 →</button>
+            <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 4 →</button>
         </div>
     </div>
 </div>
@@ -496,7 +501,6 @@ $suchbare_bewohner = ["Jannes"];
             { empty: "WohnhauRotBraunLeerNeu.svg", filled: "WohnhauRotBraunBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
-
         // --- Spielstatus-Variablen ---
         let gameState = 'dialogue_start';
         let currentTask = 'Dieter'; // Startaufgabe
@@ -514,13 +518,11 @@ $suchbare_bewohner = ["Jannes"];
             { text: "Fangen wir mit Dieter an. Wähle ihn aus der Liste und berechne seinen Hash.", img: "card_major.png" }
         ];
         let introDialogueIndex = 0;
-
         // --- Zufällige Auswahl der Assets für die Häuser ---
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
             return housePairs[randomIndex];
         }
-
         // --- Setzt das Haus-Asset ---
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
@@ -535,13 +537,11 @@ $suchbare_bewohner = ["Jannes"];
             const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
             houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
         }
-
         // --- UI Update-Funktionen ---
         function updateDialogue(text, img = 'card_major.png') {
             $('#dialogueText').html(text);
             $('#majorMikeImage').attr('src', './assets/' + img);
         }
-
         function updateHouse($house, familyName) {
             $house.removeClass('leer').addClass('belegt').data('family', familyName);
             $house.find('.house-family').text(familyName);
@@ -553,13 +553,11 @@ $suchbare_bewohner = ["Jannes"];
                 $house.find('.house-family').css('opacity', 0);
             }, 2000);
         }
-
         function gameCompleted() {
             gameState = 'game_completed';
             updateDialogue("Danke für deine Hilfe, so funktioniert alles viel besser!", "wink_major.png");
             setTimeout(showSuccessModal, 2500);
         }
-
         // --- Initialisierung der Häuser mit zufälligen Assets ---
         $('.house').each(function() {
             const $house = $(this);
@@ -570,7 +568,6 @@ $suchbare_bewohner = ["Jannes"];
             $house.data('empty-asset', pair.empty);
             $house.data('filled-asset', pair.filled);
         });
-
         // --- Task-Steuerung ---
         function showNextIntroDialogue() {
             if (introDialogueIndex < introDialogues.length) {
@@ -584,22 +581,19 @@ $suchbare_bewohner = ["Jannes"];
                 }
             }
         }
-
         // --- Event Handler ---
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && gameState === 'dialogue_start') {
                 showNextIntroDialogue();
             }
         });
-
         $('.dialogue-box').click(function() {
             if (gameState === 'dialogue_start') {
                 showNextIntroDialogue();
             }
         });
-
         $('li.family-to-assign').click(function() {
-            if (gameState === 'game_completed' || $(this).hasClass('placed')) {
+            if (gameState === 'game_completed' || $(this).hasClass('placed') || $(this).hasClass('locked')) {
                 return;
             }
             const familyData = $(this).data('family');
@@ -620,10 +614,9 @@ $suchbare_bewohner = ["Jannes"];
             updateDialogue(`Okay, ${selectedFamily} ausgewählt. Klicke auf 'Berechnen'.`, 'card_major.png');
             gameState = 'awaiting_hash';
         });
-
         $('#hashButton').click(function() {
             if (gameState === 'game_completed' || !selectedFamily) return;
-            const name = $('#nameInput').val().trim();
+            const name = $('#nameInput').val();
             if (name !== selectedFamily) {
                 updateDialogue(`Der Name im Rechner passt nicht zur ausgewählten Familie.`, "sad_major.png");
                 return;
@@ -642,9 +635,9 @@ $suchbare_bewohner = ["Jannes"];
             else if (currentTask === 'Jannes' && name === 'Jannes') {
                 updateDialogue(`Initial-Hash ist ${calculatedHash}. Klicke auf das Haus, in dem Jannes wohnt.`, "card_major.png");
                 gameState = 'awaiting_click';
+
             }
         });
-
         $('.house').click(function() {
             if (gameState !== 'awaiting_click' || !selectedFamily) {
                 return;
@@ -659,36 +652,43 @@ $suchbare_bewohner = ["Jannes"];
                 if (targetHouseNum === 1) {
                     updateHouse($house, "Dieter");
                     $('li.family-to-assign[data-family="Dieter"]').addClass('placed').removeClass('active');
+                    // Lars-Box freischalten
+                    $('li.family-to-assign[data-family="Lars"]').removeClass('locked');
                     updateDialogue("Der nächste Bewohner ist Lars. Trage Ihn ins richtige Haus ein.", "wink_major.png");
                     currentTask = 'Lars';
                     gameState = 'awaiting_selection';
+                    $('#nameInput').val('');
                 } else {
                     updateDialogue("Das war das falsche Haus. Beachte das aktuelle Verfahren bei einer Kollision (linear Probing).", "sad_major.png");
                 }
                 return;
             }
             if (currentTask === 'Lars') {
-                if ($house.data('family')) {
+                if (!$house.data('family')) {
+                    if (targetHouseNum === 4) {
+                        updateHouse($house, "Lars");
+                        $('li.family-to-assign[data-family="Lars"]').addClass('placed').removeClass('active');
+                        $('#nameInput').val('');
+                        setTimeout(() => {
+                            updateDialogue("Ich bin heute Abend bei Jannes eingeladen. Kannst du mir noch seine Hausnummer sagen?", "card_major.png");
+                            $('#nameInput').prop('readonly', false).val('').focus();
+                            currentTask = 'Jannes';
+                            selectedFamily = 'Jannes';
+                            gameState = 'awaiting_selection';
+                        }, 2000);
+                    } else {
+                        updateDialogue("Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen. Beachte auch das aktuelle Verfahren bei einer Kollision (linear Probing).", "sad_major.png");
+                        $house.addClass('checked');
+                        setTimeout(() => {
+                            $house.removeClass('checked');
+                            $house.find('.house-family').css('opacity', 0);
+                        }, 1000);
+                    }
+                    return;
+                } else {
                     updateDialogue(`Haus ${targetHouseNum} ist bereits belegt!`, "sad_major.png");
                     return;
                 }
-                if (targetHouseNum === 4) {
-                    updateHouse($house, "Lars");
-                    $('li.family-to-assign[data-family="Lars"]').addClass('placed').removeClass('active');
-                    setTimeout(() => {
-                        updateDialogue("Ich bin heute Abend bei Jannes eingeladen. Kannst du mir noch seine Hausnummer sagen?", "card_major.png");
-                        currentTask = 'Jannes';
-                        gameState = 'awaiting_selection';
-                    }, 2000);
-                } else {
-                    updateDialogue("Das war das falsche Haus, achte auf Rechtschreibung des Namens und lass die Hausnummer berechnen. Beachte auch das aktuelle Verfahren bei einer Kollision (linear Probing).", "sad_major.png");
-                    $house.addClass('checked');
-                    setTimeout(() => {
-                        $house.removeClass('checked');
-                        $house.find('.house-family').css('opacity', 0);
-                    }, 1000);
-                }
-                return;
             }
             if (currentTask === 'Jannes') {
                 if (targetHouseNum === correctJannesPosition) {
@@ -710,27 +710,24 @@ $suchbare_bewohner = ["Jannes"];
                 return;
             }
         });
-
         function startGame() {
+            // Lars-Box am Anfang sperren
+            $('li.family-to-assign[data-family="Lars"]').addClass('locked');
             updateDialogue(introDialogues[0].text, introDialogues[0].img);
             $('#dialogueContinue').fadeIn();
             gameState = 'dialogue_start';
             introDialogueIndex = 1;
         }
-
         function showSuccessModal() {
             $('#successMessage').text("Danke für deine Hilfe, so funktioniert alles viel besser!");
             $('#successOverlay').css('display', 'flex');
         }
-
         window.restartLevel = function() {
             location.reload();
         };
-
         window.nextLevel = function() {
-            window.location.href = 'level-select.php';
+            window.location.href = 'Level-Auswahl?completed=3&next=4';
         };
-
         startGame();
     });
 </script>

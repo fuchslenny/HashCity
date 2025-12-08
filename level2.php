@@ -1,25 +1,14 @@
 <?php
 /**
  * HashCity - Level 2: Erste Kollisionen
- *
- * Lernziel: Das Problem "Kollision" in Hashmaps demonstrieren (nach neuem Plan)
- * Spielmechanik: 3 Häuser sind vorbefüllt. Spieler fügt "Dieter" hinzu,
- * was eine Kollision auf Haus 0 mit "Chris" auslöst.
  */
 $anzahl_haeuser = 5; // 5 Häuser (0, 1, 2, 3, 4)
-// Familien, die platziert werden müssen (nur noch Dieter)
-$familien_liste = ["Dieter"];
-// Häuser, die bereits belegt sind (Schlüssel = Haus-Nr, Wert = Familie)
+// Häuser, die bereits belegt sind
 $prefilled_haeuser = [
         0 => "Chris",
         2 => "Jannes",
         3 => "Jana"
 ];
-// Hash-Funktion (Referenz): (SUMME(ASCII) % 5)
-// h(Chris) = 505 % 5 = 0
-// h(Jannes) = 607 % 5 = 2
-// h(Jana) = 378 % 5 = 3
-// h(Dieter) = 605 % 5 = 0  <- KOLLISION mit Chris
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -30,7 +19,6 @@ $prefilled_haeuser = [
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Kompletter CSS-Block aus level0.php kopiert für Konsistenz */
         * {
             margin: 0;
             padding: 0;
@@ -83,18 +71,6 @@ $prefilled_haeuser = [
             top: 0;
             z-index: 1000;
             backdrop-filter: blur(10px);
-        }
-        .header-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: #667eea;
-            margin: 0;
-        }
-        .header-subtitle {
-            font-size: 1rem;
-            color: #666;
-            font-weight: 600;
         }
         .back-btn {
             padding: 0.7rem 1.3rem;
@@ -235,13 +211,10 @@ $prefilled_haeuser = [
             position: relative;
             margin-bottom: 2.5rem;
         }
-        .street-block:last-child {
-            margin-bottom: 0;
-        }
-        /* Houses Row - NEU: Nur 5 Häuser */
+        /* Houses Row */
         .houses-row {
             display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 5 Häuser pro Reihe */
+            grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
             margin-bottom: 0.5rem;
             padding: 0 1rem;
@@ -312,23 +285,24 @@ $prefilled_haeuser = [
             box-shadow: 0 0 35px 12px rgba(255, 215, 0, 0.9);
             z-index: 11;
         }
+        .house.quadratic-target {
+            transform: translateY(-10px) scale(1.15) !important;
+            box-shadow: 0 0 35px 12px rgba(255, 0, 0, 0.9);
+            z-index: 11;
+        }
         .house-icon {
             width: 100%;
             height: 100%;
-            max-width: 100%;
-            max-height: 100%;
             object-fit: contain;
             transition: all 0.3s ease;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         }
-        /* "checked" = Vorbelegt (Licht an) */
         .house.checked .house-icon {
             filter: drop-shadow(0 4px 8px rgba(255, 167, 38, 0.5));
         }
-        /* "found" = Kollision */
         .house.found .house-icon {
             animation: pulse 1.5s infinite;
-            filter: drop-shadow(0 8px 16px rgba(255, 0, 0, 0.8)); /* Rot für Kollision */
+            filter: drop-shadow(0 8px 16px rgba(255, 215, 0, 0.8));
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
@@ -369,11 +343,10 @@ $prefilled_haeuser = [
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        /* belegte Häuser kenntlich machen */
-        .house.found .house-family {
+        .house.show-family .house-family {
             opacity: 1;
         }
-        /* Info Panel */
+        /* INFO-PANEL (Stil von Level 3/4) */
         .info-panel {
             background: rgba(255, 255, 255, 0.85);
             border-radius: 25px;
@@ -407,6 +380,52 @@ $prefilled_haeuser = [
             font-size: 0.95rem;
             margin-bottom: 0.4rem;
         }
+        .calculator-input {
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 0.7rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            transition: border-color 0.3s ease;
+        }
+        .calculator-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .calculator-button {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            margin-top: 0.5rem;
+        }
+        .calculator-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+        .calculator-result {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #2E7D32;
+            font-size: 1.1rem;
+        }
         .info-value {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.6rem;
@@ -417,66 +436,39 @@ $prefilled_haeuser = [
             background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
             border-color: #2196F3;
         }
-        .hash-result-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: #667eea;
-            text-align: center;
-        }
-        .calc-button {
-            padding: 0.6rem 1.5rem;
-            border: none;
-            border-radius: 30px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            width: 100%;
-            margin-top: 0.5rem;
-        }
-        .calc-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        .calc-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
         .family-list-container {
             max-height: 250px;
+            padding: 0 5px;
             overflow-y: auto;
-            overflow-x: hidden;
         }
         .list-group-item.to-do-family {
             cursor: pointer;
             font-weight: 700;
             transition: all 0.2s ease;
             font-size: 1.1rem;
+            border: 2px solid #aab8c2;
+            margin-bottom: 0.5rem;
+            border-radius: 10px !important;
         }
-        .list-group-item.to-do-family:hover,
+        .list-group-item.to-do-family:hover:not(.placed) {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
         .list-group-item.to-do-family.active {
             background: #667eea;
-            color: #fff;
+            color: white;
+            border-color: #667eea;
             transform: scale(1.03);
             z-index: 10;
         }
-        .list-group-item.list-group-item-success {
+        .list-group-item.to-do-family.list-group-item-success {
+            opacity: 0.3;
+            background: #e0e0e0;
+            cursor: not-allowed;
             text-decoration: line-through;
-            background: #f0f0f0;
-            color: #999;
-            cursor: default !important;
         }
-        .list-group-item.list-group-item-success:hover {
-            background: #f0f0f0;
-            color: #999;
-            transform: none;
-        }
-        /* Modal für Kollision */
+
+        /* Success Modal */
         .success-overlay {
             position: fixed;
             top: 0;
@@ -503,7 +495,7 @@ $prefilled_haeuser = [
             text-align: center;
             box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             animation: slideUp 0.5s ease;
-            border: 5px solid #D32F2F; /* Rot für Kollision */
+            border: 5px solid #4CAF50;
         }
         @keyframes slideUp {
             from { transform: translateY(100px); opacity: 0; }
@@ -522,7 +514,7 @@ $prefilled_haeuser = [
             font-family: 'Orbitron', sans-serif;
             font-size: 2.8rem;
             font-weight: 900;
-            color: #D32F2F; /* Rot für Kollision */
+            color: #4CAF50;
             margin-bottom: 1rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
@@ -533,8 +525,31 @@ $prefilled_haeuser = [
             margin-bottom: 2rem;
             font-weight: 500;
         }
-        /* Stats (ausgeblendet in diesem Level) */
-        .success-stats { display: none; }
+        .success-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-box {
+            background: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 15px;
+            border: 3px solid #4CAF50;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+        }
+        .stat-label {
+            font-size: 0.95rem;
+            color: #666;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #2E7D32;
+        }
         .success-buttons {
             display: flex;
             gap: 1rem;
@@ -580,12 +595,6 @@ $prefilled_haeuser = [
             .info-panel {
                 position: static;
             }
-            .houses-row {
-                /* 5 Häuser passen bereits gut */
-            }
-            .street {
-                height: 50px;
-            }
         }
         @media (max-width: 768px) {
             .game-container {
@@ -596,11 +605,9 @@ $prefilled_haeuser = [
                 padding: 1.5rem 1rem;
             }
             .houses-row {
-                grid-template-columns: repeat(3, 1fr); /* 3 in Reihe 1, 2 in Reihe 2 */
+                grid-template-columns: repeat(3, 1fr);
                 gap: 0.6rem;
-                padding: 0 0.5rem;
             }
-        }
     </style>
 </head>
 <body>
@@ -635,13 +642,13 @@ $prefilled_haeuser = [
             </div>
         </div>
         <div class="houses-grid">
-            <h2 class="grid-title">🏘️ Neubaugebiet (Level 2)</h2>
+            <h2 class="grid-title">🏘️ Level 2: Erste Kollisionen</h2>
             <div class="street-block">
                 <div class="houses-row">
                     <?php for ($i = 0; $i < $anzahl_haeuser; $i++):
                         $is_filled = isset($prefilled_haeuser[$i]);
                         $family_name = $is_filled ? $prefilled_haeuser[$i] : "";
-                        $class = $is_filled ? 'checked' : ''; // "checked" zeigt Namen und "Licht"
+                        $class = $is_filled ? 'checked' : '';
                         ?>
                         <div class="house <?php echo $class; ?>" data-house="<?php echo $i; ?>" data-family="<?php echo $family_name; ?>">
                             <img src="./assets/empty_house.svg" alt="Haus <?php echo $i; ?>" class="house-icon">
@@ -656,22 +663,22 @@ $prefilled_haeuser = [
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
             <div class="info-item hash-calculator">
-                <div class="info-label">Hash-Rechner 3000</div>
-                <div class="info-label mt-3">Ergebnis (Hash / Haus-Nr.):</div>
-                <div class="hash-result-value" id="hashResult">-</div>
-                <button id="hashButton" class="calc-button" disabled>Berechne Haus-Nr.</button>
+                <label for="hashInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
+                <input type="text" id="hashInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="hashButton" class="calculator-button" disabled>Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">Ergebnis ...</div>
             </div>
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
                 <div class="family-list-container">
                     <ul id="familienListe" class="list-group">
-                        <?php foreach ($familien_liste as $familie): ?>
-                            <li class="list-group-item to-do-family" data-family="<?php echo $familie; ?>">
-                                <?php echo $familie; ?>
-                            </li>
-                        <?php endforeach; ?>
+                        <li class="list-group-item to-do-family" data-family="Dieter">Dieter</li>
                     </ul>
                 </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Eingetragene Familien:</div>
+                <div class="info-value" id="occupiedCount">0 / 5</div>
             </div>
         </div>
     </div>
@@ -680,8 +687,7 @@ $prefilled_haeuser = [
     <div class="success-modal">
         <div class="success-icon">💥</div>
         <h2 class="success-title">🚨 KOLLISION!</h2>
-        <p class="success-message" id="successMessage">
-        </p>
+        <p class="success-message" id="successMessage"></p>
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Level neustarten</button>
             <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 3 →</button>
@@ -692,7 +698,6 @@ $prefilled_haeuser = [
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // --- Level 2 Setup ---
         const HASH_SIZE = <?php echo $anzahl_haeuser; ?>;
         const ZIEL_FAMILIE = "Dieter";
         let stadt = new Array(HASH_SIZE).fill(null);
@@ -706,8 +711,6 @@ $prefilled_haeuser = [
         let selectedFamily = null;
         let isFading = false;
         let investigationMode = false;
-
-        // --- Haus-Paare für Assets ---
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
             { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
@@ -721,16 +724,12 @@ $prefilled_haeuser = [
             { empty: "WohnhauRotBraunLeerNeu.svg", filled: "WohnhauRotBraunBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
-
-        // --- Dialoge ---
         const dialogues = [
             "Wir verwenden jetzt unser neues Hash-System, um die Häuser zuzuweisen. Das ist viel schneller als das lineare Suchen aus Level 0!",
             "Der Hash-Rechner rechts berechnet für jeden Namen die exakte Hausnummer. Deine Aufgabe ist es, den nächsten Bewohner zuzuweisen.",
             "Der nächste Bewohner ist Dieter. Wähle ihn jetzt aus der Liste aus, um zu starten!"
         ];
         let currentDialogue = 0;
-
-        // --- Hash-Funktion (0-indiziert) ---
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) {
@@ -738,18 +737,12 @@ $prefilled_haeuser = [
             }
             return (sum % size);
         }
-
-        // --- Zufällige Auswahl der Assets für die Häuser ---
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
             return housePairs[randomIndex];
         }
-
-        // --- Dialog-Steuerung ---
         function showNextDialogue() {
-            if (isFading || currentDialogue >= dialogues.length) {
-                return;
-            }
+            if (isFading || currentDialogue >= dialogues.length) return;
             isFading = true;
             $('#dialogueText').fadeOut(200, function() {
                 $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
@@ -763,8 +756,6 @@ $prefilled_haeuser = [
                 currentDialogue++;
             });
         }
-
-        // --- Initialisierung der Häuser mit zufälligen Assets ---
         $('.house').each(function() {
             const $house = $(this);
             const isFilled = $house.hasClass('checked');
@@ -774,13 +765,9 @@ $prefilled_haeuser = [
             $house.data('empty-asset', pair.empty);
             $house.data('filled-asset', pair.filled);
         });
-
-        // --- Event-Listener für Dialoge und Modal ---
         $(document).keydown(function(e) {
             if (e.key === 'Enter' || e.key === ' ') {
-                if (!gameStarted) {
-                    showNextDialogue();
-                }
+                if (!gameStarted) showNextDialogue();
                 else if (waitingForCollisionConfirm) {
                     waitingForCollisionConfirm = false;
                     $('#dialogueContinue').fadeOut();
@@ -788,85 +775,76 @@ $prefilled_haeuser = [
                 }
             }
         });
-
         $('.dialogue-box').click(function() {
-            if (!gameStarted) {
-                showNextDialogue();
-            }
+            if (!gameStarted) showNextDialogue();
             else if (waitingForCollisionConfirm) {
                 waitingForCollisionConfirm = false;
                 $('#dialogueContinue').fadeOut();
                 showCollisionModal(stadt[0], ZIEL_FAMILIE, 0);
             }
         });
-
-        // --- Level 2 Spielmechanik ---
         $('#familienListe .to-do-family').click(function() {
             if (gameCompleted || !gameStarted || investigationMode) return;
             const $item = $(this);
             if ($item.hasClass('list-group-item-success')) return;
             selectedFamily = $item.data('family');
-            $('#hashResult').text('-');
+            $('#hashInput').val(selectedFamily);
+            $('#hashResult').text('Ergebnis ...');
             $('#hashButton').prop('disabled', false);
             $('.to-do-family').removeClass('active');
             $item.addClass('active');
             $('.house').removeClass('highlight-target');
             $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
         });
-
         $('#hashButton').click(function() {
             if (!gameStarted || !selectedFamily) return;
             const family = selectedFamily;
             const hash = getHash(family, HASH_SIZE);
-
             if (gameCompleted) {
-                $('#hashResult').text(hash);
+                $('#hashResult').text(`Hausnummer: ${hash}`);
                 $('#dialogueText').html(
-                    "Siehst du das?! `h('Dieter')` ist 0 und `h('Chris')` ist auch 0! Zwei verschiedene Namen zeigen auf dasselbe Haus! DAS ist eine <strong>Kollision</strong>! Mein System ist nicht perfekt... Da muss ich mir was ausdenken."
+                    "Siehst du das?! Der Hash von <strong>Dieter</strong> ist 0... und der Hash von <strong>Chris</strong> ist AUCH 0! <br>Zwei verschiedene Namen führen zur gleichen Hausnummer. Das nennen wir eine <strong>Kollision</strong>! Mein System ist wohl doch nicht perfekt..."
                 );
                 $('#dialogueContinue').fadeIn();
                 waitingForCollisionConfirm = true;
                 $(this).prop('disabled', true);
             }
             else {
-                $('#hashResult').text(hash);
+                $('#hashResult').text(`Hausnummer: ${hash}`);
                 $('#dialogueText').text(`Perfekt! Laut Rechner gehört Familie ${family} in Haus ${hash}. Klicke auf das Haus, um sie einziehen zu lassen.`);
                 $('.house').removeClass('highlight-target');
                 $(`.house[data-house=${hash}]`).addClass('highlight-target');
                 $(this).prop('disabled', true);
             }
         });
-
         $('.house').click(function() {
             if (investigationMode && $(this).data('house') === 0) {
                 selectedFamily = $(this).data('family');
                 $('#hashButton').prop('disabled', false);
-                $('#hashResult').text('-');
+                $('#hashResult').text('Ergebnis ...');
                 $('.house').removeClass('highlight-target');
                 $(this).addClass('highlight-target');
+                $('#hashInput').val(selectedFamily);
                 $('#dialogueText').text(`Okay, '${selectedFamily}' ist ausgewählt. Klick jetzt bitte auf 'Berechnen'. Ich will sehen, was sein Hash-Wert ist!`);
                 investigationMode = false;
                 gameCompleted = true;
                 return;
             }
             if (gameCompleted || !gameStarted || waitingForCollisionConfirm || investigationMode) return;
-            if (!selectedFamily || $('#hashResult').text() === '-') {
+            if (!selectedFamily || $('#hashResult').text() === 'Ergebnis ...') {
                 $('#dialogueText').text(`Du musst erst 'Dieter' aus der Liste wählen und auf 'Berechnen' klicken!`);
                 return;
             }
-
             const $house = $(this);
             const houseNumber = $house.data('house');
             const targetHash = getHash(ZIEL_FAMILIE, HASH_SIZE);
-
             if (houseNumber !== targetHash) {
                 $('#dialogueText').text("Das war das falsche Haus. Das Ziel war Haus 0.");
                 $('#hashButton').prop('disabled', false);
-                $('#hashResult').text('-');
+                $('#hashResult').text('Ergebnis ...');
                 $('.house').removeClass('highlight-target');
                 return;
             }
-
             const currentOccupant = stadt[houseNumber];
             if (currentOccupant !== null) {
                 $house.addClass('found');
@@ -879,30 +857,23 @@ $prefilled_haeuser = [
                 $(`.to-do-family[data-family="${ZIEL_FAMILIE}"]`).removeClass('active');
             }
         });
-
-        // --- Modal-Anzeige ---
         function showCollisionModal(occupant, newcomer, houseNum) {
             const successMsg = `
                 <strong style="color: #667eea;">Major Mike sagt:</strong><br>
-                "Oh nein! Haus <strong>${houseNum}</strong> ist bereits von Familie <strong>${occupant}</strong> bewohnt!
-                Und Familie <strong>${newcomer}</strong> soll dort auch einziehen... Das funktioniert nicht!"
+                "Oh nein! Haus <strong>${houseNum}</strong> ist bereits von <strong>${occupant}</strong> bewohnt!
+                Und <strong>${newcomer}</strong> soll dort auch einziehen... Das funktioniert nicht!"
                 <br><br>
                 "Wir müssen im nächsten Level eine Lösung für diese <strong>Kollision</strong> finden."
             `;
             $('#successMessage').html(successMsg);
             $('#successOverlay').css('display', 'flex');
         }
-
-        // --- Globale Funktionen für Modal-Buttons ---
-        window.restartLevel = function() {
-            location.reload();
-        };
-
+        window.restartLevel = function() { location.reload(); };
         window.nextLevel = function() {
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-select.php?completed=2&next=3';
+                window.location.href = 'Level-Auswahl?completed=2&next=3';
             }, 500);
         };
     });
