@@ -4,7 +4,7 @@
  *
  * Lernziel: Das Problem der linearen Suche demonstrieren
  * Spielmechanik: Spieler muss linear durch alle Häuser suchen, um Familie Müller zu finden
- * Familie Müller befindet sich in Haus 16
+ * Familie Müller befindet sich in Haus 15
  */
 $familien = [
         0 => "Schmidt",
@@ -750,7 +750,7 @@ $familien = [
         <div class="success-icon">🎉</div>
         <h2 class="success-title">Familie gefunden!</h2>
         <p class="success-message" id="successMessage">
-            Gut gemacht! Du hast Familie Müller in Haus 16 gefunden!
+            Gut gemacht! Du hast Familie Müller in Haus 15 gefunden!
         </p>
         <div class="success-stats">
             <div class="stat-box">
