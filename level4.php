@@ -469,6 +469,7 @@ $familien_liste = [
         $('#hashButton').click(function() {
             if (!selectedFamily) return;
             const name = $('#nameInput').val().trim();
+            if (name==='') return;
             if (name !== selectedFamily) {
                 if ('search_sara_calc' || 'search_tina_calc'){
                     $('#dialogueText').text(`Derzeit wird nicht nach ${name} gesucht, sondern nach ${selectedFamily}`);
@@ -531,7 +532,9 @@ $familien_liste = [
                     $('#dialogueText').text(`Das ist ${clickedFamily}. Weiter suchen (Linear Probing)!`);
                     $house.removeClass('highlight-target');
                     $(`.house[data-house=${houseNumber + 1}]`).addClass('highlight-target');
-                } else {
+                } else if (clickedFamily === '' || clickedFamily === null){
+                    $('#dialogueText').text(`Dieses Haus ist leer`);
+                } else{
                     $('#dialogueText').text(`Das ist ${clickedFamily}. Falsches Haus.`);
                 }
             }
