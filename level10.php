@@ -743,17 +743,6 @@
         <!-- Info Panel -->
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-            <div class="load-factor-box lf-bad" id="lfBox">
-                <div class="lf-label">Load Factor (Belegung)</div>
-                <div class="lf-value" id="lfValue">0.95</div>
-                <div class="lf-label" id="lfText">Kritisch (Zu voll!)</div>
-            </div>
-            <div class="info-item hash-calculator">
-                <div class="info-label">Bewohnername:</div>
-                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
-                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
-                <div class="calculator-result" id="hashResult">Ergebnis ...</div>
-            </div>
             <!-- Bewerber-Liste -->
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
@@ -762,6 +751,17 @@
                         <li class="list-group-item to-do-family" data-family="Levi">Levi</li>
                     </ul>
                 </div>
+            </div>
+            <div class="info-item hash-calculator">
+                <div class="info-label">Bewohnername:</div>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">Ergebnis ...</div>
+            </div>
+            <div class="load-factor-box lf-bad" id="lfBox">
+                <div class="lf-label">Load Factor (Belegung)</div>
+                <div class="lf-value" id="lfValue">0.95</div>
+                <div class="lf-label" id="lfText">Kritisch (Zu voll!)</div>
             </div>
             <div class="info-item">
                 <div class="info-label">Eingetragene Familien:</div>

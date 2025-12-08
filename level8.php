@@ -671,18 +671,6 @@ $familien_liste = [
         </div>
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-            <div class="info-item hash-calculator">
-                <div class="info-label">Bewohnername:</div>
-                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
-                <button id="btnCalcH1" class="calculator-button">Berechne Haus-Nr.</button>
-                <div class="calculator-result" id="h1Result">Ergebnis ...</div>
-            </div>
-            <div class="info-item step-calculator" id="stepCalcBox">
-                <div class="info-label">2. Hash (Schrittweite)</div>
-                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 5 + 1</div>
-                <div class="hash-result-value" id="h2Result">-</div>
-                <button id="btnCalcH2" class="calc2-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
-            </div>
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
                 <div class="family-list-container">
@@ -694,6 +682,18 @@ $familien_liste = [
                         <?php endforeach; ?>
                     </ul>
                 </div>
+            </div>
+            <div class="info-item hash-calculator">
+                <div class="info-label">Bewohnername:</div>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="btnCalcH1" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="h1Result">Ergebnis ...</div>
+            </div>
+            <div class="info-item step-calculator" id="stepCalcBox">
+                <div class="info-label">2. Hash (Schrittweite)</div>
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 5 + 1</div>
+                <div class="hash-result-value" id="h2Result">-</div>
+                <button id="btnCalcH2" class="calc2-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
             </div>
         </div>
     </div>
