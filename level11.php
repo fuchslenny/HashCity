@@ -565,7 +565,12 @@ $familien_liste = array_merge($old_residents, $new_residents);
             setTimeout(() => {
                 phase = 'select_family';
                 $('#calcContainer').css({opacity: 1, pointerEvents: 'all'});
-                showDialogue("Siehst du? Thomas (Hash 620) ist von Haus 0 auf Haus 20 gezogen. Jetzt ist Haus 0 endlich frei für Levi! Probier es aus.");
+                showDialogue(
+                    "Siehst du? Weil wir jetzt <strong>durch 40 teilen</strong> (statt 20), ändern sich die Hausnummern!<br>" +
+                    "Thomas (Hash 620) rechnet jetzt 620 % 40 = 20. Vorher war es 0.<br>" +
+                    "Dadurch ist Haus 0 endlich frei für Levi!",
+                    'wink_major.png'
+                );
                 placeNextFamily();
             }, 40 * 30 + 1000);
         }
@@ -621,6 +626,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             $('#hashInput').val('');
             currentFamilyIdx++;
             $('#occupiedCount').text(currentFamilyIdx + ' / 40');
+            updateLoadFactor();
             if (currentFamilyIdx < families.length) {
                 phase = 'select_family';
                 placeNextFamily();
