@@ -314,21 +314,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
         </div>
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-            <div class="load-factor-box" id="lfBox">
-                <div class="lf-label">Load Factor (Belegung)</div>
-                <div class="lf-value" id="lfValue">0.95</div>
-                <div class="lf-label" id="lfText">Kritisch (Zu voll!)</div>
-            </div>
-            <button id="btnExpand" class="calculator-button expand-btn">🏗️ STADT ERWEITERN</button>
             <div class="info-panel">
-                <div class="info-item hash-calculator">
-                    <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
-                    <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
-                    <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
-                    <div class="calculator-result" id="hashResult">
-                        Ergebnis ...
-                    </div>
-                </div>
                 <div class="info-item">
                     <div class="info-label">Einziehende Familien:</div>
                     <div class="family-list-container">
@@ -341,6 +327,20 @@ $familien_liste = array_merge($old_residents, $new_residents);
                         </ul>
                     </div>
                 </div>
+                <div class="info-item hash-calculator">
+                    <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
+                    <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                    <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                    <div class="calculator-result" id="hashResult">
+                        Ergebnis ...
+                    </div>
+                </div>
+                <div class="load-factor-box" id="lfBox">
+                    <div class="lf-label">Load Factor (Belegung)</div>
+                    <div class="lf-value" id="lfValue">0.95</div>
+                    <div class="lf-label" id="lfText">Kritisch (Zu voll!)</div>
+                </div>
+                <button id="btnExpand" class="calculator-button expand-btn">🏗️ STADT ERWEITERN</button>
                 <div class="info-item">
                     <div class="info-label">Eingetragene Familien:</div>
                     <div class="info-value" id="occupiedCount">0 / 10</div>
