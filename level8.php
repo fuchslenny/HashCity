@@ -781,7 +781,6 @@ $familien_liste = [
         const dialogues = [
             "Das sieht ja schon richtig gut aus! Du darfst jetzt diesen neuen Stadtteil allein bearbeiten.",
             "Verwende dafür Double Hashing, falls es zu Kollisionen kommt. Beachte dabei, dass du die Liste von oben nach unten abarbeitest.",
-            "Denk dran: Hinten rechnen wir immer **+1**, damit die Schrittweite nie 0 ist. Viel Erfolg!"
         ];
         let dialogueIdx = 0;
         // --- Helper Functions ---
