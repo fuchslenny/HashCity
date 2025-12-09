@@ -84,13 +84,13 @@ $bewohner_liste = [
         @keyframes blink { 0%, 50%, 100% { opacity: 1; } 25%, 75% { opacity: 0.5; } }
         /* --- HAUS DESIGN --- */
         .houses-grid {
-            background: rgba(255, 255, 255, 0.8); border-radius: 25px; padding: 2rem;
+            background: rgba(255, 255, 255, 0.8); border-radius: 25px; padding: 3rem;
             border: 4px solid #fff; display: flex; flex-direction: column; justify-content: center;
         }
         .street-block { margin-bottom: 6rem; position: relative; }
         .houses-row {
             display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem;
-            padding: 0 1rem; position: relative; z-index: 2;
+            padding: 0 1rem 15px 1rem; position: relative; z-index: 2;
             align-items: end;
             min-height: 250px;
         }
@@ -141,7 +141,7 @@ $bewohner_liste = [
             display: flex;
             flex-direction: column-reverse;
             align-items: center;
-            gap: 45px;
+            gap: 8px;
             z-index: 200;
             pointer-events: none;
         }
@@ -543,6 +543,7 @@ $bewohner_liste = [
         var currentHash = null;
         var inputLocked = false;
         var SEARCH_TARGET = "Thomas";
+        var occupiedHouses = 0;
 
         // --- Haus-Paare für Assets ---
         const housePairs = [
@@ -780,6 +781,8 @@ $bewohner_liste = [
                         }
                         var newAsset = matchingPair.filled;
                         $houseElement.find('.img-house-base').attr('src', `./assets/${newAsset}`);
+                        occupiedHouses++;
+                        $('#occupiedCount').text(occupiedHouses + ' / 15');
 
                     }else if (bewohnerAnzahl > 1) {
                         const currentAsset = $houseElement.find('.img-house-base').attr('src');
@@ -793,6 +796,8 @@ $bewohner_liste = [
                         }
                         var extensionImg = matchingPair.extension;
                         $houseContainer.append($('<img>', {src: `./assets/${extensionImg}`, alt: "Erweiterung", class: "img-house-extension"}));
+                        occupiedHouses++;
+                        $('#occupiedCount').text(occupiedHouses + ' / 15');
                     }
 
                     $houseContainer.removeClass('highlight-target');
