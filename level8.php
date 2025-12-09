@@ -671,18 +671,6 @@ $familien_liste = [
         </div>
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-            <div class="info-item hash-calculator">
-                <div class="info-label">Bewohnername:</div>
-                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
-                <button id="btnCalcH1" class="calculator-button">Berechne Haus-Nr.</button>
-                <div class="calculator-result" id="h1Result">Ergebnis ...</div>
-            </div>
-            <div class="info-item step-calculator" id="stepCalcBox">
-                <div class="info-label">2. Hash (Schrittweite)</div>
-                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 5 + 1</div>
-                <div class="hash-result-value" id="h2Result">-</div>
-                <button id="btnCalcH2" class="calc2-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
-            </div>
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
                 <div class="family-list-container">
@@ -694,6 +682,18 @@ $familien_liste = [
                         <?php endforeach; ?>
                     </ul>
                 </div>
+            </div>
+            <div class="info-item hash-calculator">
+                <div class="info-label">Bewohnername:</div>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="btnCalcH1" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="h1Result">Ergebnis ...</div>
+            </div>
+            <div class="info-item step-calculator" id="stepCalcBox">
+                <div class="info-label">2. Hash (Schrittweite)</div>
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 5 + 1</div>
+                <div class="hash-result-value" id="h2Result">-</div>
+                <button id="btnCalcH2" class="calc2-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
             </div>
         </div>
     </div>
@@ -779,11 +779,9 @@ $familien_liste = [
         let isFading = false;
         // Dialoge
         const dialogues = [
-            "Quadratic Probing war schon ein guter Anfang, führt aber leider oft zu 'Clustern'. Das sind Ketten von belegten Häusern, die das Suchen langsam machen.",
-            "Chris und ich haben deswegen ein neues System entwickelt: Double Hashing (Doppelter Hash). Damit verteilen wir die Bewohner noch besser.",
-            "Der Trick ist: Bei einer Kollision springen wir nicht einfach ein Haus weiter (+1), sondern nutzen eine zweite Formel, um die Schrittweite zu berechnen.",
-            "Diese zweite Formel lautet: (Summe ASCII) % 5 + 1. Den Rechner dafür habe ich dir unten rechts freigeschaltet.",
-            "Leg los! Berechne immer erst die normale Hausnummer. Nur wenn das Haus voll ist, berechnest du die Sprungweite mit dem zweiten Hash."
+            "Das sieht ja schon richtig gut aus! Du darfst jetzt diesen neuen Stadtteil allein bearbeiten.",
+            "Verwende dafür Double Hashing, falls es zu Kollisionen kommt. Beachte dabei, dass du die Liste von oben nach unten abarbeitest.",
+            "Denk dran: Hinten rechnen wir immer **+1**, damit die Schrittweite nie 0 ist. Viel Erfolg!"
         ];
         let dialogueIdx = 0;
         // --- Helper Functions ---
@@ -862,26 +860,28 @@ $familien_liste = [
         });
         // 2. H1 Berechnen
         $('#btnCalcH1').click(function() {
-            console.log(phase);
             if (isFading) return;
             if (phase !== 'calc_h1' && phase !== 'search_calc_h1') return;
-            let name = (phase === 'search_calc_h1') ? SEARCH_TARGET : selectedFamily;
-            let val = calcH1(name);
+            let val = calcH1(selectedFamily);
             if (phase === 'search_calc_h1') {
-                searchH1 = val;
-                $('#h1Result').text(`Hausnummer: ${val}`);
-                showDialogue(`Der Start-Hash für Paul ist ${val}. Klicke auf Haus ${val} um nachzusehen.`);
-                $('.house').removeClass('highlight-target');
-                $(`#house-${val}`).addClass('highlight-target');
-                phase = 'search_check_h1';
-                $(this).prop('disabled', true);
+                selectedFamily = $('#nameInput').val();
+                val = calcH1(selectedFamily);
+                if(selectedFamily === undefined || selectedFamily === null || selectedFamily === '' ){
+                    return;
+                }
+                if(selectedFamily !== "Paul"){
+                    showDialogue(`Derzeit suchen wir nach Paul und nicht nach ${selectedFamily}`);
+                }else{
+                    searchH1 = val;
+                    $('#h1Result').text(`Hausnummer: ${val}`);
+                    showDialogue(`Der Start-Hash für Paul ist ${val}. Klicke auf Haus ${val} um nachzusehen.`);
+                    phase = 'search_check_h1';
+                    $(this).prop('disabled', true);
+                }
                 return;
             }
             h1Value = val;
             $('#h1Result').text(`Hausnummer: ${val}`);
-            showDialogue(`Der 1. Hash ergibt ${val}. Klicke auf Haus ${val}, um zu prüfen, ob es frei ist.`);
-            $('.house').removeClass('highlight-target');
-            $(`#house-${val}`).addClass('highlight-target');
             phase = 'place_h1';
 
         });
@@ -919,7 +919,6 @@ $familien_liste = [
                     showDialogue(`Oha! Haus ${houseIdx} ist AUCH besetzt. Wir müssen NOCHMAL springen. Addiere wieder ${h2Value}!`, 'sad_major.png');
                     $('.house').removeClass('highlight-target');
                     let nextTarget = (currentProbeIndex + h2Value) % HASH_SIZE;
-                    $(`#house-${nextTarget}`).addClass('highlight-target');
                 }
             }
         });
@@ -969,28 +968,21 @@ $familien_liste = [
             $(this).prop('disabled', true);
             if (phase === 'search_calc_h2') {
                 searchH2 = step;
-                let nextHouse = (searchH1 + step) % HASH_SIZE;
-                showDialogue(`Der 2. Hash ergibt Schrittweite ${step}. Rechne: ${searchH1} + ${step}. Klicke auf das Ergebnis.`);
                 $('.house').removeClass('highlight-target');
-                $(`#house-${nextHouse}`).addClass('highlight-target');
                 phase = 'search_check_step';
                 return;
             }
-            let nextHouse = (currentProbeIndex + step) % HASH_SIZE;
-            showDialogue(`Der 2. Hash ergibt Schrittweite ${step}! Aktuelles Haus (${currentProbeIndex}) + ${step} = Haus ${nextHouse}. Klicke darauf.`);
             $('.house').removeClass('highlight-target');
-            $(`#house-${nextHouse}`).addClass('highlight-target');
             phase = 'place_apply_step';
         });
         // --- Search Phase ---
         function startSearchPhase() {
             phase = 'intro_search';
             showDialogue("Alle Bewohner sind untergebracht! Super Arbeit.", 'wink_major.png');
-            $('.list-group-item').removeClass('done').css('cursor', 'default');
             $('#btnCalcH1').prop('disabled', true);
             $('#btnCalcH2').prop('disabled', true);
             setTimeout(() => {
-                showDialogue("Ich bin heute Abend bei Sarah eingeladen. Kannst du mir ihre Hausnummer sagen? (Nutze den Rechner!)");
+                showDialogue("Ich bin heute Abend bei Paul eingeladen. Kannst du mir seine Hausnummer sagen? (Nutze den Rechner!)");
                 $('#h1Result').text('Ergebnis ...');
                 $('#h2Result').text('-');
                 $('#stepCalcBox').removeClass('active');
@@ -1010,9 +1002,9 @@ $familien_liste = [
                     return;
                 }
                 if (city[houseIdx] === SEARCH_TARGET) {
-                    endLevel(); // Sollte nicht passieren, da Sarah kollidiert
+                    endLevel();
                 } else {
-                    showDialogue(`Das ist ${city[houseIdx]}, nicht Sarah! Wir brauchen den 2. Hash für die Suche. Klicke unten auf 'Sprungweite berechnen'.`, 'sad_major.png');
+                    showDialogue(`Das ist ${city[houseIdx]}, nicht Paul! Wir brauchen den 2. Hash für die Suche. Klicke unten auf 'Sprungweite berechnen'.`, 'sad_major.png');
                     $('#stepCalcBox').addClass('active');
                     $('#btnCalcH2').prop('disabled', false);
                     phase = 'search_calc_h2';
@@ -1032,7 +1024,6 @@ $familien_liste = [
                     showDialogue(`Das ist ${city[houseIdx]}! Immer noch nicht. Addiere nochmal die Schrittweite ${searchH2}.`);
                     let next = (searchH1 + searchH2) % HASH_SIZE;
                     $('.house').removeClass('highlight-target');
-                    $(`#house-${next}`).addClass('highlight-target');
                 }
             }
         }
