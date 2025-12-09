@@ -86,7 +86,9 @@ $final_residents = [
         /* Images */
         .house-icon { width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2)); }
         .img-house-base { width: 100%; height: auto; z-index: 1; display: block; position: relative; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
-        .img-house-extension { width: 100%; height: auto; z-index: 10; display: block; position: relative; margin-bottom: -5px; animation: fallDown 0.4s ease-out; }
+        .img-house-extension { width: 100%; height: auto; z-index: 10; display: block; position: relative; margin-bottom: -5px;}
+        .img-house-extension.top-floor {animation: fallDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+
         @keyframes fallDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
         .house-number { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: 900; color: white; background: #333; padding: 2px 6px; border-radius: 4px; z-index: 20; }
@@ -302,10 +304,16 @@ $final_residents = [
         { base: "WohnhauGruenBraunLeerNeu.svg", fill: "WohnhauGruenBraunBesetztNeu.svg" },
     ];
     const housePairsChaining = [
-        { base: "Wohnhaus2BlauBraun.svg", extension: "WohnhausBlauBraunErweiterung.svg" },
-        { base: "Wohnhaus2BlauGrau.svg", extension: "WohnhausBlauGrauErweiterung.svg" },
-        { base: "Wohnhaus2BlauRot.svg", extension: "WohnhausBlauRotErweiterung.svg" },
-        { base: "Wohnhaus2GrauBraun.svg", extension: "WohnhausGrauBraunErweiterung.svg" },
+        {empty: "WH2BlauBraunLeer.svg", filled: "WH2BlauBraun.svg", extension: "WHBlauBraunErweiterung.svg"},
+        {empty: "WH2BlauGrauLeer.svg", filled: "WH2BlauGrau.svg", extension: "WHBlauGrauErweiterung.svg"},
+        {empty: "WH2BlauRotLeer.svg", filled: "WH2BlauRot.svg", extension: "WHBlauRotErweiterung.svg"},
+        {empty: "WH2GrauBraunLeer.svg", filled: "WH2GrauBraun.svg", extension: "WHGrauBraunErweiterung.svg"},
+        {empty: "WH2GruenBraunLeer.svg", filled: "WH2GruenBraun.svg", extension: "WHGruenBraunErweiterung.svg"},
+        {empty: "WH2GruenGrauLeer.svg", filled: "WH2GruenGrau.svg", extension: "WHGruenGrauErweiterung.svg"},
+        {empty: "WH2GelbBraunLeer.svg", filled: "WH2GelbBraun.svg", extension: "WHGelbBraunErweiterung.svg"},
+        {empty: "WH2GelbRotLeer.svg", filled: "WH2GelbRot.svg", extension: "WHGelbRotErweiterung.svg"},
+        {empty: "WH2RotBraunLeer.svg", filled: "WH2RotBraun.svg", extension: "WHRotBraunErweiterung.svg"},
+        {empty: "WH2RotRotLeer.svg", filled: "WH2RotRot.svg", extension: "WHRotRotErweiterung.svg"}
     ];
 
     // --- Global State ---
@@ -363,7 +371,7 @@ $final_residents = [
         $el.empty();
         $el.append(`<div class="house-number">${$el.data('index')}</div>`);
         $el.append(`<div class="house-occupant"></div>`);
-        if(gameMode === 'chaining') $el.append(`<img src="./assets/${pair.base}" class="img-house-base">`);
+        if(gameMode === 'chaining') $el.append(`<img src="./assets/${pair.empty}" class="img-house-base">`);
         else $el.append(`<img src="./assets/${pair.base}" class="house-icon">`);
     }
 
@@ -377,10 +385,14 @@ $final_residents = [
         $el.append(`<div class="house-occupant"></div>`);
 
         if (gameMode === 'chaining') {
-            $el.append(`<img src="./assets/${pair.base}" class="img-house-base">`);
+            $el.append(`<img src="./assets/${pair.filled}" class="img-house-base">`);
             if (count > 1) {
-                for(let i = 1; i < count; i++) {
-                    $el.append(`<img src="./assets/${pair.extension}" class="img-house-extension" style="z-index:${10+i}">`);
+                for (let i = 1; i < count; i++) {
+                    const $extension = $(`<img src="./assets/${pair.extension}" class="img-house-extension">`);
+                    if (i === count - 1) { // Nur die oberste Etage
+                        $extension.addClass('top-floor');
+                    }
+                    $el.append($extension);
                 }
             }
             if(count > 0) {
