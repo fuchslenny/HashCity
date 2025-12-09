@@ -782,7 +782,9 @@
         }
         const dialogues = [
             "Guck mal, das ist einer der neuen Stadtteile. Hier ziehen demnächst die neuen Stadtbewohner ein. Damit das nicht so unübersichtlich wie im vorherigen Stadtteil wird, habe ich mir etwas ganz Besonderes überlegt. Dafür dürfen keine Namen doppelt existieren.",
-            "Hier rechts befindet sich unser Stadtplaner. Dort siehst du, welche Hausnummer zu welchem Namen gehört. Klicke einfach auf einen Namen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechnen Haus-Nr.'."
+            "Hier rechts befindet sich unser Stadtplaner. Dort siehst du, welche Hausnummer zu welchem Namen gehört. Klicke einfach auf einen Namen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechne Haus-Nr.'.",
+            "Unser Stadtplaner funktioniert ganz ähnlich wie ein Hashrechner bei einem Computer! Zunächst berechnet er die Summe der einzelnen ASCII-Zeichen der Namen unserer Bewohner.",
+            "Danach rechnet er diese Zahl noch modulu der Größe des Stadtviertels, hier also 5.<br> Hashmaps machen das ganz ähnlich."
         ];
         const sophieDialogue = "Ich sehe, du hast für alle Bewohner ein Haus gefunden. Ich habe noch einen Termin mit Sophie, kannst du mir helfen sie zu finden? Nutze den Hash-Rechner, um ihre Hausnummer zu berechnen.";
         let currentDialogue = 0;
@@ -802,7 +804,7 @@
             isFading = true;
 
             $('#dialogueText').fadeOut(200, function() {
-                $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
+                $(this).html(dialogues[currentDialogue]).fadeIn(200, function() {
                     isFading = false;
                 });
             });
@@ -823,7 +825,7 @@
                 $('#dialogueContinue').fadeOut();
 
                 $('#dialogueText').fadeOut(200, function() {
-                    $(this).text('Okay, lass uns anfangen! Wähle die erste Familie aus der Liste.');
+                    $(this).html('Okay, lass uns anfangen! Wähle die erste Familie aus der Liste.');
                     $(this).fadeIn(200, function() {
                         gameStarted = true; // Spiel jetzt freigeben
                         isFading = false;   // Sperre aufheben
