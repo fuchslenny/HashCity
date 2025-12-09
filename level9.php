@@ -499,7 +499,7 @@ $bewohner_liste = [
             </div>
             <div class="info-item">
                 <div class="info-label">Eingetragene Familien:</div>
-                <div class="info-value" id="occupiedCount">0 / 10</div>
+                <div class="info-value" id="occupiedCount">0 / 11</div>
             </div>
         </div>
     </div>
@@ -511,16 +511,6 @@ $bewohner_liste = [
         <p class="success-message" id="successMessage">
             Danke für deine Hilfe!
         </p>
-        <div class="success-stats">
-            <div class="stat-box">
-                <div class="stat-label">Versuche</div>
-                <div class="stat-value" id="finalAttempts">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Familien eingetragen</div>
-                <div class="stat-value" id="finalOccupied">0</div>
-            </div>
-        </div>
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
             <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 10 →</button>
@@ -536,7 +526,7 @@ $bewohner_liste = [
         var HASH_SIZE = 10;
         var familien = <?php echo json_encode($bewohner_liste); ?>;
         var stadt = new Array(HASH_SIZE).fill(null).map(function() { return []; });
-        var introStep = 0;
+        var currentDialogue = 0;
         var gamePhase = "intro";
         var currentIdx = 0;
         var currentName = null;
@@ -642,22 +632,22 @@ $bewohner_liste = [
         });
 
         // --- DIALOGE ---
-        var introTexts = [
-            "Die Effektivität von Double Hashing hängt stark von der zweiten Hashfunktion ab.",
-            "Wir führen nun <b>Mehrfamilienhäuser</b> ein (Separate Chaining). Bei einer Kollision dürfen Bewohner in dasselbe Haus!",
-            "Das funktioniert so: Wenn mehrere Bewohner ins selbe Haus sollen, entsteht ein Mehrfamilienhaus (Liste).",
-            "Trage nun die Bewohner ein. Berechne zuerst die Hausnummer. Nur bei einer Kollision entsteht ein Anbau."
+        var dialogues = [
+            "Willkommen zurück! Erinnerst du dich? Bisher mussten wir bei belegten Häusern immer lange nach einem freien Platz suchen (Probing). Das war mühsam.",
+            "Hier machen wir es schlauer: Wir suchen <strong>nicht</strong> weiter! Wenn ein Haus belegt ist, bauen wir einfach an.",
+            "Das Fachwort dafür ist <strong>Seperate Chaining</strong>. Wir erstellen quasi eine Liste von Bewohnern an derselben Adresse – wie in einem Mehrfamilienhaus.",
+            "Leg los! Berechne die Hausnummer. Ist das Haus voll? Kein Problem: Wir bauen einfach eine Etage drauf!"
         ];
 
-        $('#dialogueText').html(introTexts[0]);
+        $('#dialogueText').html(dialogues[0]);
 
         // --- INTRO LOGIK ---
         $('#dialogueBox').click(function() {
             if (gamePhase !== "intro") return;
-            introStep++;
-            if (introStep < introTexts.length) {
-                $('#dialogueText').fadeOut(100, function() { $(this).html(introTexts[introStep]).fadeIn(100); });
-                if(introStep === 1) $('#majorMikeImage').attr('src', './assets/card_major.png');
+            currentDialogue++;
+            if (currentDialogue < dialogues.length) {
+                $('#dialogueText').fadeOut(100, function() { $(this).html(dialogues[currentDialogue]).fadeIn(100); });
+                if(currentDialogue === 1) $('#majorMikeImage').attr('src', './assets/card_major.png');
             } else {
                 startGamePlacement();
             }
@@ -666,10 +656,10 @@ $bewohner_liste = [
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ')) {
                 if (gamePhase !== "intro") return;
-                introStep++;
-                if (introStep < introTexts.length) {
-                    $('#dialogueText').fadeOut(100, function() { $(this).html(introTexts[introStep]).fadeIn(100); });
-                    if(introStep === 1) $('#majorMikeImage').attr('src', './assets/card_major.png');
+                currentDialogue++;
+                if (currentDialogue < dialogues.length) {
+                    $('#dialogueText').fadeOut(100, function() { $(this).html(dialogues[currentDialogue]).fadeIn(100); });
+                    if(currentDialogue === 1) $('#majorMikeImage').attr('src', './assets/card_major.png');
                 } else {
                     startGamePlacement();
                 }
@@ -782,7 +772,7 @@ $bewohner_liste = [
                         var newAsset = matchingPair.filled;
                         $houseElement.find('.img-house-base').attr('src', `./assets/${newAsset}`);
                         occupiedHouses++;
-                        $('#occupiedCount').text(occupiedHouses + ' / 15');
+                        $('#occupiedCount').text(occupiedHouses + ' / 11');
 
                     }else if (bewohnerAnzahl > 1) {
                         const currentAsset = $houseElement.find('.img-house-base').attr('src');
@@ -797,7 +787,7 @@ $bewohner_liste = [
                         var extensionImg = matchingPair.extension;
                         $houseContainer.append($('<img>', {src: `./assets/${extensionImg}`, alt: "Erweiterung", class: "img-house-extension"}));
                         occupiedHouses++;
-                        $('#occupiedCount').text(occupiedHouses + ' / 15');
+                        $('#occupiedCount').text(occupiedHouses + ' / 11');
                     }
 
                     $houseContainer.removeClass('highlight-target');

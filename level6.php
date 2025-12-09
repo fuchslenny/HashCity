@@ -803,9 +803,6 @@
         let searchTarget = null;
         let currentFamilyIndex = 0;
         const families = ["Thomas", "Hans", "Dieter", "Lennard", "Chris", "Luise", "Jana", "Marie", "Hannah", "Sophie", "Levi", "Sammy", "Nele", "Georg", "Emma"];
-        const dialogues = [
-            "Das sieht ja schon richtig gut aus. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür quadratic probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Bearbeite sie von oben nach unten."
-        ];
         const successDialogue = "Danke für deine Hilfe!";
         const errorDialogue = "Dieses Haus kommt nicht in Frage. Versuche es erneut und achte dabei auf die Rechtschreibung des Namens und dem Verfahren bei einer Kollision (quadratic probing).";
         const correctDialogue = "Sehr gut! Alle Bewohner sind im richtigen Haus.";
