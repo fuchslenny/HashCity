@@ -743,17 +743,6 @@
         <!-- Info Panel -->
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-            <div class="load-factor-box lf-bad" id="lfBox">
-                <div class="lf-label">Load Factor (Belegung)</div>
-                <div class="lf-value" id="lfValue">0.95</div>
-                <div class="lf-label" id="lfText">Kritisch (Zu voll!)</div>
-            </div>
-            <div class="info-item hash-calculator">
-                <div class="info-label">Bewohnername:</div>
-                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
-                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
-                <div class="calculator-result" id="hashResult">Ergebnis ...</div>
-            </div>
             <!-- Bewerber-Liste -->
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
@@ -762,6 +751,17 @@
                         <li class="list-group-item to-do-family" data-family="Levi">Levi</li>
                     </ul>
                 </div>
+            </div>
+            <div class="info-item hash-calculator">
+                <div class="info-label">Bewohnername:</div>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">Ergebnis ...</div>
+            </div>
+            <div class="load-factor-box lf-bad" id="lfBox">
+                <div class="lf-label">Load Factor (Belegung)</div>
+                <div class="lf-value" id="lfValue">0.95</div>
+                <div class="lf-label" id="lfText">Kritisch (Zu voll!)</div>
             </div>
             <div class="info-item">
                 <div class="info-label">Eingetragene Familien:</div>
@@ -846,12 +846,12 @@
             "Separate Chaining erzeugt bei vielen Daten lange Listen, die die Such Performance beeinträchtigen. Außerdem können einige Speicherbereiche ungenutzt bleiben. Also entstehen sehr große Mehrfamilienhäuser, in denen man dann auch keine Bewohner schnell findet. Zudem können Häuser so auch leer stehen bleiben.",
             "Ich habe hier mal etwas vorbereitet. 19 Bewohner sind bereits eingezogen, somit sind die Häuser 0 bis 18 belegt.",
             "Wähle nun Levi aus der Liste und berechne seinen Hash. Bei Kollisionen nutze bitte linear probing.",
-            "Levi soll die Hausnummer 0 haben, leider ist sie belegt, aber nach dem Prinzip des Linear Probings können wir ja einfach das nächstfreie Haus nehmen. Das sollte kein Problem sein, oder?",
+            "Levi soll die Hausnummer 0 haben, leider ist sie belegt, aber nach dem Prinzip des Linear Probings können wir ja einfach das nächste freie Haus nehmen. Das sollte kein Problem sein, oder?",
             "Der Computer sieht nicht, welche Stelle im Speicher belegt ist oder nicht. Er muss jedes Haus einzeln prüfen. Das sollst du nun auch nachvollziehen, indem du jedes Haus der Reihe nach durchgehst!",
-            "Ganz schön viel Aufwand was? Die Stadt ist einfach zu voll, das könnte mit Hashmaps genauso passieren.",
+            "Ganz schön viel Aufwand, was? Die Stadt ist einfach zu voll, das könnte mit Hashmaps genauso passieren.",
             "Schauen wir uns diesen Stadtteil nochmal genauer an. 19 von 20 Häusern sind belegt, die Anzahl der belegten Häuser durch die Anzahl der Häuser insgesamt ist der Load-Factor.",
             "Dieser ist ein aussagekräftiges Mittel, um zu bestimmen, wie voll eine Hashmap bzw. der Stadtteil ist. Wenn dieser über 0,75 liegt, entstehen riesige Suchketten und die Verfahren verlieren an Effizienz.",
-            "Glücklicherweise haben wir dir eine Hilfe bereitgestellt, welcher immer die Übersicht bewahrt. Dieser zeigt gerade 0.95. Das ist viel zu hoch für eine effiziente Stadt, also sollten wir trotz der hohen Kosten eine Stadterweiterung durchführen."
+            "Glücklicherweise haben wir dir eine Hilfe bereitgestellt, welcher immer die Übersicht bewahrt. Dieser zeigt gerade 0,95. Das ist viel zu hoch für eine effiziente Stadt, also sollten wir trotz der hohen Kosten eine Stadterweiterung durchführen."
         ];
 
         // Funktion zum Anzeigen eines bestimmten Dialogs
