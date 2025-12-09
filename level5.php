@@ -355,13 +355,7 @@
             $('#hashButton').prop('disabled', false); // Button freischalten
 
             // Kontext-Texte
-            if (selectedFamily === "Thomas") {
-                $('#dialogueText').text("Achtung bei Thomas! Hier wird gleich eine Kollision passieren. Klicke auf Berechnen.");
-            } else if (selectedFamily === "Noah") {
-                $('#dialogueText').text("Auch bei Noah müssen wir aufpassen. Berechne seine Position!");
-            } else {
-                $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
-            }
+
         }
 
         // Klick: Berechnen
@@ -487,6 +481,13 @@
                     selectedFamily = nextFamily;
                     $('#nameInput').val(selectedFamily);
                     $('#hashButton').prop('disabled', false);
+                    if (selectedFamily === "Thomas") {
+                        $('#dialogueText').text("Achtung bei Thomas! Hier wird gleich eine Kollision passieren. Klicke auf Berechnen.");
+                    } else if (selectedFamily === "Noah") {
+                        $('#dialogueText').text("Auch bei Noah müssen wir aufpassen. Berechne seine Position!");
+                    } else {
+                        $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
+                    }
                 } else {
                     startSearchPhase();
                 }
