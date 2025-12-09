@@ -587,7 +587,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
 
 
         $('#hashButton').click(function() {
-            if (currentFamilyIdx >= families.length) return;
+            if (currentFamilyIdx >= families.length || phase !== "select_family") return;
             h1Value = calcHash(selectedFamily, 40);
             $('#hashResult').text(`Hausnummer: ${h1Value}`);
             let msg = `Hash: ${h1Value}. Klicke auf das Haus.`;
