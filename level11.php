@@ -314,7 +314,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
         </div>
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-            <div class="info-panel">
                 <div class="info-item">
                     <div class="info-label">Einziehende Familien:</div>
                     <div class="family-list-container">
@@ -345,7 +344,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
                     <div class="info-label">Eingetragene Familien:</div>
                     <div class="info-value" id="occupiedCount">19 / 20</div>
                 </div>
-            </div>
         </div>
     </div>
 </div>
