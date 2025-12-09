@@ -791,11 +791,11 @@ $familien_liste = [
         let isFading = false;
         // Dialoge
         const dialogues = [
-            "Quadratic Probing war schon ein guter Anfang, führt aber leider oft zu 'Clustern'. Das sind Ketten von belegten Häusern, die das Suchen langsam machen.",
-            "Chris und ich haben deswegen ein neues System entwickelt: Double Hashing (Doppelter Hash). Damit verteilen wir die Bewohner noch besser.",
-            "Der Trick ist: Bei einer Kollision springen wir nicht einfach ein Haus weiter (+1), sondern nutzen eine zweite Formel, um die Schrittweite zu berechnen.",
-            "Diese zweite Formel lautet: (Summe ASCII) % 5 + 1. Den Rechner dafür habe ich dir unten rechts freigeschaltet.",
-            "Leg los! Berechne immer erst die normale Hausnummer. Nur wenn das Haus voll ist, berechnest du die Sprungweite mit dem zweiten Hash."
+            "Willkommen zu Level 7! In den letzten Stadtteilen hatten wir oft das Problem von 'Clustern' – also regelrechte Staus bei der Haussuche.",
+            "Stell dir Linear Probing wie einen Stau vor: Wenn ein Auto steht, müssen alle dahinter warten. Das ist ineffizient!",
+            "Deshalb nutzen wir heute <strong>Double Hashing</strong>. Das ist wie eine individuelle 'Sprungfeder' für jeden Bewohner. Bei einer Kollision hüpfen sie einfach über den Stau hinweg!",
+            "Dazu brauchen wir eine zweite Formel (Schrittweite), die bestimmt, wie weit jemand hüpft. Ich habe dir dafür rechts unten einen zweiten Rechner freigeschaltet.",
+            "Leg los! Berechne wie immer erst die normale Hausnummer. Nur wenn das Haus voll ist, nutzen wir die Sprungfeder (2. Hash)."
         ];
         let dialogueIdx = 0;
         // --- Helper Functions ---
@@ -816,7 +816,7 @@ $familien_liste = [
             isFading = true;
             $('#majorMikeImage').attr('src', './assets/' + image);
             $('#dialogueText').fadeOut(150, function() {
-                $(this).text(text).fadeIn(150, function() {
+                $(this).html(text).fadeIn(150, function() {
                     isFading = false;
                 });
             });
@@ -907,6 +907,16 @@ $familien_liste = [
             if (isFading) return;
             let houseIdx = $(this).data('index');
             let $house = $(this);
+
+            if (phase.startsWith('search_')) {
+                if (phase === 'search_calc_h1' || phase === 'search_calc_h2') {
+                    showDialogue("Bitte berechne erst den Hash-Wert im Rechner, bevor du suchst!");
+                    return;
+                }
+                handleSearchClick(houseIdx, $house);
+                return;
+            }
+
             if (phase.startsWith('search_')) {
                 handleSearchClick(houseIdx, $house);
                 return;
@@ -924,8 +934,10 @@ $familien_liste = [
             }
             else if (phase === 'place_apply_step') {
                 let expectedIdx = (currentProbeIndex + h2Value) % HASH_SIZE;
+
                 if (houseIdx !== expectedIdx) {
-                    showDialogue(`Falsch! Wir waren bei ${currentProbeIndex}. Plus Schrittweite ${h2Value} (modulo 10) ist Haus ${expectedIdx}.`);
+                    let summe = currentProbeIndex + h2Value;
+                    showDialogue(`Falsch! <br>Rechnung: Aktuelles Haus (${currentProbeIndex}) + Sprungweite (${h2Value}) = ${summe}.<br>${summe} Modulo 10 ergibt <b>Haus ${expectedIdx}</b>.`);
                     return;
                 }
                 if (city[houseIdx] === null) {
@@ -1016,17 +1028,20 @@ $familien_liste = [
             }, 2000);
         }
         function handleSearchClick(houseIdx, $house) {
-            let occupant = city[houseIdx];
-            if (occupant) {
-                $house.find('.house-family').text(occupant).css('opacity', 1);
-            }
+            // --- Phase 1: Erster Check (Start-Hash) ---
             if (phase === 'search_check_h1') {
+                // Sperre: Nur das berechnete Start-Haus darf geklickt werden
                 if (houseIdx !== searchH1) {
-                    showDialogue(`Das ist nicht der Start-Hash (${searchH1}).`);
+                    showDialogue(`Halt! Der Rechner hat <b>Haus ${searchH1}</b> berechnet. Bitte prüfe zuerst dieses Haus.`);
                     return;
                 }
+
+                // Jetzt erst Namen aufdecken, da richtiges Haus
+                let occupant = city[houseIdx];
+                if (occupant) $house.find('.house-family').text(occupant).css('opacity', 1);
+
                 if (city[houseIdx] === SEARCH_TARGET) {
-                    endLevel(); // Sollte nicht passieren, da Sarah kollidiert
+                    endLevel();
                 } else {
                     showDialogue(`Das ist ${city[houseIdx]}, nicht Sarah! Wir brauchen den 2. Hash für die Suche. Klicke unten auf 'Sprungweite berechnen'.`, 'sad_major.png');
                     $('#stepCalcBox').addClass('active');
@@ -1034,18 +1049,27 @@ $familien_liste = [
                     phase = 'search_calc_h2';
                 }
             }
+            // --- Phase 2: Double Hashing Schritte ---
             else if (phase === 'search_check_step') {
                 let expected = (searchH1 + searchH2) % HASH_SIZE;
+
+                // Sperre: Nur das berechnete Ziel-Haus darf geklickt werden
                 if (houseIdx !== expected) {
-                    showDialogue(`Falsch. Start (${searchH1}) + Schritt (${searchH2}) = ${expected}.`);
+                    let summe = searchH1 + searchH2;
+                    showDialogue(`Falsch geklickt. <br>Rechnung: Start (${searchH1}) + Sprung (${searchH2}) = ${summe}.<br>Modulo 10 ergibt <b>Haus ${expected}</b>.`);
                     return;
                 }
+
+                // Jetzt erst Namen aufdecken
+                let occupant = city[houseIdx];
+                if (occupant) $house.find('.house-family').text(occupant).css('opacity', 1);
+
                 if (city[houseIdx] === SEARCH_TARGET) {
                     $house.addClass('found');
                     endLevel();
                 } else {
                     searchH1 = houseIdx;
-                    showDialogue(`Das ist ${city[houseIdx]}! Immer noch nicht. Addiere nochmal die Schrittweite ${searchH2}.`);
+                    showDialogue(`Das ist ${city[houseIdx]}! Immer noch nicht. Addiere nochmal die Sprungweite ${searchH2}.`);
                     let next = (searchH1 + searchH2) % HASH_SIZE;
                     $('.house').removeClass('highlight-target');
                     $(`#house-${next}`).addClass('highlight-target');
