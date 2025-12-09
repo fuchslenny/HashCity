@@ -225,7 +225,7 @@ $familien_liste = [
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box" id="dialogueBox">
                 <div class="dialogue-text" id="dialogueText">
-                    Das läuft ja schon sehr gut. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür linear probing, falls es zu Kollisionen kommt.
+                    Das läuft ja schon sehr gut. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür <strong>Linear Probing</strong>, falls es zu Kollisionen kommt.
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue">
                     Klicken oder Enter ↵
@@ -413,7 +413,7 @@ $familien_liste = [
         }
         // --- Dialoge ---
         const dialogues = [
-            "Das läuft ja schon sehr gut. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür linear probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest."
+            "Das läuft ja schon sehr gut. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür <strong>Linear Probing</strong>, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest."
         ];
         let currentDialogue = 0;
         function showNextDialogue() {
@@ -472,7 +472,7 @@ $familien_liste = [
             if (name==='') return;
             if (name !== selectedFamily) {
                 if ('search_sara_calc' || 'search_tina_calc'){
-                    $('#dialogueText').text(`Derzeit wird nicht nach ${name} gesucht, sondern nach ${selectedFamily}`);
+                    $('#dialogueText').text(`Derzeit wird nicht nach ${name} gesucht, sondern nach ${selectedFamily}.`);
                 }else {
                     $('#dialogueText').text("Der Name im Rechner passt nicht zur ausgewählten Familie.");
                 }
@@ -542,7 +542,7 @@ $familien_liste = [
                 const clickedFamily = $house.data('family');
                 if(clickedFamily) $house.find('.house-family').text(clickedFamily).css('opacity', 1);
                 if (stadt[houseNumber] !== null) {
-                    $('#dialogueText').text(`Das ist ${clickedFamily}. Nicht Tina. Haus ist voll -> Weiter suchen!`);
+                    $('#dialogueText').text(`Das ist ${clickedFamily}. Nicht Tina. Weiter suchen!`);
                     $house.removeClass('highlight-target');
                     let next = (houseNumber + 1) % HASH_SIZE;
                     $(`.house[data-house=${next}]`).addClass('highlight-target');
