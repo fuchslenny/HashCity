@@ -343,7 +343,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 <button id="btnExpand" class="calculator-button expand-btn">🏗️ STADT ERWEITERN</button>
                 <div class="info-item">
                     <div class="info-label">Eingetragene Familien:</div>
-                    <div class="info-value" id="occupiedCount">0 / 10</div>
+                    <div class="info-value" id="occupiedCount">19 / 20</div>
                 </div>
             </div>
         </div>
@@ -368,6 +368,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
     $(document).ready(function() {
         // --- Konfiguration ---
         let currentHashSize = 20;
+        let occupiedHouses = 19;
         const TARGET_HASH_SIZE = 40;
         const families = <?php echo json_encode($familien_liste); ?>;
         // Paare von leeren und gefüllten Häusern
@@ -385,7 +386,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
         ];
         // Initial: 19/20 belegt
         let city = new Array(TARGET_HASH_SIZE).fill(null);
-        let occupiedCount = 19;
         // Die "To-Do" Liste beginnt ab Index 19 (Levi)
         let currentFamilyIdx = 19;
         let selectedFamily = null;
@@ -426,7 +426,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
         }
         function updateLoadFactor() {
-            let lf = occupiedCount / currentHashSize;
+            let lf = currentFamilyIdx / currentHashSize;
             $('#lfValue').text(lf.toFixed(2));
             let $box = $('#lfBox');
             let $text = $('#lfText');
@@ -522,6 +522,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 }, i * 30);
             });
             $('.street.hidden').removeClass('hidden');
+            $('#occupiedCount').text(occupiedHouses + ' / 40');
             setTimeout(() => {
                 // 2. Logik Update
                 currentHashSize = 40;
@@ -572,23 +573,21 @@ $familien_liste = array_merge($old_residents, $new_residents);
         }
 
         function placeNextFamily() {
-            if (currentFamilyIdx >= families.length) {
-                endLevel();
-                return;
-            }
             selectedFamily = families[currentFamilyIdx];
             $('#nameInput').val(selectedFamily);
             $('.list-group-item').removeClass('active');
             $(`.list-group-item[data-family-index="${currentFamilyIdx}"]`).removeClass('disabled').addClass('active');
             $('.family-list-container').animate({
-                scrollTop: $(`.list-group-item[data-family-index="${currentFamilyIdx}"]`).position().top
+                scrollTop: $('.family-list-container')[0].scrollHeight
             }, 300);
+
             h1Value = calcHash(selectedFamily, 40);
             phase = 'find_spot';
         }
 
 
         $('#hashButton').click(function() {
+            if (currentFamilyIdx >= families.length) return;
             h1Value = calcHash(selectedFamily, 40);
             $('#hashResult').text(`Hausnummer: ${h1Value}`);
             let msg = `Hash: ${h1Value}. Klicke auf das Haus.`;
@@ -612,7 +611,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 return;
             }
             city[idx] = selectedFamily;
-            occupiedCount++;
             updateLoadFactor();
             let $house = $(this);
             setHouseAsset($house, true);
@@ -624,6 +622,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             showDialogue(`Super! ${selectedFamily} ist eingezogen.`);
             $('#hashInput').val('');
             currentFamilyIdx++;
+            $('#occupiedCount').text(currentFamilyIdx + ' / 40');
             if (currentFamilyIdx < families.length) {
                 phase = 'select_family';
                 placeNextFamily();
@@ -632,6 +631,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             }
         });
         function endLevel() {
+            $('#nameInput').val('');
             showDialogue("Fantastisch! Load Factor 0.55 (Okay). Rehashing hat funktioniert. Jetzt bist du bereit für das große Finale!", 'wink_major.png');
             $('.list-group-item').addClass('done');
             setTimeout(() => {

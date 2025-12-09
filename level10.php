@@ -765,7 +765,7 @@
             </div>
             <div class="info-item">
                 <div class="info-label">Eingetragene Familien:</div>
-                <div class="info-value" id="occupiedCount">0 / 15</div>
+                <div class="info-value" id="occupiedCount">0 / 20</div>
             </div>
         </div>
     </div>
