@@ -65,7 +65,6 @@ $final_residents = [
         .street::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px); transform: translateY(-50%); z-index: 2; }
         .street.hidden { display: none; }
 
-        /* House Logic */
         .house { position: relative; cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column-reverse; align-items: center; width: 100%; }
         .house.hidden { display: none; }
         .house:hover { transform: translateY(-5px) scale(1.05); z-index: 10; }
@@ -84,35 +83,126 @@ $final_residents = [
         .house.pop-in { animation: popIn 0.4s ease-out forwards; }
 
         /* Images */
-        .house-icon { width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2)); }
+        .house-icon {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
         .img-house-base { width: 100%; height: auto; z-index: 1; display: block; position: relative; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
         .img-house-extension { width: 100%; height: auto; z-index: 10; display: block; position: relative; margin-bottom: -5px;}
         .img-house-extension.top-floor {animation: fallDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
 
         @keyframes fallDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .house-number { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: 900; color: white; background: #333; padding: 2px 6px; border-radius: 4px; z-index: 20; }
+        .house-number {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+        }
         .house-occupant { display: none !important; }
 
         /* Info Panel */
-        .info-panel { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); height: fit-content; position: sticky; top: 100px; border: 4px solid #fff; }
-        .info-title { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; color: #2E7D32; margin-bottom: 1.2rem; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-        .info-item { background: #fff; padding: 1rem; border-radius: 15px; margin-bottom: 1rem; border: 3px solid #4CAF50; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15); }
-        .info-label { font-weight: 700; color: #666; font-size: 0.95rem; margin-bottom: 0.4rem; }
+        .info-panel {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            border: 4px solid #fff;
+        }
+        .info-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 1.2rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .info-item {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border: 3px solid #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15);
+        }
+        .info-label {
+            font-weight: 700;
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+        }
 
         .load-factor-box { text-align: center; padding: 0.5rem; background: #f0f0f0; border-radius: 10px; margin-bottom: 1rem; border: 2px solid #ccc; transition: all 0.5s ease; }
         .lf-value { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: bold; color: #333; }
         .lf-label { font-size: 0.8rem; color: #666; }
-        .lf-good { color: #4CAF50; border-color: #4CAF50; background: #e8f5e9; }
-        .lf-medium { color: #FF9800; border-color: #FF9800; background: #fff3e0; }
-        .lf-bad { color: #D32F2F; border-color: #D32F2F; background: #FFEBEE; animation: pulseRed 2s infinite; }
+        /* Ampel-Farben für Load Factor */
+        .lf-good {
+            color: #4CAF50;
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        } /* <= 0.5 */
+        .lf-medium {
+            color: #FF9800;
+            border-color: #FF9800;
+            background: #fff3e0;
+        } /* 0.5 - 0.75 */
+        .lf-bad {
+            color: #D32F2F;
+            border-color: #D32F2F;
+            background: #FFEBEE;
+        }
         @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(211, 47, 47, 0); } 100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); } }
 
-        .hash-calculator { background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%); border-color: #2196F3; }
-        .calculator-result { margin-top: 0.5rem; padding: 0.8rem; background: #f8f9fa; border: 2px dashed #4CAF50; border-radius: 10px; text-align: center; font-family: 'Orbitron', sans-serif; font-weight: 700; color: #2E7D32; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .hash-calculator {
+            background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
+            border-color: #2196F3;
+        }
+        .calculator-result {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #2E7D32;
+            font-size: 1.1rem;
+        }
         .calculator-button { width: 100%; padding: 0.8rem; background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%); color: white; border: none; border-radius: 10px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3); margin-top: 0.5rem; }
         .calculator-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4); }
         .calculator-button:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; transform: none; }
+        .calculator-input {
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 0.7rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            transition: border-color 0.3s ease;
+        }
+        .calculator-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
 
         .expand-btn { background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%); font-size: 1.1rem; margin-bottom: 1.5rem; }
 
@@ -123,8 +213,20 @@ $final_residents = [
         .calc2-button { padding: 0.6rem 1.5rem; border: none; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: white; width: 100%; margin-top: 0.5rem; }
         .hash-result-value { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 900; color: #667eea; text-align: center; margin: 0.5rem 0; }
 
-        .family-list-container { max-height: 250px; padding: 0 5px; overflow-y: auto; }
-        .list-group-item { cursor: pointer; font-weight: bold; transition: 0.2s; border: 1px solid #ddd; margin-bottom: 4px; border-radius: 6px; }
+        .family-list-container {
+            max-height: 250px;
+            padding: 0 5px;
+            overflow-y: auto;
+        }
+        .list-group-item.to-do-family {
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+            border: 2px solid #aab8c2;
+            margin-bottom: 0.5rem;
+            border-radius: 10px !important;
+        }
         .list-group-item.active { background: #667eea; color: white; transform: scale(1.02); border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .list-group-item.done { text-decoration: line-through; opacity: 0.5; background: #eee; color: #888; cursor: default; }
         .list-group-item.search-target { background: #FF9800; color: white; animation: pulseSearch 2s infinite; border: 2px solid #E65100; }
@@ -241,20 +343,24 @@ $final_residents = [
 
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-
-            <div class="load-factor-box" id="lfBox">
-                <div class="lf-label">Load Factor</div>
-                <div class="lf-value" id="lfValue">0.00</div>
-                <div class="lf-label" id="lfText">Limit: 0.75</div>
+            <div class="info-item">
+                <div class="info-label">Warteschlange (<span id="queueCount">30</span>):</div>
+                <div class="family-list-container">
+                    <ul class="list-group" id="resList">
+                        <?php foreach($final_residents as $idx => $name): ?>
+                            <li class="list-group-item to-do-family" id="res-<?php echo $idx; ?>" data-name="<?php echo $name; ?>">
+                                <?php echo $name; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
             </div>
 
-            <button id="btnExpand" class="calculator-button expand-btn" disabled>🏗️ STADT ERWEITERN</button>
-
             <div class="info-item hash-calculator">
-                <div class="info-label">Rechner <span style="float:right; font-size:0.8rem">Mod <span id="modBase">10</span></span></div>
-
-                <div class="calculator-result" id="calcResult">-</div>
-                <button id="btnCalc1" class="calculator-button" disabled>1. Hash Berechnen</button>
+                <div class="info-label">Bewohnername:</div>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">Ergebnis ...</div>
             </div>
 
             <div class="info-item step-calculator" id="stepCalcBox">
@@ -263,19 +369,12 @@ $final_residents = [
                 <div class="hash-result-value" id="h2Result">-</div>
                 <button id="btnCalcH2" class="calc2-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
             </div>
-
-            <div class="info-item">
-                <div class="info-label">Warteschlange (<span id="queueCount">30</span>):</div>
-                <div class="family-list-container">
-                    <ul class="list-group" id="resList">
-                        <?php foreach($final_residents as $idx => $name): ?>
-                            <li class="list-group-item" id="res-<?php echo $idx; ?>" data-name="<?php echo $name; ?>">
-                                <?php echo $name; ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
+            <div class="load-factor-box" id="lfBox">
+                <div class="lf-label">Load Factor</div>
+                <div class="lf-value" id="lfValue">0.00</div>
+                <div class="lf-label" id="lfText">Limit: 0.75</div>
             </div>
+            <button id="btnExpand" class="calculator-button expand-btn" disabled>🏗️ STADT ERWEITERN</button>
         </div>
     </div>
 </div>
@@ -431,10 +530,10 @@ $final_residents = [
         }
 
         h1 = null; h2 = null;
-        $('#calcResult').text('-');
+        $('#hashResult').text('-');
         $('#h2Result').text('-');
         $('#stepCalcBox').removeClass('active');
-        $('#btnCalc1').prop('disabled', false).text('1. Hash Berechnen');
+        $('#hashButton').prop('disabled', false).text('1. Hash Berechnen');
         $('#btnCalcH2').prop('disabled', true);
 
         $('.house').removeClass('collision-highlight found-highlight');
@@ -566,14 +665,14 @@ $final_residents = [
     }
 
     // --- Calc Logic ---
-    $('#btnCalc1').click(function() {
+    $('#hashButton').click(function() {
         let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
         let sum = getAsciiSum(name);
         h1 = sum % currentCapacity;
-        $('#calcResult').text(`H1: ${h1}`);
+        $('#hashResult').text(`H1: ${h1}`);
         let msg = isSearchPhase ? `Suche ${name}: 1. Hash ist ${h1}.` : `1. Hash ist ${h1}.`;
         $('#dialogueText').text(msg);
-        $('#btnCalc1').prop('disabled', true);
+        $('#hashButton').prop('disabled', true);
     });
 
     $('#btnCalcH2').click(function() {
@@ -745,10 +844,10 @@ $final_residents = [
         $('.list-group-item').removeClass('search-target');
         $(`#search-0`).addClass('search-target');
         h1 = null; h2 = null;
-        $('#calcResult').text('-');
+        $('#hashResult').text('-');
         $('#h2Result').text('-');
         $('#stepCalcBox').removeClass('active');
-        $('#btnCalc1').prop('disabled', false).text('1. Hash (Suche)');
+        $('#hashButton').prop('disabled', false).text('1. Hash (Suche)');
         $('.house').removeClass('collision-highlight found-highlight');
         $('#dialogueText').text(`Suche: ${currentSearchTarget.name}. Berechne den Hash!`);
     }
