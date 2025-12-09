@@ -683,18 +683,6 @@ $familien_liste = [
         </div>
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-            <div class="info-item hash-calculator">
-                <div class="info-label">Bewohnername:</div>
-                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
-                <button id="btnCalcH1" class="calculator-button">Berechne Haus-Nr.</button>
-                <div class="calculator-result" id="h1Result">Ergebnis ...</div>
-            </div>
-            <div class="info-item step-calculator" id="stepCalcBox">
-                <div class="info-label">2. Hash (Schrittweite)</div>
-                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 5 + 1</div>
-                <div class="hash-result-value" id="h2Result">-</div>
-                <button id="btnCalcH2" class="calc2-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
-            </div>
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
                 <div class="family-list-container">
@@ -706,6 +694,18 @@ $familien_liste = [
                         <?php endforeach; ?>
                     </ul>
                 </div>
+            </div>
+            <div class="info-item hash-calculator">
+                <div class="info-label">Bewohnername:</div>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="btnCalcH1" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="h1Result">Ergebnis ...</div>
+            </div>
+            <div class="info-item step-calculator" id="stepCalcBox">
+                <div class="info-label">2. Hash (Schrittweite)</div>
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 5 + 1</div>
+                <div class="hash-result-value" id="h2Result">-</div>
+                <button id="btnCalcH2" class="calc2-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
             </div>
         </div>
     </div>
@@ -874,10 +874,17 @@ $familien_liste = [
         });
         // 2. H1 Berechnen
         $('#btnCalcH1').click(function() {
-            if (isFading) return;
+
+            selectedFamily = $('#nameInput').val();
+            console.log(selectedFamily);
+            if ((isFading || selectedFamily === undefined || selectedFamily === '')) return;
             if (phase !== 'calc_h1' && phase !== 'search_calc_h1') return;
-            let val = calcH1(selectedFamily);
             if (phase === 'search_calc_h1') {
+                if(selectedFamily !== 'Sarah'){
+                    showDialogue(`Derzeit suchen wir nach Sarah und nicht nach ${selectedFamily}.`);
+                    return;
+                }
+                let val = calcH1(selectedFamily);
                 searchH1 = val;
                 $('#h1Result').text(`Hausnummer: ${val}`);
                 showDialogue(`Der Start-Hash für Sarah ist ${val}. Klicke auf Haus ${val} um nachzusehen.`);
@@ -887,11 +894,11 @@ $familien_liste = [
                 $(this).prop('disabled', true);
                 return;
             }
-            h1Value = val;
-            $('#h1Result').text(`Hausnummer: ${val}`);
-            showDialogue(`Der 1. Hash ergibt ${val}. Klicke auf Haus ${val}, um zu prüfen, ob es frei ist.`);
+            h1Value = calcH1(selectedFamily);
+            $('#h1Result').text(`Hausnummer: ${h1Value}`);
+            showDialogue(`Der 1. Hash ergibt ${h1Value}. Klicke auf Haus ${h1Value}, um zu prüfen, ob es frei ist.`);
             $('.house').removeClass('highlight-target');
-            $(`#house-${val}`).addClass('highlight-target');
+            $(`#house-${h1Value}`).addClass('highlight-target');
             phase = 'place_h1';
 
         });
@@ -954,6 +961,7 @@ $familien_liste = [
                 }, 1000);
             } else {
                 startSearchPhase();
+                selectedFamily = '';
             }
         }
         function handleCollision(idx) {
@@ -995,7 +1003,6 @@ $familien_liste = [
         function startSearchPhase() {
             phase = 'intro_search';
             showDialogue("Alle Bewohner sind untergebracht! Super Arbeit.", 'wink_major.png');
-            $('.list-group-item').removeClass('done').css('cursor', 'default');
             $('#btnCalcH1').prop('disabled', true);
             $('#btnCalcH2').prop('disabled', true);
             setTimeout(() => {
