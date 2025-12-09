@@ -724,9 +724,9 @@ $prefilled_haeuser = [
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
         const dialogues = [
-            "Wir verwenden jetzt unser neues Hash-System, um die Häuser zuzuweisen. Das ist viel schneller als das lineare Suchen aus Level 0!",
-            "Der Hash-Rechner rechts berechnet für jeden Namen die exakte Hausnummer. Deine Aufgabe ist es, den nächsten Bewohner zuzuweisen.",
-            "Der nächste Bewohner ist Dieter. Wähle ihn jetzt aus der Liste aus, um zu starten!"
+            "Wir verwenden jetzt unser neues Hash-System, um die Häuser zuzuweisen.",
+            "Der Hash-Rechner berechnet wie bereits erklärt die Hausnummern für die neuen Bewohner.",
+            "Dieter ist als erstes dran. Wähle ihn jetzt aus der Liste aus, um zu starten!"
         ];
         let currentDialogue = 0;
         function getHash(key, size) {
