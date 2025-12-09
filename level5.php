@@ -214,16 +214,7 @@
         <div class="success-icon">🎉</div>
         <h2 class="success-title">Familie gefunden!</h2>
         <p class="success-message" id="successMessage">Vielen Dank! Nun ist auch dieser Stadtteil fertig.</p>
-        <div class="success-stats">
-            <div class="stat-box">
-                <div class="stat-label">Versuche</div>
-                <div class="stat-value" id="finalAttempts">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Familien eingetragen</div>
-                <div class="stat-value" id="finalOccupied">5</div>
-            </div>
-        </div>
+
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
             <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 6 →</button>
