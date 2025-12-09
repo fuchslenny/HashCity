@@ -481,6 +481,12 @@
                 if (currentFamilyIndex < families.length) {
                     $('#dialogueText').text("Sehr gut! Nächster Bewohner.");
                     setTimeout(initFamilyList, 500);
+                    const nextFamily = families[currentFamilyIndex];
+                    $('.to-do-family').removeClass('active');
+                    $(`.to-do-family[data-family="${nextFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick).addClass('active');
+                    selectedFamily = nextFamily;
+                    $('#nameInput').val(selectedFamily);
+                    $('#hashButton').prop('disabled', false);
                 } else {
                     startSearchPhase();
                 }
