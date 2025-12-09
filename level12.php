@@ -150,7 +150,7 @@ $final_residents = [
 <div class="mode-overlay" id="modeOverlay">
     <div class="mode-box">
         <h1 style="font-family: 'Orbitron'; font-weight: 900; color: #333;">Level 12: Die finale Prüfung</h1>
-        <p>30 Einwohner. Keine Hilfslinien. Du bist auf dich allein gestellt.</p>
+        <p>30 Einwohner. Keine Hilfestellung. Du bist auf dich allein gestellt.</p>
         <div class="mode-grid">
             <div class="mode-card" onclick="selectMode('linear')">
                 <h4>Linear Probing</h4>
