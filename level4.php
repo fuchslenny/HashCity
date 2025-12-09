@@ -273,14 +273,6 @@ $familien_liste = [
         </div>
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-            <div class="info-item hash-calculator">
-                <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
-                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
-                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
-                <div class="calculator-result" id="hashResult">
-                    Ergebnis ...
-                </div>
-            </div>
             <div class="info-item">
                 <div class="info-label">Einziehende Familien:</div>
                 <div class="family-list-container">
@@ -291,6 +283,14 @@ $familien_liste = [
                             </li>
                         <?php endforeach; ?>
                     </ul>
+                </div>
+            </div>
+            <div class="info-item hash-calculator">
+                <label for="nameInput" class="info-label" style="color: #666; font-size: 0.95rem;">Bewohnername:</label>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">
+                    Ergebnis ...
                 </div>
             </div>
             <div class="info-item">
