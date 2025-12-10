@@ -781,6 +781,22 @@ $familien = [
             { empty: "WohnhauRotBraunLeerNeu.svg", filled: "WohnhauRotBraunBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
+        // Sound-Dateien
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
 
         // --- Zufällige Auswahl der Assets für die Häuser ---
         function getRandomHousePair() {
@@ -861,15 +877,18 @@ $familien = [
             // Man darf nur das Haus klicken, das der aktuellen Anzahl geprüfter Häuser entspricht (0, dann 1, dann 2...)
             if (clickedHouseNum !== checkedHouses) {
                 if (clickedHouseNum > checkedHouses) {
+                    playSound('error');
                     $('#dialogueText').text(`Halt! Wir müssen der Reihe nach suchen. Prüfe zuerst Haus ${checkedHouses}.`);
                     $('#majorMikeImage').attr('src', './assets/card_major.png');
                 } else {
+                    playSound('error');
                     $('#dialogueText').text(`In Haus ${clickedHouseNum} waren wir schon. Weiter geht's bei Haus ${checkedHouses}.`);
                 }
                 return; // Abbruch
             }
 
             // Richtiger Klick -> Weiter im Text
+            playSound('click');
             attempts++;
             checkedHouses++;
 
@@ -907,6 +926,7 @@ $familien = [
         // --- Erfolg-Modal anzeigen ---
         function showSuccessModal() {
             // Nur noch eine Box rendern
+            playSound('success');
             const statsHtml = `
                 <div class="stat-box">
                     <div class="stat-label">Häuser geprüft</div>
