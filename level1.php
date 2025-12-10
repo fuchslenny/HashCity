@@ -879,7 +879,7 @@
             const family = $('#hashInput').val().trim();
             if (!family) return;
             hash = getHash(family, HASH_SIZE);
-            $('#hashResult').text(`Initial-Hash: ${hash}`);
+            $('#hashResult').text(`Hausnummer: ${hash}`);
             if (searchMode) {
                 if (family === 'Sophie' && hash === 4) {
                     $('.house[data-house="4"]').addClass('found show-family');
