@@ -342,7 +342,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 <button id="btnExpand" class="calculator-button expand-btn">🏗️ STADT ERWEITERN</button>
                 <div class="info-item">
                     <div class="info-label">Eingetragene Familien:</div>
-                    <div class="info-value" id="occupiedCount">19 / 20</div>
+                    <div class="info-value" id="occupiedCount">19 / 23</div>
                 </div>
         </div>
     </div>
@@ -520,7 +520,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 }, i * 30);
             });
             $('.street.hidden').removeClass('hidden');
-            $('#occupiedCount').text(occupiedHouses + ' / 40');
+            $('#occupiedCount').text(occupiedHouses + ' / 23');
             setTimeout(() => {
                 // 2. Logik Update
                 currentHashSize = 40;
@@ -625,7 +625,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             showDialogue(`Super! ${selectedFamily} ist eingezogen.`);
             $('#hashInput').val('');
             currentFamilyIdx++;
-            $('#occupiedCount').text(currentFamilyIdx + ' / 40');
+            $('#occupiedCount').text(currentFamilyIdx + ' / 23');
             updateLoadFactor();
             if (currentFamilyIdx < families.length) {
                 phase = 'select_family';
