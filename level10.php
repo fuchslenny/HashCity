@@ -798,7 +798,7 @@
         let probingActive = false;
         let maxProbes = 6;
         let houseAssets = [];
-
+        let phase = '';
         // Paare der neuen Assets (für JavaScript)
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
@@ -924,13 +924,14 @@
 
         // 2. Hash-Wert berechnen (ereignisgebunden)
         $('#hashButton').click(function() {
-            if (gameCompleted) return;
+            if (gameCompleted || phase === 'block_button') return;
             const family = $('#nameInput').val().trim();
             if (!family) return;
             const startHash = getHash(family, HASH_SIZE);
             $('#hashResult').text(startHash);
             currentDialogueStep = 3;
             showDialogue(currentDialogueStep);
+            phase = 'block_button';
         });
 
         // 3. Haus klicken, um zum nächsten Haus zu gehen
