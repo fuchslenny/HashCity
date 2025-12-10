@@ -329,6 +329,10 @@ $familien_liste = [
             { empty: "WohnhauRotBraunLeerNeu.svg", filled: "WohnhauRotBraunBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
         // --- Level 4 Setup ---
         const HASH_SIZE = <?php echo $anzahl_haeuser; ?>;
         const familien = <?php echo json_encode($familien_liste); ?>;
@@ -350,6 +354,17 @@ $familien_liste = [
         let search2InitialHash = null;
         const search2CorrectHouse = 8;
 
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück (wichtig bei schnellen Klicks!)
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
         function initFamilyListUI() {
             $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
         }
@@ -509,15 +524,18 @@ $familien_liste = [
             const houseNumber = $house.data('house');
             if (gamePhase === "placement_find_spot") {
                 if (houseNumber === correctTargetHouse) {
+                    playSound('click');
                     placeFamily($house, houseNumber, selectedFamily);
                     currentFamilyIndex++;
                     $('#occupiedCount').text(currentFamilyIndex + ' / 10');
                     selectNextFamily();
                 } else if (stadt[houseNumber] !== null) {
+                    playSound('error');
                     $('#dialogueText').text("Halt! Belegt. Nutze Linear Probing (nächstes freies Haus).");
                     $house.addClass('checked');
                     $house.removeClass('highlight-target');
                 } else {
+                    playSound('error');
                     $('#dialogueText').text("Falsches Haus. Linear Probing beachten!");
                 }
             }
@@ -529,17 +547,21 @@ $familien_liste = [
                 console.log("Correct: "+ search1CorrectHouse);
                 if(clickedFamily) $house.find('.house-family').text(clickedFamily).css('opacity', 1);
                 if (houseNumber === search1CorrectHouse) {
+                    playSound('click');
                     $('#dialogueText').text("Gefunden! Danke.");
                     $house.addClass('found');
                     $('.house').removeClass('highlight-target');
                     setTimeout(startSearchPhase2, 2000);
                 } else if (houseNumber >= search1InitialHash && houseNumber < search1CorrectHouse) {
+                    playSound('error');
                     $('#dialogueText').text(`Das ist ${clickedFamily}. Weiter suchen (Linear Probing)!`);
                     $house.removeClass('highlight-target');
                     $(`.house[data-house=${houseNumber + 1}]`).addClass('highlight-target');
                 } else if (clickedFamily === '' || clickedFamily === null){
+                    playSound('error');
                     $('#dialogueText').text(`Dieses Haus ist leer`);
                 } else{
+                    playSound('error');
                     $('#dialogueText').text(`Das ist ${clickedFamily}. Falsches Haus.`);
                 }
             }
@@ -551,19 +573,22 @@ $familien_liste = [
                 console.log("Correct: "+ search2CorrectHouse);
                 if(clickedFamily) $house.find('.house-family').text(clickedFamily).css('opacity', 1);
                 if (houseNumber === search2CorrectHouse) {
+                    playSound('error');
                     $house.addClass('found');
                     $('#dialogueText').html("<b>STOP!</b> Hier wohnt niemand. Da die Kette hier abreißt, wissen wir sicher: <b>Tina wohnt nicht in der Stadt!</b>");
                     $('#majorMikeImage').attr('src', './assets/wink_major.png');
                     setTimeout(showSuccessModal, 4000);
                 }
                 else if (houseNumber >= search2InitialHash && houseNumber < search2CorrectHouse) {
-                    console.log("test");
+                    playSound('error');
                     $('#dialogueText').text(`Das ist ${clickedFamily}. Weiter suchen (Linear Probing)!`);
                     $house.removeClass('highlight-target');
                     $(`.house[data-house=${houseNumber + 1}]`).addClass('highlight-target');
                 } else if (clickedFamily === '' || clickedFamily === null){
+                    playSound('error');
                     $('#dialogueText').text(`Dieses Haus ist leer und kommt nicht in Frage. Klicke auf die markierten Häuser!`);
                 } else{
+                    playSound('error');
                     $('#dialogueText').text(`Dieses Haus gehört ${clickedFamily} und kommt nicht in Frage. Klicke auf die markierten Häuser!`);
                 }
             }
@@ -578,7 +603,7 @@ $familien_liste = [
             $('#nameInput').prop('readonly', false);
             $('#nameInput').val('');
             $('.house').removeClass('highlight-target');
-            $('#dialogueText').text("Sehr gut! Alle Bewohner sind da. Kannst du mir sagen, wo Sara wohnt? Berechne ihren Hash.");
+            $('#dialogueText').html("Sehr gut! Alle Bewohner sind da. Kannst du mir sagen, wo <strong>Sara</strong> wohnt? Berechne ihren Hash.");
             $('#majorMikeImage').attr('src', './assets/wink_major.png');
         }
         // --- Start Phase 3 (Tina) ---
@@ -589,11 +614,12 @@ $familien_liste = [
             $('#hashResult').text('Ergebnis ...');
             $('.house').removeClass('highlight-target');
             $('.house').removeClass('found');
-            $('#dialogueText').text("Eine Frage noch: Wohnt eigentlich 'Tina' hier? Berechne ihren Hash und prüf das mal.");
+            $('#dialogueText').html("Eine Frage noch: Wohnt eigentlich <strong>Tina</strong> hier? Berechne ihren Hash und prüf das mal.");
             $('#majorMikeImage').attr('src', './assets/card_major.png');
         }
         // --- Success Modal ---
         function showSuccessModal() {
+            playSound('success');
             $('#successMessage').text("Klasse! Du hast verstanden, wie man in einer Hashmap sucht (und auch, wie man sieht, dass etwas fehlt).");
             $('#successOverlay').css('display', 'flex');
         }
