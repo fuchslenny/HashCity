@@ -493,7 +493,6 @@ $final_residents = [
     }
 
     function updateHouseVisual($el, count) {
-        console.log(count);
         const idx = $el.data('index');
         const pair = $el.data('pair');
         if (!pair) return;
@@ -675,7 +674,6 @@ $final_residents = [
             setTimeout(() => {
                 $house.addClass('pop-in');
                 let count = placedResidents.filter(r => r.houseIndex === i).length;
-                console.log(count);
                 updateHouseVisual($house, count);
             }, i * 30);
         }
