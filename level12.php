@@ -64,7 +64,15 @@ $final_residents = [
         .street::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px); transform: translateY(-50%); z-index: 2; }
         .street.hidden { display: none; }
 
-        .house { aspect-ratio: 1; background: transparent; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; position: relative; border-radius: 8px; padding: 0.2rem; }
+        .house {
+            position: relative;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
         .house.hidden { display: none; }
         .house:hover { transform: translateY(-5px) scale(1.05); z-index: 10; }
 
