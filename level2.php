@@ -839,7 +839,6 @@ $prefilled_haeuser = [
             if (houseNumber !== targetHash) {
                 $('#dialogueText').text("Das war das falsche Haus. Das Ziel war Haus 0.");
                 $('#hashButton').prop('disabled', false);
-                $('#hashResult').text('Ergebnis ...');
                 $('.house').removeClass('highlight-target');
                 return;
             }
