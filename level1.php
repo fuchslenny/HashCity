@@ -766,6 +766,22 @@
             { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
         ];
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück (wichtig bei schnellen Klicks!)
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
         // Funktion zum Setzen des Haus-Assets
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
@@ -912,6 +928,7 @@
                     $house.find('.house-family').text(occupant);
                     $('#dialogueText').text(`In Haus ${houseNumber} wohnt ${occupant}.`);
                     if (occupant === 'Sophie') {
+                        playSound('success');
                         $house.addClass('found');
                         $('#successMessage').html(`
                             <strong style="color: #667eea;">Major Mike sagt:</strong><br>
@@ -922,24 +939,30 @@
                         $('#finalOccupied').text(occupiedHouses);
                         $('#successOverlay').css('display', 'flex');
                         gameCompleted = true;
+                    } else {
+                        playSound('error');
                     }
                 }
             } else {
                 if (gameCompleted || !gameStarted || !selectedFamily) {
                     if(gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
+                    playSound('error');
                     return;
                 }
                 console.log(hash);
                 if(hash === null){
                     $('#dialogueText').text(`Berechne erst den Hash mit dem Hashrechner!`);
+                    playSound('error');
                     return;
                 }
                 if (houseNumber !== hash) {
                     $('#dialogueText').text(`Halt! Der Rechner hat Haus ${hash} für Familie ${selectedFamily} berechnet, nicht Haus ${houseNumber}.`);
+                    playSound('error');
                     return;
                 }
                 const currentOccupant = stadt[houseNumber];
                 if (currentOccupant === null) {
+                    playSound('click');
                     stadt[houseNumber] = selectedFamily;
                     setHouseAsset($house, true);
                     $house.addClass('checked');
