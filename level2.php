@@ -820,7 +820,6 @@ $prefilled_haeuser = [
             if (investigationMode && $(this).data('house') === 0) {
                 selectedFamily = $(this).data('family');
                 $('#hashButton').prop('disabled', false);
-                $('#hashResult').text('Ergebnis ...');
                 $('.house').removeClass('highlight-target');
                 $(this).addClass('highlight-target');
                 $('#hashInput').val(selectedFamily);
