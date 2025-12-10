@@ -58,8 +58,7 @@ $final_residents = [
         .street-block { position: relative; margin-bottom: 2rem; transition: opacity 0.5s; }
         .street-block.hidden { display: none; }
 
-        .houses-row { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.5rem; margin-bottom: 0.5rem; padding: 0 0.5rem; position: relative; z-index: 2; align-items: end; min-height: 120px; }
-
+        .houses-row { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.5rem; margin-bottom: 0.5rem; padding: 0 0.5rem; position: relative; z-index: 2; transition: all 0.5s ease; }
         .street { width: 100%; height: 60px; background-image: url('./assets/Strasse.svg'); background-size: cover; background-position: center; position: relative; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 1; margin-top: -15px; }
         .street::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%); border-radius: 8px; z-index: -1; }
         .street::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px); transform: translateY(-50%); z-index: 2; }
@@ -90,7 +89,11 @@ $final_residents = [
             transition: all 0.3s ease;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         }
-        .img-house-base { width: 100%; height: auto; z-index: 1; display: block; position: relative; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+        .img-house-base {
+            width: 90px; height: auto; z-index: 1;
+            display: block; position: relative;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
         .img-house-extension { width: 100%; height: auto; z-index: 10; display: block; position: relative; margin-bottom: -5px;}
         .img-house-extension.top-floor {animation: fallDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
 
@@ -106,7 +109,7 @@ $final_residents = [
             font-weight: 900;
             color: white;
             text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
-            z-index: 10;
+            z-index: 100;
             background: rgba(0, 0, 0, 0.3);
             padding: 0.2rem 0.5rem;
             border-radius: 8px;
@@ -475,6 +478,7 @@ $final_residents = [
     }
 
     function updateHouseVisual($el, count) {
+        console.log(count);
         const idx = $el.data('index');
         const pair = $el.data('pair');
         if (!pair) return;
@@ -484,8 +488,9 @@ $final_residents = [
         $el.append(`<div class="house-occupant"></div>`);
 
         if (gameMode === 'chaining') {
-            $el.append(`<img src="./assets/${pair.filled}" class="img-house-base">`);
+
             if (count > 1) {
+                $el.append(`<img src="./assets/${pair.filled}" class="img-house-base">`);
                 for (let i = 1; i < count; i++) {
                     const $extension = $(`<img src="./assets/${pair.extension}" class="img-house-extension">`);
                     if (i === count - 1) { // Nur die oberste Etage
@@ -493,11 +498,13 @@ $final_residents = [
                     }
                     $el.append($extension);
                 }
+            }else if(count === 1) {
+                $el.append(`<img src="./assets/${pair.filled}" class="img-house-base">`);
+            }else{
+                $el.append(`<img src="./assets/${pair.empty}" class="img-house-base">`);
             }
-            if(count > 0) {
-                let names = placedResidents.filter(r => r.houseIndex == idx).map(r => r.name).join(', ');
-                $el.find('.house-occupant').text(names);
-            }
+            let names = placedResidents.filter(r => r.houseIndex == idx).map(r => r.name).join(', ');
+            $el.find('.house-occupant').text(names);
         } else {
             let img = (count > 0) ? pair.fill : pair.base;
             $el.append(`<img src="./assets/${img}" class="house-icon">`);
@@ -652,6 +659,7 @@ $final_residents = [
             setTimeout(() => {
                 $house.addClass('pop-in');
                 let count = placedResidents.filter(r => r.houseIndex === i).length;
+                console.log(count);
                 updateHouseVisual($house, count);
             }, i * 30);
         }
