@@ -526,9 +526,8 @@ $familien = [
             font-weight: 500;
         }
         .success-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
+            display: flex;
+            justify-content: center;
             margin-bottom: 2rem;
         }
         .stat-box {
@@ -537,6 +536,8 @@ $familien = [
             border-radius: 15px;
             border: 3px solid #4CAF50;
             box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+            width: 100%;
+            text-align: center;
         }
         .stat-label {
             font-size: 0.95rem;
@@ -737,10 +738,6 @@ $familien = [
                 <div class="info-label">Überprüfte Häuser:</div>
                 <div class="info-value" id="checkedCount">0 / 20</div>
             </div>
-            <div class="info-item">
-                <div class="info-label">Anzahl Versuche:</div>
-                <div class="info-value" id="attemptsCount">0</div>
-            </div>
         </div>
     </div>
 </div>
@@ -753,10 +750,6 @@ $familien = [
             Gut gemacht! Du hast Familie Müller in Haus 15 gefunden!
         </p>
         <div class="success-stats">
-            <div class="stat-box">
-                <div class="stat-label">Versuche</div>
-                <div class="stat-value" id="finalAttempts">0</div>
-            </div>
             <div class="stat-box">
                 <div class="stat-label">Häuser geprüft</div>
                 <div class="stat-value" id="finalChecked">0</div>
@@ -834,6 +827,7 @@ $familien = [
                         $('#dialogueContinue').fadeOut();
                         gameStarted = true;
                         $('.house').css('cursor', 'pointer');
+                        $(`.house[data-house=0]`).addClass('highlight-target');
                     }
                 });
             }
@@ -856,21 +850,36 @@ $familien = [
             }
         });
 
-        // --- Haus-Klick-Handler ---
+        // --- Haus-Klick-Handler (Logik: Zwang zur linearen Suche) ---
         $('.house').click(function() {
             if (!gameStarted || gameCompleted) return;
 
             const $house = $(this);
-            if ($house.hasClass('checked') || $house.hasClass('found')) {
-                return;
+            const clickedHouseNum = $house.data('house');
+
+            // --- ZWANG ZUR REIHENFOLGE ---
+            // Man darf nur das Haus klicken, das der aktuellen Anzahl geprüfter Häuser entspricht (0, dann 1, dann 2...)
+            if (clickedHouseNum !== checkedHouses) {
+                if (clickedHouseNum > checkedHouses) {
+                    $('#dialogueText').text(`Halt! Wir müssen der Reihe nach suchen. Prüfe zuerst Haus ${checkedHouses}.`);
+                    $('#majorMikeImage').attr('src', './assets/card_major.png');
+                } else {
+                    $('#dialogueText').text(`In Haus ${clickedHouseNum} waren wir schon. Weiter geht's bei Haus ${checkedHouses}.`);
+                }
+                return; // Abbruch
             }
 
+            // Richtiger Klick -> Weiter im Text
             attempts++;
             checkedHouses++;
-            const houseNumber = $house.data('house');
-            const family = $house.data('family');
 
-            // Haus als "geprüft" markieren
+            // Visualisierung: Nächstes Ziel highlighten
+            $('.house').removeClass('highlight-target');
+            if (checkedHouses < 20) {
+                $(`.house[data-house=${checkedHouses}]`).addClass('highlight-target');
+            }
+
+            const family = $house.data('family');
             $house.find('.house-icon').attr('src', `./assets/${$house.data('filled-asset')}`);
             $house.addClass('checked show-family');
 
@@ -881,20 +890,7 @@ $familien = [
                 showSuccessModal();
             } else {
                 $('#majorMikeImage').attr('src', './assets/sad_major.png');
-                const responses = [
-                    `Nein, in Haus ${houseNumber} wohnt Familie ${family}. Weiter suchen!`,
-                    `Das ist Familie ${family} in Haus ${houseNumber}. Das sind nicht die Müllers!`,
-                    `Haus ${houseNumber}: Familie ${family}. Falsche Familie, versuch's weiter!`,
-                    `Hmm, Familie ${family}... nicht die Richtigen. Probier ein anderes Haus!`,
-                    `Familie ${family}? Nein, das sind nicht die Müllers. Mach weiter!`
-                ];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                $('#dialogueText').text(randomResponse);
-                setTimeout(function() {
-                    if (!gameCompleted) {
-                        $('#majorMikeImage').attr('src', './assets/card_major.png');
-                    }
-                }, 2000);
+                $('#dialogueText').text(`Haus ${clickedHouseNum}: Familie ${family}. Nicht die Müllers. Weiter zum nächsten Haus!`);
             }
 
             updateStats();
@@ -910,22 +906,20 @@ $familien = [
 
         // --- Erfolg-Modal anzeigen ---
         function showSuccessModal() {
-            $('#finalAttempts').text(attempts);
-            $('#finalChecked').text(checkedHouses);
-            let performanceMsg = '';
-            if (attempts <= 5) {
-                performanceMsg = 'Wow, du hattest Glück! Aber ';
-            } else if (attempts <= 10) {
-                performanceMsg = 'Nicht schlecht! Aber ';
-            } else if (attempts <= 16) {
-                performanceMsg = 'Das hat eine Weile gedauert! ';
-            } else {
-                performanceMsg = 'Oh je, das hat wirklich lange gedauert! ';
-            }
+            // Nur noch eine Box rendern
+            const statsHtml = `
+                <div class="stat-box">
+                    <div class="stat-label">Häuser geprüft</div>
+                    <div class="stat-value">${checkedHouses}</div>
+                </div>
+            `;
+            $('.success-stats').html(statsHtml); // Inhalt der Stats-Area überschreiben
+
             const successMsg = `
                 <strong style="color: #667eea;">Major Mike sagt:</strong><br>
-                "${performanceMsg}Stell dir vor, wir hätten 1000 Häuser in unserer Stadt!
-                Das lineare Durchsuchen ist viel zu langsam. Es <em>muss</em> eine bessere Methode geben!
+                "Puh, das hat gedauert! Wir mussten ${checkedHouses} Häuser prüfen.<br>
+                Stell dir vor, wir hätten 1000 Häuser! Das lineare Durchsuchen ist viel zu langsam.
+                Es <em>muss</em> eine bessere Methode geben!
                 Lass uns im nächsten Level etwas Neues lernen: <strong>Hash-Funktionen!</strong>"
             `;
             $('#successMessage').html(successMsg);
