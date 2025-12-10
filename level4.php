@@ -348,6 +348,7 @@ $familien_liste = [
         // Ziel 2: TINA (Existiert NICHT)
         const SEARCH_TARGET_2 = "Tina";
         let search2InitialHash = null;
+        const search2CorrectHouse = 8;
 
         function initFamilyListUI() {
             $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
@@ -522,6 +523,10 @@ $familien_liste = [
             }
             else if (gamePhase === "search_sara_find") {
                 const clickedFamily = $house.data('family');
+                console.log(gamePhase);
+                console.log("houseNumber: "+ houseNumber);
+                console.log("Initial: "+ search1InitialHash);
+                console.log("Correct: "+ search1CorrectHouse);
                 if(clickedFamily) $house.find('.house-family').text(clickedFamily).css('opacity', 1);
                 if (houseNumber === search1CorrectHouse) {
                     $('#dialogueText').text("Gefunden! Danke.");
@@ -540,18 +545,26 @@ $familien_liste = [
             }
             else if (gamePhase === "search_tina_find") {
                 const clickedFamily = $house.data('family');
+                console.log(clickedFamily);
+                console.log("houseNumber: "+ houseNumber);
+                console.log("Initial: "+ search2InitialHash);
+                console.log("Correct: "+ search2CorrectHouse);
                 if(clickedFamily) $house.find('.house-family').text(clickedFamily).css('opacity', 1);
-                if (stadt[houseNumber] !== null) {
-                    $('#dialogueText').text(`Das ist ${clickedFamily}. Nicht Tina. Weiter suchen!`);
-                    $house.removeClass('highlight-target');
-                    let next = (houseNumber + 1) % HASH_SIZE;
-                    $(`.house[data-house=${next}]`).addClass('highlight-target');
-                }
-                else {
+                if (houseNumber === search2CorrectHouse) {
                     $house.addClass('found');
                     $('#dialogueText').html("<b>STOP!</b> Hier wohnt niemand. Da die Kette hier abreißt, wissen wir sicher: <b>Tina wohnt nicht in der Stadt!</b>");
                     $('#majorMikeImage').attr('src', './assets/wink_major.png');
                     setTimeout(showSuccessModal, 4000);
+                }
+                else if (houseNumber >= search2InitialHash && houseNumber < search2CorrectHouse) {
+                    console.log("test");
+                    $('#dialogueText').text(`Das ist ${clickedFamily}. Weiter suchen (Linear Probing)!`);
+                    $house.removeClass('highlight-target');
+                    $(`.house[data-house=${houseNumber + 1}]`).addClass('highlight-target');
+                } else if (clickedFamily === '' || clickedFamily === null){
+                    $('#dialogueText').text(`Dieses Haus ist leer und kommt nicht in Frage. Klicke auf die markierten Häuser!`);
+                } else{
+                    $('#dialogueText').text(`Dieses Haus gehört ${clickedFamily} und kommt nicht in Frage. Klicke auf die markierten Häuser!`);
                 }
             }
         });
