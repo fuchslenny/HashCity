@@ -90,11 +90,26 @@ $final_residents = [
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         }
         .img-house-base {
-            width: 90px; height: auto; z-index: 1;
-            display: block; position: relative;
+            width: 100%;       /* Füllt die Breite des Eltern-Containers */
+            height: auto;     /* Höhe automatisch anpassen, um das Seitenverhältnis zu wahren */
+            max-width: 100%;  /* Maximale Breite begrenzen */
+            max-height: 100%; /* Maximale Höhe begrenzen */
+            object-fit: contain; /* Bild wird vollständig angezeigt, ohne Verzerrung */
+            display: block;
+            position: relative;
+            z-index: 1;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
         }
-        .img-house-extension { width: 100%; height: auto; z-index: 10; display: block; position: relative; margin-bottom: -5px;}
+        .img-house-extension {
+            width: 100%;       /* Füllt die Breite des Eltern-Containers */
+            height: auto;     /* Höhe automatisch anpassen */
+            max-width: 100%;  /* Maximale Breite begrenzen */
+            object-fit: contain; /* Bild wird vollständig angezeigt */
+            display: block;
+            position: relative;
+            margin-bottom: -5px; /* Überlappung für den "Stapel"-Effekt */
+            z-index: 10;
+        }
         .img-house-extension.top-floor {animation: fallDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
 
         @keyframes fallDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
@@ -532,17 +547,18 @@ $final_residents = [
 
         let container = $('.family-list-container');
         let scrollTo = $(`#res-${currentResIdx}`);
+        let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
         if(scrollTo.length) {
             container.animate({ scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop() - 50 });
         }
 
         h1 = null; h2 = null;
-        $('#hashResult').text('-');
+        $('#hashResult').text('Ergebnis ...');
         $('#h2Result').text('-');
         $('#stepCalcBox').removeClass('active');
         $('#hashButton').prop('disabled', false).text('1. Hash Berechnen');
         $('#btnCalcH2').prop('disabled', true);
-
+        $('#nameInput').val(name);
         $('.house').removeClass('collision-highlight found-highlight');
         updateStats();
     }
