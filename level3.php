@@ -200,7 +200,11 @@ $hash_werte = [
             { empty: "WohnhauRotBraunLeerNeu.svg", filled: "WohnhauRotBraunBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
-        // --- Variablen ---
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
         let gameStarted = false; // Steuert den Intro-Modus
         let isFading = false;
         let currentTask = 'Dieter';
@@ -215,6 +219,17 @@ $hash_werte = [
 
         $('#nameInput').val('');
 
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
         // --- Helper: Dialog Update (für Game-Logic) ---
         function updateDialogue(text, img = 'card_major.png') {
             $('#dialogueText').html(text);
@@ -310,6 +325,7 @@ $hash_werte = [
             // --- DIETER (Ziel: Haus 1) ---
             if (currentTask === 'Dieter') {
                 if (houseNum === 1) {
+                    playSound('click');
                     // Einziehen lassen
                     $house.removeClass('leer').addClass('belegt checked').data('family', 'Dieter');
                     $house.find('.house-family').text('Dieter').css('opacity', 1);
@@ -328,14 +344,17 @@ $hash_werte = [
                     $('#nameInput').val('');
                     $('#hashButton').prop('disabled', false); // Button wieder aktiv machen für Auswahl
                 } else if ($house.hasClass('belegt')) {
+                    playSound('error');
                     updateDialogue("Haus ist belegt! Linear Probing = Nächstes freies Haus.", "sad_major.png");
                 } else {
+                    playSound('error');
                     updateDialogue("Falsches Haus. Dieter gehört in Haus 1 (0 -> besetzt -> 1).", "sad_major.png");
                 }
             }
             // --- LARS (Ziel: Haus 4) ---
             else if (currentTask === 'Lars') {
                 if (houseNum === 4) {
+                    playSound('click');
                     // Einziehen lassen
                     $house.removeClass('leer').addClass('belegt checked').data('family', 'Lars');
                     $house.find('.house-family').text('Lars').css('opacity', 1);
@@ -354,22 +373,28 @@ $hash_werte = [
                     $('#hashButton').prop('disabled', false);
                     $('#hashResult').text('Ergebnis: ...');
                 } else if ($house.hasClass('belegt')) {
+                    playSound('error');
                     updateDialogue("Besetzt! Weiter suchen (Linear Probing).", "sad_major.png");
                 } else {
+                    playSound('error');
                     updateDialogue("Falsch. Hash war 2. 2->belegt, 3->belegt -> 4.", "sad_major.png");
                 }
             }
             // --- JANNES (Suche in Haus 2) ---
             else if (currentTask === 'Jannes') {
                 if (houseNum === 2) {
+                    playSound('click');
                     $house.addClass('found');
+                    playSound('success');
                     $('#successOverlay').css('display', 'flex');
                 } else {
                     // Besseres Feedback beim falschen Haus
                     const occupant = $house.data('family');
                     if (occupant) {
+                        playSound('error');
                         updateDialogue(`Hier wohnt ${occupant}. Wir suchen Jannes (Hash 2)!`, "sad_major.png");
                     } else {
+                        playSound('error');
                         updateDialogue("Dieses Haus ist leer. Wir suchen Jannes (Hash 2)!", "sad_major.png");
                     }
                 }
