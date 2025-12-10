@@ -354,31 +354,6 @@ $bewohner_liste = [
             margin-bottom: 2rem;
             font-weight: 500;
         }
-        .success-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .stat-box {
-            background: #f8f9fa;
-            padding: 1.2rem;
-            border-radius: 15px;
-            border: 3px solid #4CAF50;
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
-        }
-        .stat-label {
-            font-size: 0.95rem;
-            color: #666;
-            font-weight: 700;
-            margin-bottom: 0.4rem;
-        }
-        .stat-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #2E7D32;
-        }
         .success-buttons {
             display: flex;
             gap: 1rem;
