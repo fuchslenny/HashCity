@@ -729,6 +729,21 @@ $prefilled_haeuser = [
             "Dieter ist als erstes dran. Wähle ihn jetzt aus der Liste aus, um zu starten!"
         ];
         let currentDialogue = 0;
+        // Sound-Dateien
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) {
@@ -818,6 +833,7 @@ $prefilled_haeuser = [
         });
         $('.house').click(function() {
             if (investigationMode && $(this).data('house') === 0) {
+                playSound('click');
                 selectedFamily = $(this).data('family');
                 $('#hashButton').prop('disabled', false);
                 $('.house').removeClass('highlight-target');
@@ -830,6 +846,7 @@ $prefilled_haeuser = [
             }
             if (gameCompleted || !gameStarted || waitingForCollisionConfirm || investigationMode) return;
             if (!selectedFamily || $('#hashResult').text() === 'Ergebnis ...') {
+                playSound('error');
                 $('#dialogueText').text(`Du musst erst 'Dieter' aus der Liste wählen und auf 'Berechnen' klicken!`);
                 return;
             }
@@ -837,6 +854,7 @@ $prefilled_haeuser = [
             const houseNumber = $house.data('house');
             const targetHash = getHash(ZIEL_FAMILIE, HASH_SIZE);
             if (houseNumber !== targetHash) {
+                playSound('error');
                 $('#dialogueText').text("Das war das falsche Haus. Das Ziel war Haus 0.");
                 $('#hashButton').prop('disabled', false);
                 $('.house').removeClass('highlight-target');
@@ -844,6 +862,7 @@ $prefilled_haeuser = [
             }
             const currentOccupant = stadt[houseNumber];
             if (currentOccupant !== null) {
+                playSound('error');
                 $house.addClass('found');
                 $('#majorMikeImage').attr('src', './assets/sad_major.png');
                 $('#dialogueText').html(
@@ -862,6 +881,7 @@ $prefilled_haeuser = [
                 <br><br>
                 "Wir müssen im nächsten Level eine Lösung für diese <strong>Kollision</strong> finden."
             `;
+            playSound('success');
             $('#successMessage').html(successMsg);
             $('#successOverlay').css('display', 'flex');
         }
