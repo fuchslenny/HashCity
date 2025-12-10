@@ -129,9 +129,19 @@ $bewohner_liste = [
             to { opacity: 1; transform: translateY(0); }
         }
         .house-number {
-            position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
-            background: #222; color: #fff; padding: 2px 10px; border-radius: 8px;
-            font-family: 'Orbitron', sans-serif; font-size: 0.9rem; z-index: 20;
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
         }
         /* --- NAMENS-LOGIK --- */
         .name-badge-container {
