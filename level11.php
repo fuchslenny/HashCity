@@ -66,7 +66,14 @@ $familien_liste = array_merge($old_residents, $new_residents);
             100% { transform: scale(1); opacity: 1; }
         }
         .house.pop-in { animation: popIn 0.4s ease-out forwards; }
-        .house { aspect-ratio: 1; background: transparent; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; position: relative; border-radius: 8px; padding: 0.2rem; }
+        .house {
+            position: relative;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
         .house:hover:not(.checked):not(.found) { transform: translateY(-5px) scale(1.1); z-index: 10; }
         .house.highlight-target { transform: translateY(-8px) scale(1.2) !important; box-shadow: 0 0 25px 5px gold; z-index: 11; }
         .house-icon { width: 100%; height: 100%; object-fit: contain; transition: all 0.3s ease; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2)); }
