@@ -487,10 +487,12 @@
                     $('#successOverlay').css('display', 'flex');
                     $('#finalAttempts').text(attempts);
                 } else if (occupant) {
+                    playSound('error');
                     attempts++;
                     $(this).addClass('show-family').find('.house-family').text(occupant);
                     $('#dialogueText').text(`Nein, hier wohnt ${occupant}. Wir suchen Thomas!`);
                 } else {
+                    playSound('error');
                     attempts++;
                     $('#dialogueText').text("Hier wohnt niemand.");
                 }
@@ -499,10 +501,12 @@
 
             // --- PLATZIERUNGS MODUS ---
             if (!selectedFamily) {
+                playSound('error');
                 $('#dialogueText').text("Bitte wähle erst einen Namen aus der Liste.");
                 return;
             }
             if ($('#hashResult').text().includes('Ergebnis')) {
+                playSound('error');
                 $('#dialogueText').text("Bitte klicke erst auf 'Berechnen'!");
                 return;
             }
@@ -510,6 +514,7 @@
             const result = quadraticProbing(selectedFamily, HASH_SIZE, stadt);
 
             if (houseIdx !== result.finalIndex) {
+                playSound('error');
                 $('#dialogueText').text("Falsches Haus! Achte auf die Berechnung und die Markierungen.");
                 return;
             }
@@ -534,6 +539,7 @@
                 // Weiter
                 currentFamilyIndex++;
                 if (currentFamilyIndex < families.length) {
+                    playSound('click');
                     $('#dialogueText').text("Sehr gut! Nächster Bewohner.");
                     setTimeout(initFamilyList, 500);
                     const nextFamily = families[currentFamilyIndex];

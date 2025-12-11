@@ -825,6 +825,22 @@
             { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
         ];
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
         // Funktion zum Setzen des Haus-Assets
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
@@ -926,6 +942,7 @@
                         searchTarget = 'Chris';
                         $('#hashButton').prop('disabled', false);
                     } else if (searchTarget === 'Chris' && occupant === 'Chris') {
+                        playSound('success');
                         attempts++;
                         $('#successMessage').html(
                             `<strong style="color: #667eea;">Major Mike sagt:</strong><br>
@@ -948,8 +965,10 @@
                         }
                         steps.push(position);
                         if (steps.includes(houseNumber)) {
+                            playSound('click');
                             $('#dialogueText').text("Du bist auf dem richtigen Weg!");
                         } else {
+                            playSound('error');
                             $('#dialogueText').text(searchErrorDialogue);
                         }
                     }
@@ -961,6 +980,7 @@
                 }
                 const finalIndex = quadraticProbing(selectedFamily, HASH_SIZE, stadt);
                 if (houseNumber !== finalIndex) {
+                    playSound('error');
                     $('#dialogueText').text(errorDialogue);
                     return;
                 }
@@ -979,6 +999,7 @@
                     $('#occupiedCount').text(occupiedHouses + ' / 15');
                     currentFamilyIndex++;
                     if (currentFamilyIndex < families.length) {
+                        playSound('click');
                         $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen.`);
                         const nextFamily = families[currentFamilyIndex];
                         $('.to-do-family').removeClass('active');
