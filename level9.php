@@ -623,6 +623,22 @@ $bewohner_liste = [
             "Das Fachwort dafür ist <strong>Seperate Chaining</strong>. Wir erstellen quasi eine Liste von Bewohnern an derselben Adresse – wie in einem Mehrfamilienhaus.",
             "Leg los! Berechne die Hausnummer. Ist das Haus voll? Kein Problem: Wir bauen einfach eine Etage drauf!"
         ];
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
 
         $('#dialogueText').html(dialogues[0]);
 
@@ -737,6 +753,7 @@ $bewohner_liste = [
             if (gamePhase === "placement_click") {
                 if (inputLocked) return;
                 if (clickedHouse === currentHash) {
+                    playSound('click');
                     inputLocked = true;
                     $('#dialogueText').text("Sehr gut. Das war das richtige Haus.");
                     $('#majorMikeImage').attr('src', './assets/wink_major.png');
@@ -790,6 +807,7 @@ $bewohner_liste = [
                         }
                     }, 1000);
                 } else {
+                    playSound('error');
                     $('#dialogueText').html("Falsches Haus! Achte auf die Berechnung.");
                     $('#majorMikeImage').attr('src', './assets/sad_major.png');
                 }
@@ -803,15 +821,18 @@ $bewohner_liste = [
 
                 if (clickedHouse === currentHash && residentList.includes(SEARCH_TARGET)) {
                     if ($thomasElement.hasClass('revealed')) {
+                        playSound('success')
                         $('#dialogueText').text("Da ist er ja! Danke für deine Hilfe!");
                         $('#majorMikeImage').attr('src', './assets/wink_major.png');
                         $thomasElement.addClass('found');
                         setTimeout(function() { $('#successOverlay').fadeIn(); }, 1000);
                     } else {
+                        playSound('click');
                         $('#dialogueText').text("Er wohnt in diesem Haus. Klicke weiter, um ihn in der Liste zu finden!");
                         $('#majorMikeImage').attr('src', './assets/card_major.png');
                     }
                 } else {
+                    playSound('error');
                     $('#dialogueText').html("Falsches Haus. Thomas wohnt hier nicht.");
                     $('#majorMikeImage').attr('src', './assets/sad_major.png');
                 }
