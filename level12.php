@@ -491,6 +491,43 @@ $final_residents = [
     let dialogueIdx = 1;
     let fails = 0;
 
+    // Sound-Dateien laden
+    const soundClick   = new Audio('./assets/sounds/click.mp3');
+    const soundSuccess = new Audio('./assets/sounds/success.mp3');
+    const soundError   = new Audio('./assets/sounds/error.mp3');
+
+    const dialogueAudios = [
+        new Audio('./assets/sounds/Lvl12/Lvl12_1.wav'),
+        new Audio('./assets/sounds/Lvl12/Lvl12_2.wav'),
+        new Audio('./assets/sounds/Lvl12/Lvl12_3.wav'),
+        new Audio('./assets/sounds/Lvl12/Lvl12_4.wav'),
+        new Audio('./assets/sounds/Lvl12/Lvl12_5.wav'),
+        new Audio('./assets/sounds/Lvl12/Lvl12_6.wav')
+    ];
+    let currentAudioObj = null;
+
+    function playDialogueAudio(index) {
+        if (currentAudioObj) {
+            currentAudioObj.pause();
+            currentAudioObj.currentTime = 0;
+        }
+        if (index >= 0 && index < dialogueAudios.length) {
+            currentAudioObj = dialogueAudios[index];
+            currentAudioObj.play().catch(e => console.log("Audio blocked", e));
+        }
+    }
+
+    function playSound(type) {
+        let audio;
+        if (type === 'click') audio = soundClick;
+        else if (type === 'success') audio = soundSuccess;
+        else if (type === 'error') audio = soundError;
+
+        if (audio) {
+            audio.currentTime = 0; // Spult zum Anfang zurück
+            audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+        }
+    }
     // --- Initialization ---
     function selectMode(mode) {
         gameMode = mode;
@@ -513,6 +550,7 @@ $final_residents = [
         $('#dialogueText').text(`Modus: ${modeName}. Keine Hilfen. Viel Erfolg!`);
         initVisuals();
         updateStats();
+        playDialogueAudio(0);
         showDialogue(dialogues[0]);
     }
 
@@ -524,9 +562,11 @@ $final_residents = [
     function advanceDialogue() {
         if(isFading || dialogueIdx>dialogues.length) return;
         if (dialogueIdx < dialogues.length) {
+            playDialogueAudio(dialogueIdx);
             showDialogue(dialogues[dialogueIdx]);
             dialogueIdx++;
         }else{
+            if(currentAudioObj) currentAudioObj.pause();
             dialogueIdx++;
             highlightNextResident();
             $('#dialogueContinue').hide();
@@ -574,7 +614,6 @@ $final_residents = [
         $el.append(`<div class="house-occupant"></div>`);
 
         if (gameMode === 'chaining') {
-
             if (count > 1) {
                 $el.append(`<img src="./assets/${pair.filled}" class="img-house-base">`);
                 for (let i = 1; i < count; i++) {
@@ -822,10 +861,12 @@ $final_residents = [
         // 1. Chaining (Simple)
         if (gameMode === 'chaining') {
             if (clickedIndex === h1) {
+                playSound('click');
                 if(isSearchPhase) handleSearchClick(clickedIndex, $el, name);
                 else placeResident(clickedIndex, name);
             } else {
                 fails++;
+                playSound('error');
                 failFeedback("Falsches Haus! Rechne nochmal nach.");
             }
             return;
@@ -842,6 +883,8 @@ $final_residents = [
         // Case A: User clicked the FINAL CORRECT EMPTY spot directly
         if (clickedIndex === correctTarget) {
             fails = 0;
+            playSound('click');
+
             // Check Load Factor Limit
             let futureLF = (placedResidents.length + 1) / currentCapacity;
             if (futureLF > 0.76) {
@@ -856,6 +899,7 @@ $final_residents = [
 
         // Case B: User clicked a Valid but Occupied spot (Collision path)
         if (validPath.includes(clickedIndex)) {
+            playSound('click');
             $el.addClass('collision-highlight');
             setTimeout(() => $el.removeClass('collision-highlight'), 500);
 
@@ -870,8 +914,10 @@ $final_residents = [
             }
             return;
         }
+
         // Case C: Wrong House
 
+        playSound('error');
         fails++;
         if(fails >= 3){
             failGame("Du hast zu viele falsche Versuche gehabt!")
@@ -949,6 +995,7 @@ $final_residents = [
     }
 
     function winGame() {
+        playSound('success');
         $('#endModal').removeClass('modal-fail').addClass('modal-win');
         $('#endIcon').text("🎓");
         $('#endTitle').text("ABSCHLUSS BESTANDEN!");
@@ -958,6 +1005,7 @@ $final_residents = [
     }
 
     function failGame(reason) {
+        playSound('error');
         $('#endModal').removeClass('modal-win').addClass('modal-fail');
         $('#endIcon').text("☠️");
         $('#endTitle').text("Gescheitert");
