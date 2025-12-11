@@ -405,6 +405,24 @@ $familien_liste = array_merge($old_residents, $new_residents);
             "Klicke auf 'STADT ERWEITERN', um das Problem zu lösen!"
         ];
         let dialogueIdx = 0;
+
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
+
         // --- Helper ---
         function getAsciiSum(name) {
             let sum = 0;
@@ -613,14 +631,20 @@ $familien_liste = array_merge($old_residents, $new_residents);
         $('.house').click(function() {
             if (phase !== 'find_spot') return;
             let idx = $(this).data('index');
-            if (idx !== h1Value) { showDialogue(`Falsches Haus. Ziel ist ${h1Value}.`); return; }
+            if (idx !== h1Value) {
+                playSound('error');
+                showDialogue(`Falsches Haus. Ziel ist ${h1Value}.`);
+                return;
+            }
             if (city[idx] !== null) {
+                playSound('click');
                 h1Value = (h1Value + 1) % 40;
                 showDialogue("Kollision? Nimm das nächste freie.");
                 $('.house').removeClass('highlight-target');
                 $(`#house-${h1Value}`).addClass('highlight-target');
                 return;
             }
+            playSound('click');
             city[idx] = selectedFamily;
             updateLoadFactor();
             let $house = $(this);
@@ -643,6 +667,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
             }
         });
         function endLevel() {
+            playSound('success');
             $('#nameInput').val('');
             showDialogue("Fantastisch! Load Factor 0.55 (Okay). Rehashing hat funktioniert. Jetzt bist du bereit für das große Finale!", 'wink_major.png');
             $('.list-group-item').addClass('done');
