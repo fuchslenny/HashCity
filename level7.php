@@ -742,6 +742,22 @@ $familien_liste = [
             { empty: "WohnhauRotBraunLeerNeu.svg", filled: "WohnhauRotBraunBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
 
         // --- Zufällige Auswahl der Assets für die Häuser ---
         function getRandomHousePair() {
@@ -911,6 +927,7 @@ $familien_liste = [
 
             if (phase.startsWith('search_')) {
                 if (phase === 'search_calc_h1' || phase === 'search_calc_h2') {
+                    playSound('error');
                     showDialogue("Bitte berechne erst den Hash-Wert im Rechner, bevor du suchst!");
                     return;
                 }
@@ -924,12 +941,14 @@ $familien_liste = [
             }
             if (phase === 'place_h1') {
                 if (houseIdx !== h1Value) {
+                    playSound('error');
                     showDialogue("Das war das falsche Haus. Der Rechner sagt " + h1Value + ".");
                     return;
                 }
                 if (city[houseIdx] === null) {
                     placeFamily(houseIdx);
                 } else {
+                    playSound('click');
                     handleCollision(houseIdx);
                 }
             }
@@ -937,6 +956,7 @@ $familien_liste = [
                 let expectedIdx = (currentProbeIndex + h2Value) % HASH_SIZE;
 
                 if (houseIdx !== expectedIdx) {
+                    playSound('error');
                     let summe = currentProbeIndex + h2Value;
                     showDialogue(`Falsch! <br>Rechnung: Aktuelles Haus (${currentProbeIndex}) + Sprungweite (${h2Value}) = ${summe}.<br>${summe} Modulo 10 ergibt <b>Haus ${expectedIdx}</b>.`);
                     return;
@@ -944,6 +964,7 @@ $familien_liste = [
                 if (city[houseIdx] === null) {
                     placeFamily(houseIdx);
                 } else {
+                    playSound('error');
                     currentProbeIndex = houseIdx;
                     showDialogue(`Oha! Haus ${houseIdx} ist AUCH besetzt. Wir müssen NOCHMAL springen. Addiere wieder ${h2Value}!`, 'sad_major.png');
                     $('.house').removeClass('highlight-target');
@@ -953,6 +974,7 @@ $familien_liste = [
             }
         });
         function placeFamily(idx) {
+            playSound('click');
             city[idx] = selectedFamily;
             let $house = $(`#house-${idx}`);
             setHouseAsset($house, true);
@@ -978,6 +1000,7 @@ $familien_liste = [
             }
         }
         function handleCollision(idx) {
+            playSound('error');
             showDialogue(`Mist! Haus ${idx} ist schon belegt. Eine Kollision! Wir brauchen Double Hashing. Klicke auf den 2. Hash Rechner!`, 'sad_major.png');
             $('#stepCalcBox').addClass('active');
             $('#btnCalcH1').prop('disabled', true);
@@ -1033,6 +1056,7 @@ $familien_liste = [
             if (phase === 'search_check_h1') {
                 // Sperre: Nur das berechnete Start-Haus darf geklickt werden
                 if (houseIdx !== searchH1) {
+                    playSound('error');
                     showDialogue(`Halt! Der Rechner hat <b>Haus ${searchH1}</b> berechnet. Bitte prüfe zuerst dieses Haus.`);
                     return;
                 }
@@ -1044,6 +1068,7 @@ $familien_liste = [
                 if (city[houseIdx] === SEARCH_TARGET) {
                     endLevel();
                 } else {
+                    playSound('error');
                     showDialogue(`Das ist ${city[houseIdx]}, nicht Sarah! Wir brauchen den 2. Hash für die Suche. Klicke unten auf 'Sprungweite berechnen'.`, 'sad_major.png');
                     $('#stepCalcBox').addClass('active');
                     $('#btnCalcH2').prop('disabled', false);
@@ -1056,6 +1081,7 @@ $familien_liste = [
 
                 // Sperre: Nur das berechnete Ziel-Haus darf geklickt werden
                 if (houseIdx !== expected) {
+                    playSound('error');
                     let summe = searchH1 + searchH2;
                     showDialogue(`Falsch geklickt. <br>Rechnung: Start (${searchH1}) + Sprung (${searchH2}) = ${summe}.<br>Modulo 10 ergibt <b>Haus ${expected}</b>.`);
                     return;
@@ -1069,6 +1095,7 @@ $familien_liste = [
                     $house.addClass('found');
                     endLevel();
                 } else {
+                    playSound('error');
                     searchH1 = houseIdx;
                     showDialogue(`Das ist ${city[houseIdx]}! Immer noch nicht. Addiere nochmal die Sprungweite ${searchH2}.`);
                     let next = (searchH1 + searchH2) % HASH_SIZE;
@@ -1078,6 +1105,7 @@ $familien_liste = [
             }
         }
         function endLevel() {
+            playSound('success');
             $('#successMessage').text("Danke für deine Hilfe, so funktioniert alles viel besser!");
             $('#successOverlay').css('display', 'flex');
         }
