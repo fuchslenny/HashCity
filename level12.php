@@ -279,6 +279,7 @@ $final_residents = [
         .modal-box { background: white; border-radius: 30px; padding: 3rem; text-align: center; border: 5px solid; max-width: 600px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
         .modal-win { border-color: #4CAF50; }
         .modal-fail { border-color: #D32F2F; }
+        .dialogue-continue { position: absolute; bottom: 10px; right: 15px; font-size: 0.85rem; color: #667eea; font-style: italic; font-weight: 700; animation: blink 1.5s infinite; }
 
     </style>
 </head>
@@ -330,6 +331,9 @@ $final_residents = [
             <div class="major-mike-name">🎖️ Major Mike</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">Zeig was du gelernt hast!</div>
+                <div class="dialogue-continue" id="dialogueContinue">
+                    Klicken oder Enter ↵
+                </div>
             </div>
         </div>
 
@@ -428,6 +432,28 @@ $final_residents = [
     // --- Configuration ---
     const residents = <?php echo json_encode($final_residents); ?>;
     const MAX_PROBE_STEPS = 5;
+    const dialogues = [
+        "Nach all der Arbeit, all den Berechnungen, all den Kollisionen, den Cluster-Problemen und dem Rehashing brauche ich dringend eine Pause. Ich gehe also in den Urlaub! Du sollst ab jetzt die komplette Stadtverwaltung übernehmen. Die Stadt ist groß geworden, gut strukturiert – und du bist mittlerweile mehr als qualifiziert, alles selbst zu regeln.",
+
+        "Ein Stadtteil ist noch frei, den du nun vervollständigen sollst, während ich im Urlaub bin. Natürlich habe ich noch ein paar Regeln für dich:",
+
+        "der Load Factor muss unter 0,75 bleiben, " +
+        "dir stehen maximal 40 Häuser zur Verfügung, " +
+        "du hast zwei Rehashings zur Verfügung, " +
+        "beim Einfügen oder Suchen eines Bewohners sind maximal fünf Schritte erlaubt.",
+
+        "Du entscheidest also: " +
+        "wann gerehasht wird, " +
+        "wie du die Bewohner verteilst " +
+        "und wie du sicherstellst, dass die Stadt effizient bleibt. " +
+        "Ich gebe dir nur die Regeln vor – die Umsetzung liegt bei dir.",
+
+        "Damit steht deiner erfolgreichen Verwaltung des letzten Stadtteils nichts mehr im Weg. Ich verabschiede mich jetzt offiziell in den Urlaub. Mach du hier weiter.",
+
+        "Viel Erfolg und herzlichen Glückwunsch! Du hast das Finale erreicht. Jetzt zeig, was du gelernt hast."
+    ];
+    const urlaubmsg = "Major Mike befindet sich derzeit im Urlaub...";
+
 
     // Assets
     const housePairsProbing = [
@@ -460,7 +486,9 @@ $final_residents = [
     let currentSearchTarget = null;
     let h1 = null, h2 = null;
     let expansionCount = 0;
+    let isFading = false;
     const maxExpansions = 2;
+    let dialogueIdx = 1;
 
     // --- Initialization ---
     function selectMode(mode) {
@@ -484,7 +512,34 @@ $final_residents = [
         $('#dialogueText').text(`Modus: ${modeName}. Keine Hilfen. Viel Erfolg!`);
         initVisuals();
         updateStats();
-        highlightNextResident();
+        showDialogue(dialogues[0]);
+    }
+
+    $('#dialogueText').click(() => {
+        console.log("test");
+        advanceDialogue();
+    });
+    $(document).keydown(e => { if((e.key === 'Enter')) advanceDialogue(); });
+
+    function advanceDialogue() {
+        if(isFading || dialogueIdx>dialogues.length) return;
+        if (dialogueIdx < dialogues.length) {
+            showDialogue(dialogues[dialogueIdx]);
+            dialogueIdx++;
+        }else{
+            dialogueIdx++;
+            highlightNextResident();
+            $('#dialogueContinue').hide();
+            showDialogue(urlaubmsg);
+        }
+    }
+
+    function showDialogue(text) {
+        if (isFading && text !== dialogues[0]) return;
+        isFading = true;
+        $('#dialogueText').fadeOut(150, function() {
+            $(this).html(text).fadeIn(150, function() { isFading = false; });
+        });
     }
 
     function updateStepFormula() {
@@ -621,7 +676,7 @@ $final_residents = [
     // --- EXPANSION LOGIC ---
     $('#btnExpand').click(function() {
         if(placedResidents.length === 0) {
-            $('#dialogueText').text("Niemand da zum Umziehen!");
+            showDialogue("Niemand da zum Umziehen!");
             return;
         }
 
@@ -631,7 +686,7 @@ $final_residents = [
         currentCapacity *= 2;
         updateStepFormula();
 
-        $('#dialogueText').text(`Erweitere Stadt auf ${currentCapacity}. Rehashing...`);
+        showDialogue(`Erweitere Stadt auf ${currentCapacity}. Rehashing...`);
 
         if(currentCapacity >= 20) {
             $('#block-1').removeClass('hidden');
@@ -696,7 +751,7 @@ $final_residents = [
         }
 
         setTimeout(() => {
-            $('#dialogueText').text("Umzug fertig! Alle Positionen neu berechnet.");
+            showDialogue("Umzug fertig! Alle Positionen neu berechnet.");
             $('#btnExpand').text("🏗️ STADT ERWEITERN");
             updateStats();
             highlightNextResident();
@@ -708,9 +763,6 @@ $final_residents = [
         let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
         let sum = getAsciiSum(name);
         h1 = sum % currentCapacity;
-        $('#hashResult').text(`H1: ${h1}`);
-        let msg = isSearchPhase ? `Suche ${name}: 1. Hash ist ${h1}.` : `1. Hash ist ${h1}.`;
-        $('#dialogueText').text(msg);
         $('#hashButton').prop('disabled', true);
     });
 
@@ -720,7 +772,6 @@ $final_residents = [
         let hashSize2 = Math.floor(currentCapacity / 2);
         h2 = (sum % hashSize2) + 1;
         $('#h2Result').text(h2);
-        $('#dialogueText').html(`Sprungweite (H2) ist <b>${h2}</b>.`);
         $('#btnCalcH2').prop('disabled', true);
     });
 
@@ -772,7 +823,7 @@ $final_residents = [
                 if(isSearchPhase) handleSearchClick(clickedIndex, $el, name);
                 else placeResident(clickedIndex, name);
             } else {
-                failFeedback("Falsches Haus! Modulo Rechnen!");
+                failFeedback("Falsches Haus! Rechne nochmal nach.");
             }
             return;
         }
@@ -812,11 +863,8 @@ $final_residents = [
 
             // Unlock Double Hashing Calc if appropriate
             if (gameMode === 'double') {
-                $('#dialogueText').html(`Haus ${clickedIndex} belegt! Kollision.<br>Rechne weiter (Step).`);
                 $('#stepCalcBox').addClass('active');
                 if($('#h2Result').text() === '-') $('#btnCalcH2').prop('disabled', false);
-            } else {
-                $('#dialogueText').text(`Haus belegt! Kollision. Wo musst du als nächstes hin?`);
             }
             return;
         }
@@ -832,7 +880,7 @@ $final_residents = [
 
         if (residentsHere.includes(targetName)) {
             $el.addClass('found-highlight');
-            $('#dialogueText').text(`Gefunden! ${targetName} wohnt in Haus ${clickedIndex}.`);
+            showDialogue(`Gefunden! ${targetName} wohnt in Haus ${clickedIndex}.`);
             searchQueue.shift();
             $(`#search-0`).remove();
             setTimeout(() => startNextSearch(), 1500);
@@ -843,11 +891,11 @@ $final_residents = [
             $el.addClass('collision-highlight');
             setTimeout(() => $el.removeClass('collision-highlight'), 500);
             if (gameMode === 'double') {
-                $('#dialogueText').text(`${targetName} nicht hier. Berechne Step!`);
+                showDialogue(`${targetName} nicht hier. Berechne Step!`);
                 $('#stepCalcBox').addClass('active');
                 if($('#h2Result').text() === '-') $('#btnCalcH2').prop('disabled', false);
             } else {
-                $('#dialogueText').text(`${targetName} nicht hier. Rechne weiter...`);
+                showDialogue(`${targetName} nicht hier. Rechne weiter...`);
             }
         }
     }
@@ -858,7 +906,6 @@ $final_residents = [
         updateHouseVisual($(`#house-${idx}`), count);
         $(`#res-${currentResIdx}`).addClass('done');
         currentResIdx++;
-        $('#dialogueText').text(`${name} wohnt jetzt in Haus ${idx}.`);
         setTimeout(() => { highlightNextResident(); }, 800);
     }
 
@@ -867,8 +914,7 @@ $final_residents = [
         isSearchPhase = true;
         let shuffled = [...placedResidents].sort(() => 0.5 - Math.random());
         searchQueue = shuffled.slice(0, 3);
-        $('#dialogueText').text("Alle platziert! Finde nun die 3 gesuchten Personen!");
-        $('#mmAvatar').attr('src', './assets/wink_major.png');
+        showDialogue("Alle platziert! Finde nun die 3 gesuchten Personen!");
         $('#btnExpand').prop('disabled', true);
         $('#resList').empty();
         searchQueue.forEach((p, index) => {
@@ -888,14 +934,12 @@ $final_residents = [
         $('#stepCalcBox').removeClass('active');
         $('#hashButton').prop('disabled', false).text('1. Hash (Suche)');
         $('.house').removeClass('collision-highlight found-highlight');
-        $('#dialogueText').text(`Suche: ${currentSearchTarget.name}. Berechne den Hash!`);
+        showDialogue(`Suche: ${currentSearchTarget.name}.`);
     }
 
     // --- Helpers ---
     function failFeedback(msg) {
         $('#dialogueText').html(`<span style="color:red">⛔ ${msg}</span>`);
-        $('#mmAvatar').attr('src', './assets/sad_major.png');
-        setTimeout(() => $('#mmAvatar').attr('src', './assets/card_major.png'), 1500);
     }
 
     function winGame() {
