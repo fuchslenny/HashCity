@@ -254,7 +254,16 @@ $final_residents = [
             border-radius: 10px !important;
         }
         .list-group-item.active { background: #667eea; color: white; transform: scale(1.02); border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .list-group-item.done { text-decoration: line-through; opacity: 0.5; background: #eee; color: #888; cursor: default; }
+        .list-group-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .list-group-item.done {
+            opacity: 1;
+            background: #e0e0e0;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
         .list-group-item.search-target { background: #FF9800; color: white; animation: pulseSearch 2s infinite; border: 2px solid #E65100; }
         @keyframes pulseSearch { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
 
@@ -374,7 +383,7 @@ $final_residents = [
                 <div class="family-list-container">
                     <ul class="list-group" id="resList">
                         <?php foreach($final_residents as $idx => $name): ?>
-                            <li class="list-group-item to-do-family" id="res-<?php echo $idx; ?>" data-name="<?php echo $name; ?>">
+                            <li class="list-group-item to-do-family disabled" id="res-<?php echo $idx; ?>" data-name="<?php echo $name; ?>">
                                 <?php echo $name; ?>
                             </li>
                         <?php endforeach; ?>
@@ -550,7 +559,7 @@ $final_residents = [
             return;
         }
         $('.list-group-item').removeClass('active');
-        $(`#res-${currentResIdx}`).addClass('active');
+        $(`#res-${currentResIdx}`).removeClass('disabled').addClass('active');
 
         let container = $('.family-list-container');
         let scrollTo = $(`#res-${currentResIdx}`);
