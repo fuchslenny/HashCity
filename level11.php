@@ -53,8 +53,8 @@ $familien_liste = array_merge($old_residents, $new_residents);
         .grid-title { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; color: #2E7D32; text-align: center; margin-bottom: 2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
         .street-block { position: relative; margin-bottom: 2rem; }
         /* 40 Häuser -> 4 Reihen à 10 Häuser */
-        .houses-row { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.5rem; margin-bottom: 0.5rem; padding: 0 0.5rem; position: relative; z-index: 2; transition: all 0.5s ease; }
-        .street { width: 100%; height: 50px; background-image: url('./assets/Strasse.svg'); background-size: cover; background-position: center; position: relative; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 1; margin-bottom: 1rem;}
+        .houses-row { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.5rem; padding: 0 0.5rem; position: relative; z-index: 2; transition: all 0.5s ease; }
+        .street { width: 100%; height: 50px; background-image: url('./assets/Strasse.svg'); background-size: cover; background-position: center; position: relative; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 10; margin-bottom: 1rem;}
         .street::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%); border-radius: 8px; z-index: -1; }
         .street::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px); transform: translateY(-50%); z-index: 2; }
         .house.hidden { display: none; }
@@ -67,6 +67,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
         }
         .house.pop-in { animation: popIn 0.4s ease-out forwards; }
         .house {
+            margin-bottom: -5px;
             position: relative;
             display: flex;
             flex-direction: column-reverse;
