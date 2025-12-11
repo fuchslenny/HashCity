@@ -645,7 +645,7 @@
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">
-                    Das sieht ja schon richtig gut aus. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür quadratic probing, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest.
+                    Das sieht ja schon richtig gut aus. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür <strong>Quadratic Probing</strong>, falls es zu Kollisionen kommt.<br><strong>Wichtig:</strong> Wenn du beim Rechnen über 19 kommst, fang vorne wieder bei 0 an!
                 </div>
             </div>
         </div>
@@ -907,7 +907,7 @@
                     }
                 }
             } else {
-                $('#dialogueText').text(`Laut Rechner gehört Familie ${family} in Haus ${anzeige}. Lasse sie nach dem Prinzip des Quadratic Probing einziehen!`);
+                $('#dialogueText').html(`Laut Rechner gehört Familie ${family} in Haus ${anzeige}. Lasse sie nach dem Prinzip des Quadratic Probing einziehen!`);
             }
         });
         // 3. Haus klicken, um Familie zu platzieren oder Bewohner zu suchen

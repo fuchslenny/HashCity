@@ -254,7 +254,6 @@
         let occupiedHouses = 0;
         let attempts = 0;
 
-        // --- Dialoge (NEU: Weicherer Einstieg) ---
         const dialogues = [
             "Willkommen zurück! Das 'Linear Probing' aus dem letzten Stadtteil hat leider zu 'Clustern' geführt – also Grüppchenbildung, die die Suche verlangsamt.",
             "Deshalb nutzen wir heute <strong>Quadratic Probing</strong>. Wenn ein Haus besetzt ist, gehen wir nicht einfach zum Nachbarn (+1, +2...), sondern springen in Quadrat-Schritten weiter: +1² (1), +2² (4), +3² (9) usw.",
