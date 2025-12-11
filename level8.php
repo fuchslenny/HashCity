@@ -219,7 +219,6 @@ $familien_liste = [
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
-            margin-bottom: 0.5rem;
             padding: 0 1rem;
             position: relative;
             z-index: 2;
@@ -235,7 +234,7 @@ $familien_liste = [
             position: relative;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            z-index: 1;
+            z-index: 10;
         }
         .street::before {
             content: '';
@@ -266,6 +265,8 @@ $familien_liste = [
             z-index: 2;
         }
         .house {
+            margin-bottom: -10px;
+            z-index: 0;
             aspect-ratio: 1;
             background: transparent;
             border: none;
