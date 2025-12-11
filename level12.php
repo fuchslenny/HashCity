@@ -516,7 +516,6 @@ $final_residents = [
     }
 
     $('#dialogueText').click(() => {
-        console.log("test");
         advanceDialogue();
     });
     $(document).keydown(e => { if((e.key === 'Enter')) advanceDialogue(); });
@@ -760,9 +759,11 @@ $final_residents = [
 
     // --- Calc Logic ---
     $('#hashButton').click(function() {
+        if(dialogueIdx <= dialogues.length) return;
         let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
         let sum = getAsciiSum(name);
         h1 = sum % currentCapacity;
+        $('#hashResult').text(`H1: ${h1}`);
         $('#hashButton').prop('disabled', true);
     });
 
