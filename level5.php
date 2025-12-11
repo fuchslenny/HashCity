@@ -483,6 +483,7 @@
                 const occupant = stadt[houseIdx];
                 if (occupant === 'Thomas') {
                     // GEWONNEN
+                    playSound('success');
                     $(this).addClass('show-family').find('.house-family').text('Thomas');
                     $('#successOverlay').css('display', 'flex');
                     $('#finalAttempts').text(attempts);

@@ -731,6 +731,23 @@ $familien_liste = [
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
 
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
+
         // --- Zufällige Auswahl der Assets für die Häuser ---
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
@@ -897,6 +914,7 @@ $familien_liste = [
             console.log("phase: " + phase);
             if (phase === 'place_h1') {
                 if (houseIdx !== h1Value) {
+                    playSound('error');
                     showDialogue("Das war das falsche Haus. Der Rechner sagt " + h1Value + ".");
                     return;
                 }
@@ -909,12 +927,14 @@ $familien_liste = [
             else if (phase === 'place_apply_step') {
                 let expectedIdx = (currentProbeIndex + h2Value) % HASH_SIZE;
                 if (houseIdx !== expectedIdx) {
+                    playSound('error');
                     showDialogue(`Falsch! Wir waren bei ${currentProbeIndex}. Plus Schrittweite ${h2Value} (modulo 10) ist Haus ${expectedIdx}.`);
                     return;
                 }
                 if (city[houseIdx] === null) {
                     placeFamily(houseIdx);
                 } else {
+                    playSound('error');
                     currentProbeIndex = houseIdx;
                     showDialogue(`Oha! Haus ${houseIdx} ist AUCH besetzt. Wir müssen NOCHMAL springen. Addiere wieder ${h2Value}!`, 'sad_major.png');
                     $('.house').removeClass('highlight-target');
@@ -923,6 +943,7 @@ $familien_liste = [
             }
         });
         function placeFamily(idx) {
+            playSound('click');
             city[idx] = selectedFamily;
             let $house = $(`#house-${idx}`);
             setHouseAsset($house, true);
@@ -947,6 +968,7 @@ $familien_liste = [
             }
         }
         function handleCollision(idx) {
+            playSound('error');
             showDialogue(`Mist! Haus ${idx} ist schon belegt. Eine Kollision! Wir brauchen Double Hashing. Klicke auf den 2. Hash Rechner!`, 'sad_major.png');
             $('#stepCalcBox').addClass('active');
             $('#btnCalcH1').prop('disabled', true);
@@ -1028,6 +1050,7 @@ $familien_liste = [
             }
         }
         function endLevel() {
+            playSound('success');
             $('#successMessage').text("Danke für deine Hilfe, so funktioniert alles viel besser!");
             $('#successOverlay').css('display', 'flex');
         }
