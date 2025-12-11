@@ -667,7 +667,7 @@ $familien = [
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">
-                    Willkommen in HashCity! Ich bin Major Mike, der Bürgermeister!
+                    ...
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
                     Klicken oder Enter ↵
@@ -786,7 +786,28 @@ $familien = [
         const soundClick   = new Audio('./assets/sounds/click.mp3');
         const soundSuccess = new Audio('./assets/sounds/success.mp3');
         const soundError   = new Audio('./assets/sounds/error.mp3');
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl0/Lvl0_1.mp3'),
+            new Audio('./assets/sounds/Lvl0/Lvl0_2.mp3'),
+            new Audio('./assets/sounds/Lvl0/Lvl0_3.mp3'),
+            new Audio('./assets/sounds/Lvl0/Lvl0_4.mp3')
 
+        ];
+        let currentAudioObj = null;
+
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
         function playSound(type) {
             let audio;
             if (type === 'click') audio = soundClick;
@@ -819,20 +840,34 @@ $familien = [
         let attempts = 0;
         let gameStarted = false;
         let gameCompleted = false;
+        let isFading = false;
         const dialogues = [
             "Hallo! Willkommen in HashCity! Ich bin Major Mike, der Bürgermeister dieser wunderschönen Stadt. Schön, dass du hier bist!",
             "Ich habe ein kleines Problem... Ich habe meinen Stadtplan verloren und weiß nicht mehr genau, wo welche Familie wohnt. 😅",
             "Ich muss dringend mit Familie Müller sprechen! Kannst du mir helfen, sie zu finden? Klicke einfach die Häuser an, um zu sehen, wer dort wohnt.",
             "Perfekt! Dann fangen wir an. Viel Erfolg beim Suchen! 🔍"
         ];
-        let currentDialogue = 0;
+        let currentDialogue = -1;
 
         // --- Dialoge anzeigen ---
         function showNextDialogue() {
+            if (isFading) return;
+            // Schritt erhöhen
             currentDialogue++;
+
+            // Prüfen ob wir noch Dialoge haben
             if (currentDialogue < dialogues.length) {
+                // SPERRE AKTIVIEREN
+                isFading = true;
+
+                playDialogueAudio(currentDialogue);
+
                 $('#dialogueText').fadeOut(200, function() {
-                    $(this).text(dialogues[currentDialogue]).fadeIn(200);
+                    $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
+                        isFading = false;
+                    });
+
+                    // Bilder-Logik
                     if (currentDialogue === 1) {
                         $('#majorMikeImage').attr('src', './assets/sad_major.png');
                     } else if (currentDialogue === 2) {
@@ -840,13 +875,14 @@ $familien = [
                     } else if (currentDialogue === 3) {
                         $('#majorMikeImage').attr('src', './assets/card_major.png');
                     }
-                    if (currentDialogue === dialogues.length - 1) {
-                        $('#dialogueContinue').fadeOut();
-                        gameStarted = true;
-                        $('.house').css('cursor', 'pointer');
-                        $(`.house[data-house=0]`).addClass('highlight-target');
-                    }
                 });
+            }
+            // Wenn Dialoge vorbei sind -> Spiel starten
+            else {
+                $('#dialogueContinue').fadeOut();
+                gameStarted = true;
+                $('.house').css('cursor', 'pointer');
+                $(`.house[data-house=0]`).addClass('highlight-target');
             }
         }
 
@@ -856,13 +892,13 @@ $familien = [
         }, 1000);
 
         $(document).keydown(function(e) {
-            if ((e.key === 'Enter' || e.key === ' ') && currentDialogue < dialogues.length - 1) {
+            if ((e.key === 'Enter' || e.key === ' ') && currentDialogue < dialogues.length) {
                 showNextDialogue();
             }
         });
 
         $('.dialogue-box').click(function() {
-            if (currentDialogue < dialogues.length - 1) {
+            if (currentDialogue < dialogues.length) {
                 showNextDialogue();
             }
         });
