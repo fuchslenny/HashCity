@@ -52,11 +52,44 @@ $hash_werte = [
         .houses-grid { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 4px solid #fff; overflow: hidden; }
         .grid-title { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; color: #2E7D32; text-align: center; margin-bottom: 2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
         .street-block { position: relative; margin-bottom: 2.5rem; }
-        .houses-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.8rem; margin-bottom: 0.5rem; padding: 0 1rem; position: relative; z-index: 2; }
-        .street { width: 100%; height: 60px; background-image: url('./assets/Strasse.svg'); background-size: cover; background-position: center; background-repeat: repeat-x; position: relative; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 1; }
+        .houses-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
+        }
+        .street {
+            width: 100%;
+            height: 60px;
+            background-image: url('./assets/Strasse.svg');
+            Background-size: cover;
+            background-position: center;
+            background-repeat: repeat-x;
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
         .street::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%); border-radius: 8px; z-index: -1; }
         .street::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px); transform: translateY(-50%); z-index: 2; }
-        .house { aspect-ratio: 1; background: transparent; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s ease; position: relative; border-radius: 10px; padding: 0.3rem; cursor: pointer; }
+        .house {
+            margin-bottom: -10px;
+            z-index: 0;
+            aspect-ratio: 1;
+            background: transparent;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 10px;
+            padding: 0.3rem;
+        }
         .house:hover:not(.belegt) { transform: translateY(-8px) scale(1.08); z-index: 10; }
         .house-icon { width: 100%; height: 100%; object-fit: contain; transition: all 0.3s ease; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); pointer-events: none; }
         .house.belegt .house-icon, .house.checked .house-icon { filter: drop-shadow(0 4px 8px rgba(255, 167, 38, 0.5)); }
