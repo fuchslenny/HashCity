@@ -278,6 +278,7 @@
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
         ];
 
+
         // --- State ---
         let stadt = new Array(HASH_SIZE).fill(null);
         let currentFamilyIndex = 0;
@@ -292,8 +293,44 @@
             "Deshalb nutzen wir heute <strong>Quadratic Probing</strong>. Wenn ein Haus besetzt ist, gehen wir nicht einfach zum Nachbarn (+1, +2...), sondern springen in Quadrat-Schritten weiter: +1² (1), +2² (4), +3² (9) usw.",
             "Dadurch verteilen sich die Bewohner viel besser in der Stadt. Probieren wir es direkt aus! Klicke auf 'Levi' in der Liste."
         ];
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl5/Lvl5_1.mp3'),
+            new Audio('./assets/sounds/Lvl5/Lvl5_2.mp3'),
+            new Audio('./assets/sounds/Lvl5/Lvl5_3.mp3')
+        ];
+
         let currentDialogue = 0;
         let isFading = false;
+        let currentAudioObj = null;
+
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
 
         // --- Logic Helper ---
         function getHash(key, size) {
@@ -334,6 +371,7 @@
             if (isFading) return;
 
             if (currentDialogue < dialogues.length) {
+                playDialogueAudio(currentDialogue);
                 isFading = true;
                 $('#dialogueText').fadeOut(200, function() {
                     $(this).html(dialogues[currentDialogue]); // .html für Fettdruck
@@ -548,7 +586,8 @@
         window.nextLevel = function() { window.location.href = 'Level-Auswahl?completed=5&next=6'; };
 
         // Start
-        nextDialogueStep();
+        $('#dialogueText').text("...");
+        $('#dialogueContinue').show();
     });
 </script>
 </body>
