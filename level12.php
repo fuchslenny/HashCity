@@ -276,7 +276,7 @@ $final_residents = [
         .mode-card h4 { color: #667eea; font-weight: 900; font-family: 'Orbitron'; }
 
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 4000; }
-        .modal-box { background: white; border-radius: 30px; padding: 3rem; text-align: center; border: 5px solid; max-width: 600px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .modal-box { background: white; border-radius: 30px; padding: 3rem; text-align: center; border: 5px solid; max-width: 90%; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
         .modal-win { border-color: #4CAF50; }
         .modal-fail { border-color: #D32F2F; }
         .dialogue-continue { position: absolute; bottom: 10px; right: 15px; font-size: 0.85rem; color: #667eea; font-style: italic; font-weight: 700; animation: blink 1.5s infinite; }
@@ -489,6 +489,7 @@ $final_residents = [
     let isFading = false;
     const maxExpansions = 2;
     let dialogueIdx = 1;
+    let fails = 0;
 
     // --- Initialization ---
     function selectMode(mode) {
@@ -626,7 +627,7 @@ $final_residents = [
         $('#hashResult').text('Ergebnis ...');
         $('#h2Result').text('-');
         $('#stepCalcBox').removeClass('active');
-        $('#hashButton').prop('disabled', false).text('1. Hash Berechnen');
+        $('#hashButton').prop('disabled', false).text('Berechne Hausnummer');
         $('#btnCalcH2').prop('disabled', true);
         $('#nameInput').val(name);
         $('.house').removeClass('collision-highlight found-highlight');
@@ -763,7 +764,7 @@ $final_residents = [
         let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
         let sum = getAsciiSum(name);
         h1 = sum % currentCapacity;
-        $('#hashResult').text(`H1: ${h1}`);
+        $('#hashResult').text(`Hausnummer: ${h1}`);
         $('#hashButton').prop('disabled', true);
     });
 
@@ -824,6 +825,7 @@ $final_residents = [
                 if(isSearchPhase) handleSearchClick(clickedIndex, $el, name);
                 else placeResident(clickedIndex, name);
             } else {
+                fails++;
                 failFeedback("Falsches Haus! Rechne nochmal nach.");
             }
             return;
@@ -839,12 +841,7 @@ $final_residents = [
 
         // Case A: User clicked the FINAL CORRECT EMPTY spot directly
         if (clickedIndex === correctTarget) {
-            // Check strict limit
-            if (result.steps > MAX_PROBE_STEPS) {
-                failGame(`Zu viele Schritte (${result.steps}) nötig! Erweiterung war überfällig.`);
-                return;
-            }
-
+            fails = 0;
             // Check Load Factor Limit
             let futureLF = (placedResidents.length + 1) / currentCapacity;
             if (futureLF > 0.76) {
@@ -867,10 +864,18 @@ $final_residents = [
                 $('#stepCalcBox').addClass('active');
                 if($('#h2Result').text() === '-') $('#btnCalcH2').prop('disabled', false);
             }
+            fails++;
+            if(fails >= 3){
+                failGame("Du hast zu viele falsche Versuche gehabt!")
+            }
             return;
         }
-
         // Case C: Wrong House
+
+        fails++;
+        if(fails >= 3){
+            failGame("Du hast zu viele falsche Versuche gehabt!")
+        }
         failFeedback("Falsches Haus! Rechne nochmal nach.");
     });
 
@@ -933,7 +938,7 @@ $final_residents = [
         $('#hashResult').text('-');
         $('#h2Result').text('-');
         $('#stepCalcBox').removeClass('active');
-        $('#hashButton').prop('disabled', false).text('1. Hash (Suche)');
+        $('#hashButton').prop('disabled', false);
         $('.house').removeClass('collision-highlight found-highlight');
         showDialogue(`Suche: ${currentSearchTarget.name}.`);
     }
