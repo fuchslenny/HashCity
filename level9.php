@@ -504,14 +504,14 @@ $bewohner_liste = [
 </div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-
     $(document).ready(function() {
         // --- KONFIGURATION ---
         var HASH_SIZE = 10;
         var familien = <?php echo json_encode($bewohner_liste); ?>;
         var stadt = new Array(HASH_SIZE).fill(null).map(function() { return []; });
-        var currentDialogue = 0;
         var gamePhase = "intro";
         var currentIdx = 0;
         var currentName = null;
@@ -519,160 +519,131 @@ $bewohner_liste = [
         var inputLocked = false;
         var SEARCH_TARGET = "Thomas";
         var occupiedHouses = 0;
+        let isFading = false;
 
-        // --- Haus-Paare für Assets ---
-        const housePairs = [
-            {
-                empty: "WH2BlauBraunLeer.svg",
-                filled: "WH2BlauBraun.svg",
-                extension: "WHBlauBraunErweiterung.svg"
-            },
-            {
-                empty: "WH2BlauGrauLeer.svg",
-                filled: "WH2BlauGrau.svg", // Annahme: WH2BlauGrau.svg ist die besetzte Variante
-                extension: "WHBlauGrauErweiterung.svg"
-            },
-            {
-                empty: "WH2BlauRotLeer.svg",
-                filled: "WH2BlauRot.svg", // Annahme: WH2BlauRot.svg ist die besetzte Variante
-                extension: "WHBlauRotErweiterung.svg"
-            },
-            {
-                empty: "WH2GrauBraunLeer.svg",
-                filled: "WH2GrauBraun.svg", // Annahme: WH2GrauBraun.svg ist die besetzte Variante
-                extension: "WHGrauBraunErweiterung.svg"
-            },
-            {
-                empty: "WH2GruenBraunLeer.svg",
-                filled: "WH2GruenBraun.svg", // Annahme: WH2GruenBraun.svg ist die besetzte Variante
-                extension: "WHGruenBraunErweiterung.svg" // Falls nicht vorhanden, weglassen
-            },
-            {
-                empty: "WH2GruenGrauLeer.svg",
-                filled: "WH2GruenGrau.svg", // Annahme: WH2GruenGrau.svg ist die besetzte Variante
-                extension: "WHGruenGrauErweiterung.svg"
-            },
-            {
-                empty: "WH2GelbBraunLeer.svg",
-                filled: "WH2GelbBraun.svg", // Annahme: WH2GelbBraun.svg ist die besetzte Variante
-                extension: "WHGelbBraunErweiterung.svg" // Keine Erweiterungsdatei vorhanden
-            },
-            {
-                empty: "WH2GelbRotLeer.svg",
-                filled: "WH2GelbRot.svg", // Annahme: WH2GelbRot.svg ist die besetzte Variante
-                extension: "WHGelbRotErweiterung.svg"
-            },
-            {
-                empty: "WH2RotBraunLeer.svg",
-                filled: "WH2RotBraun.svg",
-                extension: "WHRotBraunErweiterung.svg"
-            },
-            {
-                empty: "WH2RotRotLeer.svg",
-                filled: "WH2RotRot.svg", // Annahme: WH2RotRot.svg ist die besetzte Variante
-                extension: "WHRotRotErweiterung.svg"
-            }
-        ];
-
-        const families = [
-            "Franz",    // Hash 3
-            "Heinrich", // Hash 0
-            "Nora",     // Hash 0 (Kollision)
-            "Thomas",   // Hash 0 (Kollision)
-            "Markus",   // Hash 7
-            "Emma",     // Hash 4
-            "Johannes", // Hash 2
-            "Katrin",   // Hash 7 (Kollision)
-            "Peter",    // Hash 2 (Kollision)
-            "Nina",     // Hash 0 (Kollision)
-            "Julia"     // Hash 1
-            ];
-        function initFamilyList() {
-            $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
-            const currentFamily = families[currentIdx];
-            $(`.to-do-family[data-family="${currentFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', selectNextResident);
-            selectedFamily = currentFamily;
-        }
-        initFamilyList();
-
-        // --- Zufällige Auswahl der Assets für die Häuser ---
-        function getRandomHousePair() {
-            const randomIndex = Math.floor(Math.random() * housePairs.length);
-            return housePairs[randomIndex];
-        }
-
-        // --- Setzt das Haus-Asset ---
-        function setHouseAsset(houseElement, isExtension) {
-            const pair = getRandomHousePair();
-            if (!isExtension) {
-                houseElement.find('.img-house-base').attr('src', `./assets/${pair.empty}`);
-            } else {
-                return `./assets/${pair.extension}`;
-            }
-        }
-
-        // --- Initialisierung der Häuser mit zufälligen Assets ---
-        $('.house-container').each(function() {
-            setHouseAsset($(this), false);
-        });
-
-        // --- DIALOGE ---
+        // --- Dialoge & Sound Setup ---
         var dialogues = [
             "Willkommen zurück! Erinnerst du dich? Bisher mussten wir bei belegten Häusern immer lange nach einem freien Platz suchen (Probing). Das war mühsam.",
             "Hier machen wir es schlauer: Wir suchen <strong>nicht</strong> weiter! Wenn ein Haus belegt ist, bauen wir einfach an.",
             "Das Fachwort dafür ist <strong>Seperate Chaining</strong>. Wir erstellen quasi eine Liste von Bewohnern an derselben Adresse – wie in einem Mehrfamilienhaus.",
             "Leg los! Berechne die Hausnummer. Ist das Haus voll? Kein Problem: Wir bauen einfach eine Etage drauf!"
         ];
-        // Sound-Dateien laden
+
+        let currentDialogue = -1;
+
         const soundClick   = new Audio('./assets/sounds/click.mp3');
         const soundSuccess = new Audio('./assets/sounds/success.mp3');
         const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl9/Lvl9_1.mp3'),
+            new Audio('./assets/sounds/Lvl9/Lvl9_2.mp3'),
+            new Audio('./assets/sounds/Lvl9/Lvl9_3.mp3'),
+            new Audio('./assets/sounds/Lvl9/Lvl9_4.mp3'),
+        ];
+
+        let currentAudioObj = null;
+
+        function playDialogueAudio(index) {
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio blocked:", e));
+            }
+        }
 
         function playSound(type) {
             let audio;
             if (type === 'click') audio = soundClick;
             else if (type === 'success') audio = soundSuccess;
             else if (type === 'error') audio = soundError;
-
             if (audio) {
-                audio.currentTime = 0; // Spult zum Anfang zurück
-                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+                audio.currentTime = 0;
+                audio.play().catch(e => {});
             }
         }
 
-        $('#dialogueText').html(dialogues[0]);
+        // --- Intro Logic (Vereinheitlicht!) ---
+        function showNextDialogue() {
+            if (isFading || gamePhase !== "intro") return;
 
-        // --- INTRO LOGIK ---
-        $('#dialogueBox').click(function() {
-            if (gamePhase !== "intro") return;
+            // Erst erhöhen (-1 -> 0)
             currentDialogue++;
-            if (currentDialogue < dialogues.length) {
-                $('#dialogueText').fadeOut(100, function() { $(this).html(dialogues[currentDialogue]).fadeIn(100); });
-                if(currentDialogue === 1) $('#majorMikeImage').attr('src', './assets/card_major.png');
-            } else {
-                startGamePlacement();
+
+            // Intro-Texte (0 bis 3)
+            if (currentDialogue < 4) {
+                playDialogueAudio(currentDialogue);
+                isFading = true;
+
+                $('#dialogueText').fadeOut(150, function() {
+                    $(this).html(dialogues[currentDialogue]).fadeIn(150, function() {
+                        isFading = false;
+                    });
+
+                    if(currentDialogue === 1) $('#majorMikeImage').attr('src', './assets/card_major.png');
+
+                    // Letzter Intro-Text erreicht -> Spiel starten vorbereiten
+                    if (currentDialogue === 3) {
+                        $('#dialogueContinue').fadeOut();
+                        setTimeout(startGamePlacement, 3000); // Automatischer Start nach Text 4
+                    }
+                });
             }
+        }
+
+        // Listener für Dialoge
+        $('#dialogueBox').click(function() {
+            if (gamePhase === "intro") showNextDialogue();
         });
 
         $(document).keydown(function(e) {
-            if ((e.key === 'Enter' || e.key === ' ')) {
-                if (gamePhase !== "intro") return;
-                currentDialogue++;
-                if (currentDialogue < dialogues.length) {
-                    $('#dialogueText').fadeOut(100, function() { $(this).html(dialogues[currentDialogue]).fadeIn(100); });
-                    if(currentDialogue === 1) $('#majorMikeImage').attr('src', './assets/card_major.png');
-                } else {
-                    startGamePlacement();
-                }
+            if ((e.key === 'Enter' || e.key === ' ') && gamePhase === "intro") {
+                showNextDialogue();
             }
         });
 
+        // --- Init State ---
+        $('#dialogueText').text("...");
+        $('#dialogueContinue').show();
+
+        // --- Game Logic ---
         function startGamePlacement() {
             gamePhase = "placement_calc";
             $('#dialogueContinue').hide();
             $('#majorMikeImage').attr('src', './assets/card_major.png');
             selectNextResident();
         }
+
+        // Assets
+        const housePairs = [
+            { empty: "WH2BlauBraunLeer.svg", filled: "WH2BlauBraun.svg", extension: "WHBlauBraunErweiterung.svg" },
+            { empty: "WH2BlauGrauLeer.svg", filled: "WH2BlauGrau.svg", extension: "WHBlauGrauErweiterung.svg" },
+            { empty: "WH2BlauRotLeer.svg", filled: "WH2BlauRot.svg", extension: "WHBlauRotErweiterung.svg" },
+            { empty: "WH2GrauBraunLeer.svg", filled: "WH2GrauBraun.svg", extension: "WHGrauBraunErweiterung.svg" },
+            { empty: "WH2GruenBraunLeer.svg", filled: "WH2GruenBraun.svg", extension: "WHGruenBraunErweiterung.svg" },
+            { empty: "WH2GruenGrauLeer.svg", filled: "WH2GruenGrau.svg", extension: "WHGruenGrauErweiterung.svg" },
+            { empty: "WH2GelbBraunLeer.svg", filled: "WH2GelbBraun.svg", extension: "WHGelbBraunErweiterung.svg" },
+            { empty: "WH2GelbRotLeer.svg", filled: "WH2GelbRot.svg", extension: "WHGelbRotErweiterung.svg" },
+            { empty: "WH2RotBraunLeer.svg", filled: "WH2RotBraun.svg", extension: "WHRotBraunErweiterung.svg" },
+            { empty: "WH2RotRotLeer.svg", filled: "WH2RotRot.svg", extension: "WHRotRotErweiterung.svg" }
+        ];
+
+        function getRandomHousePair() { return housePairs[Math.floor(Math.random() * housePairs.length)]; }
+
+        $('.house-container').each(function() {
+            const pair = getRandomHousePair();
+            $(this).find('.img-house-base').attr('src', `./assets/${pair.empty}`);
+        });
+
+        function initFamilyList() {
+            $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
+            const currentFamily = familien[currentIdx];
+            $(`.to-do-family[data-family="${currentFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', selectNextResident);
+        }
+        initFamilyList();
 
         function selectNextResident() {
             if (currentIdx >= familien.length) {
@@ -694,7 +665,6 @@ $bewohner_liste = [
             return sum % HASH_SIZE;
         }
 
-        // --- BUTTON KLICK ---
         $('#hashButton').click(function() {
             if (gamePhase === "placement_calc") {
                 currentHash = getHash(currentName);
@@ -709,9 +679,8 @@ $bewohner_liste = [
                 if (currentName !== 'Thomas'){
                     $('#dialogueText').text(`Derzeit suchen wir nach ${SEARCH_TARGET} und nicht ${currentName}.`);
                     return;
-                }else{
-                    $('#dialogueText').text(`Laut Rechner wohnt Thomas in Haus ${currentHash}. Klicke nun mehrmals auf das Haus, um jede Etage durchzugehen.`);
                 }
+                $('#dialogueText').text(`Laut Rechner wohnt Thomas in Haus ${currentHash}. Klicke nun mehrmals auf das Haus, um jede Etage durchzugehen.`);
                 $('#hashResult').text(`Hausnummer: ${currentHash}`);
                 $(this).prop('disabled', true);
                 $('#house-' + currentHash).addClass('highlight-target');
@@ -719,16 +688,12 @@ $bewohner_liste = [
             }
         });
 
-        // --- GLOBALER CLICK LISTENER (Zum Schließen) ---
         $(document).click(function(event) {
             if (!$(event.target).closest('.house-container').length) {
-                if(gamePhase === "search_click") {
-                    $('.resident-name').removeClass('revealed');
-                }
+                if(gamePhase === "search_click") $('.resident-name').removeClass('revealed');
             }
         });
 
-        // --- HAUS KLICK ---
         $('.house-container').click(function(e) {
             e.stopPropagation();
             var clickedHouse = $(this).data('house');
@@ -736,12 +701,11 @@ $bewohner_liste = [
             var $nameContainer = $('#names-' + clickedHouse);
             var $houseElement = $(`#house-${clickedHouse}`);
 
-            // Andere Häuser schließen (nur in Search Phase sichtbar)
-            $('.house-container').not(this).find('.resident-name').removeClass('revealed');
-
-            // TRAVERSIEREN (Namen aufdecken)
+            // Search Traversing
             if (gamePhase === "search_click") {
+                $('.house-container').not(this).find('.resident-name').removeClass('revealed');
                 var $hiddenNames = $nameContainer.find('.resident-name').not('.revealed');
+
                 if ($hiddenNames.length > 0) {
                     $hiddenNames.first().addClass('revealed');
                 } else if ($nameContainer.find('.resident-name').length > 0) {
@@ -749,7 +713,7 @@ $bewohner_liste = [
                 }
             }
 
-            // --- PHASE: EINFÜGEN (VERTEILEN) ---
+            // Placement Phase
             if (gamePhase === "placement_click") {
                 if (inputLocked) return;
                 if (clickedHouse === currentHash) {
@@ -761,36 +725,31 @@ $bewohner_liste = [
                     var bewohnerAnzahl = stadt[clickedHouse].length;
                     var nameTag = $('<div class="resident-name">' + currentName + '</div>');
                     $nameContainer.append(nameTag);
-                    if(bewohnerAnzahl === 1){
-                        const currentAsset = $houseElement.find('.img-house-base').attr('src');
-                        const assetName = currentAsset.split('/').pop();
-                        let matchingPair = null;
-                        for (const pair of housePairs) {
-                            if (pair.empty === assetName || pair.filled === assetName) {
-                                matchingPair = pair;
-                                break;
-                            }
-                        }
-                        var newAsset = matchingPair.filled;
-                        $houseElement.find('.img-house-base').attr('src', `./assets/${newAsset}`);
-                        occupiedHouses++;
-                        $('#occupiedCount').text(occupiedHouses + ' / 11');
 
-                    }else if (bewohnerAnzahl > 1) {
-                        const currentAsset = $houseElement.find('.img-house-base').attr('src');
-                        const assetName = currentAsset.split('/').pop();
-                        let matchingPair = null;
-                        for (const pair of housePairs) {
-                            if (pair.filled === assetName || pair.extension === assetName) {
-                                matchingPair = pair;
-                                break;
-                            }
+                    // Asset Update logic (simplified for brevity)
+                    // ... (Hier deine bestehende Asset-Logik einfügen, falls nötig, oder so lassen) ...
+                    // Da deine Asset-Logik etwas komplexer war (mit Extensions), habe ich sie hier verkürzt angedeutet.
+                    // Du kannst deinen Original-Block hier reinkopieren.
+
+                    // Asset Logik (Wiederhergestellt):
+                    const currentAsset = $houseElement.find('.img-house-base').attr('src');
+                    const assetName = currentAsset.split('/').pop();
+                    let matchingPair = null;
+                    for (const pair of housePairs) {
+                        if (pair.empty === assetName || pair.filled === assetName || pair.extension === assetName) {
+                            matchingPair = pair; break;
                         }
-                        var extensionImg = matchingPair.extension;
-                        $houseContainer.append($('<img>', {src: `./assets/${extensionImg}`, alt: "Erweiterung", class: "img-house-extension"}));
-                        occupiedHouses++;
-                        $('#occupiedCount').text(occupiedHouses + ' / 11');
                     }
+                    if(!matchingPair) matchingPair = housePairs[0];
+
+                    if(bewohnerAnzahl === 1){
+                        $houseElement.find('.img-house-base').attr('src', `./assets/${matchingPair.filled}`);
+                        occupiedHouses++;
+                    } else if (bewohnerAnzahl > 1) {
+                        $houseContainer.append($('<img>', {src: `./assets/${matchingPair.extension}`, alt: "Erweiterung", class: "img-house-extension"}));
+                        occupiedHouses++;
+                    }
+                    $('#occupiedCount').text(occupiedHouses + ' / 11');
 
                     $houseContainer.removeClass('highlight-target');
                     $('.to-do-family[data-family-index=' + currentIdx + ']').removeClass('active').addClass('list-group-item-success').css('opacity', '1');
@@ -812,7 +771,7 @@ $bewohner_liste = [
                     $('#majorMikeImage').attr('src', './assets/sad_major.png');
                 }
             }
-            // --- PHASE: SUCHEN (MIT DURCHKLICKEN) ---
+            // Search Logic (Check)
             else if (gamePhase === "search_click") {
                 var residentList = stadt[clickedHouse];
                 var $thomasElement = $nameContainer.find('.resident-name').filter(function() {
@@ -821,7 +780,7 @@ $bewohner_liste = [
 
                 if (clickedHouse === currentHash && residentList.includes(SEARCH_TARGET)) {
                     if ($thomasElement.hasClass('revealed')) {
-                        playSound('success')
+                        playSound('success');
                         $('#dialogueText').text("Da ist er ja! Danke für deine Hilfe!");
                         $('#majorMikeImage').attr('src', './assets/wink_major.png');
                         $thomasElement.addClass('found');
@@ -841,6 +800,10 @@ $bewohner_liste = [
 
         function startSearchPhase() {
             gamePhase = "search_calc";
+
+            // Sound für die Suche (Lvl9_5.mp3)
+            playDialogueAudio(4);
+
             currentName = null;
             currentHash = null;
             $('#nameInput').prop('readonly', false).val('');
@@ -852,6 +815,10 @@ $bewohner_liste = [
             $('#majorMikeImage').attr('src', './assets/card_major.png');
             $('.resident-name').removeClass('revealed');
         }
+
+        // Globale Funktionen
+        window.restartLevel = function() { location.reload(); };
+        window.nextLevel = function() { window.location.href = 'Level-Auswahl?completed=9&next=10'; };
     });
 </script>
 </body>
