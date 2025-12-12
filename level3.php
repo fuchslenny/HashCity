@@ -154,7 +154,7 @@ $hash_werte = [
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">
-                    Hallo. Ich habe eine Idee, wie wir die Kollisionen beheben könnten. Wenn ein Haus bereits belegt ist, soll der Bewohner einfach ins nächste freie Haus einziehen.
+                    ...
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue">
                     Klicken oder Enter ↵
@@ -245,13 +245,33 @@ $hash_werte = [
         let calculatedHash = null;
         // --- Dialoge (Level 2 Style) ---
         const dialogues = [
+            "Hallo. Ich habe eine Idee, wie wir die Kollisionen beheben könnten. Wenn ein Haus bereits belegt ist, soll der Bewohner einfach ins nächste freie Haus einziehen.",
             "Dieses Verfahren heißt <strong>Linear Probing</strong>.",
             "Fangen wir mit Dieter an. Wähle ihn aus der Liste und berechne seinen Hash."
         ];
-        let currentDialogue = 0;
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl3/Lvl3_1.mp3'),
+            new Audio('./assets/sounds/Lvl3/Lvl3_2.mp3'),
+            new Audio('./assets/sounds/Lvl3/Lvl3_3.mp3')
+        ];
+        let currentDialogue = -1;
 
         $('#nameInput').val('');
 
+        let currentAudioObj = null;
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
         function playSound(type) {
             let audio;
             if (type === 'click') audio = soundClick;
@@ -272,7 +292,9 @@ $hash_werte = [
         // --- Helper: Nächster Intro-Dialog ---
         function showNextDialogue() {
             if (isFading || currentDialogue >= dialogues.length) return;
+            currentDialogue++;
             isFading = true;
+            playDialogueAudio(currentDialogue);
             $('#dialogueText').fadeOut(200, function() {
                 $(this).html(dialogues[currentDialogue]).fadeIn(200, function() {
                     isFading = false;
@@ -283,7 +305,6 @@ $hash_werte = [
                     gameStarted = true;
                     // Lars Box erst sperren wenn Spiel startet (oder beim laden)
                 }
-                currentDialogue++;
             });
         }
 
