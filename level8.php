@@ -735,6 +735,25 @@ $familien_liste = [
         const soundClick   = new Audio('./assets/sounds/click.mp3');
         const soundSuccess = new Audio('./assets/sounds/success.mp3');
         const soundError   = new Audio('./assets/sounds/error.mp3');
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl8/Lvl8_1.mp3'),
+            new Audio('./assets/sounds/Lvl8/Lvl8_2.mp3')
+        ];
+
+        let currentAudioObj = null;
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
 
         function playSound(type) {
             let audio;
@@ -800,7 +819,8 @@ $familien_liste = [
             "Das sieht ja schon richtig gut aus! Du darfst jetzt diesen neuen Stadtteil allein bearbeiten.",
             "Verwende dafür Double Hashing, falls es zu Kollisionen kommt. Beachte dabei, dass du die Liste von oben nach unten abarbeitest.",
         ];
-        let dialogueIdx = 0;
+
+        let currentDialogue = -1;
         // --- Helper Functions ---
         function getAsciiSum(name) {
             let sum = 0;
@@ -816,6 +836,7 @@ $familien_liste = [
         // --- UI Updates ---
         function showDialogue(text, image = 'card_major.png') {
             if (isFading && text !== dialogues[0]) return;
+            playDialogueAudio(currentDialogue);
             isFading = true;
             $('#majorMikeImage').attr('src', './assets/' + image);
             $('#dialogueText').fadeOut(150, function() {
@@ -826,9 +847,9 @@ $familien_liste = [
         }
         function advanceDialogue() {
             if(isFading) return;
-            if (dialogueIdx < dialogues.length) {
-                showDialogue(dialogues[dialogueIdx]);
-                dialogueIdx++;
+            if (currentDialogue < dialogues.length) {
+                showDialogue(dialogues[currentDialogue]);
+                currentDialogue++;
             } else {
                 if (phase === 'intro') {
                     $('#dialogueContinue').fadeOut();

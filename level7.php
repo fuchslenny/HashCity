@@ -809,10 +809,10 @@ $familien_liste = [
         // Dialoge
         const dialogues = [
             "Willkommen zu Level 7! In den letzten Stadtteilen hatten wir oft das Problem von 'Clustern' – also regelrechte Staus bei der Haussuche.",
-            "Stell dir Linear Probing wie einen Stau vor: Wenn ein Auto steht, müssen alle dahinter warten. Das ist ineffizient!",
-            "Deshalb nutzen wir heute <strong>Double Hashing</strong>. Das ist wie eine individuelle 'Sprungfeder' für jeden Bewohner. Bei einer Kollision hüpfen sie einfach über den Stau hinweg!",
-            "Dazu brauchen wir eine zweite Formel (Schrittweite), die bestimmt, wie weit jemand hüpft. Ich habe dir dafür rechts unten einen zweiten Rechner freigeschaltet.",
-            "Leg los! Berechne wie immer erst die normale Hausnummer. Nur wenn das Haus voll ist, nutzen wir die Sprungfeder (2. Hash)."
+            "Stell dir Linear Probing wie einen Stau vor: Wenn ein Auto steht, müssen alle dahinter warten. Das ist sehr ineffizient!",
+            "Deshalb nutzen wir jetzt <strong>Double Hashing</strong>. Das ist wie eine individuelle 'Sprungfeder' für jeden Bewohner. Bei einer Kollision springen sie einfach über den Stau hinweg!",
+            "Dazu brauchen wir eine zweite Formel, die bestimmt, wie weit jemand springt. Ich habe dir dafür rechts unten einen zweiten Rechner freigeschaltet.",
+            "Leg los! Berechne wie immer erst die normale Hausnummer. Nur wenn das Haus voll ist, nutzen wir die Sprungfeder, also den 2. Hash."
         ];
         let dialogueIdx = 0;
         // --- Helper Functions ---
