@@ -404,13 +404,36 @@ $familien_liste = array_merge($old_residents, $new_residents);
             "Die einzige Lösung: <strong>Rehashing</strong>! Wir verdoppeln die Stadt auf 40 Häuser und berechnen alle Positionen neu.",
             "Klicke auf 'STADT ERWEITERN', um das Problem zu lösen!"
         ];
-        let dialogueIdx = 0;
+        let currentDialogue = -1;
 
         // Sound-Dateien laden
         const soundClick   = new Audio('./assets/sounds/click.mp3');
         const soundSuccess = new Audio('./assets/sounds/success.mp3');
         const soundError   = new Audio('./assets/sounds/error.mp3');
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl11/Lvl11_1.wav'),
+            new Audio('./assets/sounds/Lvl11/Lvl11_2.wav'),
+            new Audio('./assets/sounds/Lvl11/Lvl11_3.wav'),
+            new Audio('./assets/sounds/Lvl11/Lvl11_4.wav'),
+            new Audio('./assets/sounds/Lvl11/Lvl11_5.wav'),
+            new Audio('./assets/sounds/Lvl11/Lvl11_6.wav')
+        ];
 
+        let currentAudioObj = null;
+
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
         function playSound(type) {
             let audio;
             if (type === 'click') audio = soundClick;
@@ -519,14 +542,15 @@ $familien_liste = array_merge($old_residents, $new_residents);
             });
         }
         function advanceDialogue() {
-            if(isFading) return;
-            if (dialogueIdx < dialogues.length) {
-                if(dialogueIdx === dialogues.length -1){
-                    $('#dialogueContinue').hide();
-                    phase = "expand";
+            if(isFading) return; // Sperre während Animation
+            currentDialogue++;
+            if (currentDialogue < dialogues.length) {
+                playDialogueAudio(currentDialogue);
+                showDialogue(dialogues[currentDialogue]);
+                if(currentDialogue === dialogues.length - 1){
+                    $('#dialogueContinue').hide(); // Hinweis weg
+                    phase = "expand"; // Phase wechseln
                 }
-                showDialogue(dialogues[dialogueIdx]);
-                dialogueIdx++;
             }
         }
         $('#dialogueBox').click(() => {
@@ -543,7 +567,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 let $el = $(this);
                 setTimeout(() => {
                     $el.removeClass('hidden').addClass('pop-in');
-                }, i * 30);
+                }, i * 75);
             });
             $('.street.hidden').removeClass('hidden');
             $('#occupiedCount').text(occupiedHouses + ' / 23');
@@ -553,6 +577,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 $('#gridTitle').text("🏘️ Level 11: Re-Hashing");
                 updateLoadFactor(); // Load Factor halbiert sich (19/40)
                 $(this).hide();
+                playDialogueAudio(4);
                 showDialogue("Platz ist da! Aber alle wohnen noch an den 'alten' Adressen. Achtung, ich ordne jetzt ALLE neu an!", 'wink_major.png');
                 setTimeout(performAutoRehash, 3000);
             }, 1500);
@@ -586,11 +611,12 @@ $familien_liste = array_merge($old_residents, $new_residents);
                     }else{
                         setHouseAsset($house, false);
                     }
-                }, i * 30); // Schnelle Welle (1.2 Sek total)
+                }, i * 100); // Schnelligkeit der Welle
             }
             setTimeout(() => {
                 phase = 'select_family';
                 $('#calcContainer').css({opacity: 1, pointerEvents: 'all'});
+                playDialogueAudio(5);
                 showDialogue(
                     "Siehst du? Weil wir jetzt <strong>durch 40 teilen</strong> (statt 20), ändern sich die Hausnummern!<br>" +
                     "Thomas (Hash 620) rechnet jetzt 620 % 40 = 20. Vorher war es 0.<br>" +
@@ -598,7 +624,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
                     'wink_major.png'
                 );
                 placeNextFamily();
-            }, 40 * 30 + 1000);
+            }, 40 * 100 + 1000);
         }
 
         function placeNextFamily() {
@@ -667,11 +693,11 @@ $familien_liste = array_merge($old_residents, $new_residents);
             }
         });
         function endLevel() {
-            playSound('success');
             $('#nameInput').val('');
             showDialogue("Fantastisch! Load Factor 0.55 (Okay). Rehashing hat funktioniert. Jetzt bist du bereit für das große Finale!", 'wink_major.png');
             $('.list-group-item').addClass('done');
             setTimeout(() => {
+                playSound('success');
                 $('#successMessage').text("Du hast gelernt, wie man eine überfüllte Hashmap rettet!");
                 $('#successOverlay').css('display', 'flex');
             }, 3000);
@@ -683,7 +709,8 @@ $familien_liste = array_merge($old_residents, $new_residents);
             setTimeout(() => window.location.href = 'level-select.php?completed=11&next=12', 500);
         };
         initCity();
-        advanceDialogue();
+        $('#dialogueText').text("...");
+        $('#dialogueContinue').show();
     });
 </script>
 </body>
