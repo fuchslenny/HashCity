@@ -258,7 +258,7 @@ $familien_liste = [
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box" id="dialogueBox">
                 <div class="dialogue-text" id="dialogueText">
-                    Das läuft ja schon sehr gut. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür <strong>Linear Probing</strong>, falls es zu Kollisionen kommt.
+                    ...
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue">
                     Klicken oder Enter ↵
@@ -366,6 +366,9 @@ $familien_liste = [
         const soundClick   = new Audio('./assets/sounds/click.mp3');
         const soundSuccess = new Audio('./assets/sounds/success.mp3');
         const soundError   = new Audio('./assets/sounds/error.mp3');
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl4/Lvl4_1.mp3')
+        ];
         // --- Level 4 Setup ---
         const HASH_SIZE = <?php echo $anzahl_haeuser; ?>;
         const familien = <?php echo json_encode($familien_liste); ?>;
@@ -387,6 +390,20 @@ $familien_liste = [
         let search2InitialHash = null;
         const search2CorrectHouse = 8;
 
+        let currentAudioObj = null;
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
         function playSound(type) {
             let audio;
             if (type === 'click') audio = soundClick;
@@ -464,22 +481,24 @@ $familien_liste = [
         const dialogues = [
             "Das läuft ja schon sehr gut. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür <strong>Linear Probing</strong>, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest."
         ];
-        let currentDialogue = 0;
+        let currentDialogue = -1;
         function showNextDialogue() {
             if (isFading || gameStarted) return;
-            isFading = true;
-            $('#dialogueText').fadeOut(150, function() {
-                $(this).text(dialogues[currentDialogue]).fadeIn(150, function() {
-                    isFading = false;
+            currentDialogue++;
+            if (currentDialogue < dialogues.length) {
+                playDialogueAudio(currentDialogue);
+                isFading = true;
+                $('#dialogueText').fadeOut(150, function() {
+                    $(this).html(dialogues[currentDialogue]).fadeIn(150, function() {
+                        isFading = false;
+                    });
+                    $('#majorMikeImage').attr('src', './assets/card_major.png');
                 });
-                $('#majorMikeImage').attr('src', './assets/card_major.png');
-                if (currentDialogue === dialogues.length - 1) {
-                    $('#dialogueContinue').fadeOut();
-                    gameStarted = true;
-                    selectNextFamily();
-                }
-                currentDialogue++;
-            });
+            } else {
+                $('#dialogueContinue').fadeOut();
+                gameStarted = true;
+                selectNextFamily();
+            }
         }
         // --- UI Update-Funktionen ---
         function placeFamily($house, houseNumber, family) {
