@@ -635,7 +635,7 @@ $prefilled_haeuser = [
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">
-                    Ich habe hier mal etwas vorbereitet. Drei Bewohner sind bereits eingezogen.
+                    ...
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue">
                     Klicken oder Enter ↵
@@ -725,15 +725,36 @@ $prefilled_haeuser = [
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
         const dialogues = [
-            "Wir verwenden jetzt unser neues Hash-System, um die Häuser zuzuweisen.",
-            "Der Hash-Rechner berechnet wie bereits erklärt die Hausnummern für die neuen Bewohner.",
-            "Dieter ist als erstes dran. Wähle ihn jetzt aus der Liste aus, um zu starten!"
+            "Wir verwenden jetzt unser neues Hash-System, um die Häuser zuzuweisen. Das ist viel schneller als das lineare Suchen aus Level 0.",
+            "Der Hash-Rechner rechts berechnet für jeden Namen die exakte Hausnummer. Deine Aufgabe ist es, den nächsten Bewohner zuzuweisen.",
+            "Der nächste Bewohner ist Dieter. Wähle ihn jetzt aus der Liste aus, um zu starten!"
         ];
-        let currentDialogue = 0;
+        let currentDialogue = -1;
         // Sound-Dateien
         const soundClick   = new Audio('./assets/sounds/click.mp3');
         const soundSuccess = new Audio('./assets/sounds/success.mp3');
         const soundError   = new Audio('./assets/sounds/error.mp3');
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl2/Lvl2_1.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_2.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_3.mp3')
+        ];
+        let currentAudioObj = null;
+
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
+
         function playSound(type) {
             let audio;
             if (type === 'click') audio = soundClick;
@@ -758,6 +779,8 @@ $prefilled_haeuser = [
         }
         function showNextDialogue() {
             if (isFading || currentDialogue >= dialogues.length) return;
+            currentDialogue++;
+            playDialogueAudio(currentDialogue);
             isFading = true;
             $('#dialogueText').fadeOut(200, function() {
                 $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
@@ -768,7 +791,6 @@ $prefilled_haeuser = [
                     $('#dialogueContinue').fadeOut();
                     gameStarted = true;
                 }
-                currentDialogue++;
             });
         }
         $('.house').each(function() {

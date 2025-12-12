@@ -772,6 +772,28 @@
         const soundSuccess = new Audio('./assets/sounds/success.mp3');
         const soundError   = new Audio('./assets/sounds/error.mp3');
 
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl1/Lvl1_1.mp3'),
+            new Audio('./assets/sounds/Lvl1/Lvl1_2.mp3'),
+            new Audio('./assets/sounds/Lvl1/Lvl1_3.mp3'),
+            new Audio('./assets/sounds/Lvl1/Lvl1_4.mp3'),
+            new Audio('./assets/sounds/Lvl1/Lvl1_5.mp3')
+        ];
+        let currentAudioObj = null;
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
+
         function playSound(type) {
             let audio;
             if (type === 'click') audio = soundClick;
@@ -798,7 +820,7 @@
             houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
         }
         const dialogues = [
-            "Guck mal, das ist einer der neuen Stadtteile. Hier ziehen demnächst die neuen Stadtbewohner ein. Damit das nicht so unübersichtlich wie im vorherigen Stadtteil wird, habe ich mir etwas ganz Besonderes überlegt. Dafür dürfen keine Namen doppelt existieren.",
+            "Schau mal, das ist einer der neuen Stadtteile. Hier ziehen demnächst die neuen Stadtbewohner ein. Damit das nicht so unübersichtlich wie im vorherigen Stadtteil wird, habe ich mir etwas ganz Besonderes überlegt. Dafür dürfen keine Namen doppelt existieren.",
             "Hier rechts befindet sich unser Stadtplaner. Dort siehst du, welche Hausnummer zu welchem Namen gehört. Klicke einfach auf einen Namen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechne Haus-Nr.'.",
             "Unser Stadtplaner funktioniert ganz ähnlich wie ein Hashrechner bei einem Computer! Zunächst berechnet er die Summe der einzelnen ASCII-Zeichen der Namen unserer Bewohner.",
             "Danach rechnet er diese Zahl noch modulu der Größe des Stadtviertels, hier also 5.<br> Hashmaps machen das ganz ähnlich."
