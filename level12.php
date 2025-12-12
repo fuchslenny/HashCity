@@ -137,7 +137,6 @@ $final_residents = [
             padding: 0.2rem 0.5rem;
             border-radius: 8px;
         }
-        .house-occupant { display: none !important; }
 
         /* Info Panel */
         .info-panel {
@@ -280,6 +279,81 @@ $final_residents = [
         .modal-win { border-color: #4CAF50; }
         .modal-fail { border-color: #D32F2F; }
         .dialogue-continue { position: absolute; bottom: 10px; right: 15px; font-size: 0.85rem; color: #667eea; font-style: italic; font-weight: 700; animation: blink 1.5s infinite; }
+        .house-occupant { z-index: 20; position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: white; font-weight: 700; text-align: center; opacity: 0; transition: opacity 0.3s ease; background: rgba(0, 0, 0, 0.7); padding: 0.3rem 0.6rem; border-radius: 8px; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); pointer-events: none; }
+        .house.show-family .house-occupant { opacity: 1; }
+        .name-badge-container {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 8px;
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        .resident-name {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border: 2px solid #667eea;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transform: translateY(-25px);
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .resident-name.revealed {
+            display: block;
+            opacity: 1;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .resident-name.found {
+            background: #4CAF50; color: white; border-color: #fff; transform: scale(1.3) translateY(-25px); z-index: 100;
+        }
+        .fail-counter-box {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border: 3px solid #D32F2F;
+            box-shadow: 0 4px 15px rgba(211, 47, 47, 0.15);
+            text-align: center;
+        }
+
+        .fail-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #D32F2F;
+            margin: 0.5rem 0;
+        }
+
+        .fail-limit {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Warnung bei kritischem Zustand */
+        .fail-counter-box.warning {
+            border-color: #FF9800;
+            animation: pulseWarning 1s infinite alternate;
+        }
+
+        @keyframes pulseWarning {
+            from { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
+            to { box-shadow: 0 0 0 10px rgba(211, 47, 47, 0); }
+        }
 
     </style>
 </head>
@@ -414,6 +488,11 @@ $final_residents = [
                 <div class="lf-label" id="lfText">Limit: 0.75</div>
             </div>
             <button id="btnExpand" class="calculator-button expand-btn" disabled>🏗️ STADT ERWEITERN</button>
+            <div class="info-item fail-counter-box">
+                <div class="info-label">Fehlversuche:</div>
+                <div class="fail-value" id="failValue">0</div>
+                <div class="fail-limit">Limit: 3</div>
+            </div>
         </div>
     </div>
 </div>
@@ -431,22 +510,16 @@ $final_residents = [
 <script>
     // --- Configuration ---
     const residents = <?php echo json_encode($final_residents); ?>;
-    const MAX_PROBE_STEPS = 5;
     const dialogues = [
         "Nach all der Arbeit, all den Berechnungen, all den Kollisionen, den Cluster-Problemen und dem Rehashing brauche ich dringend eine Pause. Ich gehe also in den Urlaub! Du sollst ab jetzt die komplette Stadtverwaltung übernehmen. Die Stadt ist groß geworden, gut strukturiert – und du bist mittlerweile mehr als qualifiziert, alles selbst zu regeln.",
 
-        "Ein Stadtteil ist noch frei, den du nun vervollständigen sollst, während ich im Urlaub bin. Natürlich habe ich noch ein paar Regeln für dich:",
+        "Ein Stadtteil ist noch frei, den du nun vervollständigen sollst, während ich im Urlaub bin. Nutze ihn um Sachen auszuprobieren. Natürlich habe ich noch ein paar Regeln für dich:",
 
-        "der Load Factor muss unter 0,75 bleiben, " +
-        "dir stehen maximal 40 Häuser zur Verfügung, " +
-        "du hast zwei Rehashings zur Verfügung, " +
-        "beim Einfügen oder Suchen eines Bewohners sind maximal fünf Schritte erlaubt.",
+        "der Load Factor muss unter 0,75 bleiben, dir stehen maximal 40 Häuser zur Verfügung, du hast zwei Rehashings zur Verfügung, du darfst höchstens 2 Mal hintereinander danebenliegen.",
 
-        "Du entscheidest also: " +
-        "wann gerehasht wird, " +
-        "wie du die Bewohner verteilst " +
-        "und wie du sicherstellst, dass die Stadt effizient bleibt. " +
-        "Ich gebe dir nur die Regeln vor – die Umsetzung liegt bei dir.",
+        "Als Fehler zählen dieses mal auch die Klicks auf Häuser, die zwar durch das Probing möglich, jedoch aber bereits belegt sind. Ausgenommen ist natürlich das Freischalten des Sprungrechners beim Double Hashing durch Klicken auf das Initialhaus.",
+
+        "Du entscheidest also: wann gerehasht wird, wie du die Bewohner verteilst und wie du sicherstellst, dass die Stadt effizient bleibt. Ich gebe dir nur die Regeln vor – die Umsetzung liegt bei dir.",
 
         "Damit steht deiner erfolgreichen Verwaltung des letzten Stadtteils nichts mehr im Weg. Ich verabschiede mich jetzt offiziell in den Urlaub. Mach du hier weiter.",
 
@@ -490,6 +563,7 @@ $final_residents = [
     const maxExpansions = 2;
     let dialogueIdx = 1;
     let fails = 0;
+    let searchIdx = 0;
 
     // Sound-Dateien laden
     const soundClick   = new Audio('./assets/sounds/click.mp3');
@@ -548,6 +622,7 @@ $final_residents = [
 
         $('#modeBadge').text(modeName);
         $('#dialogueText').text(`Modus: ${modeName}. Keine Hilfen. Viel Erfolg!`);
+        $('#btnExpand').prop('disabled',false);
         initVisuals();
         updateStats();
         playDialogueAudio(0);
@@ -681,7 +756,7 @@ $final_residents = [
             const uniqueHouses = new Set(placedResidents.map(r => r.houseIndex));
             lf = uniqueHouses.size / currentCapacity;
         }
-
+        $('#failValue').text(fails);
         $('#lfValue').text(lf.toFixed(2));
         $('#modBase').text(currentCapacity);
 
@@ -701,12 +776,6 @@ $final_residents = [
             }
         } else {
             $lfBox.addClass('lf-good');
-        }
-
-        if(!isSearchPhase && expansionCount < maxExpansions && h1 === null) {
-            $('#btnExpand').prop('disabled', false);
-        } else {
-            $('#btnExpand').prop('disabled', true);
         }
 
         $('#queueCount').text(isSearchPhase ? searchQueue.length : residents.length - currentResIdx);
@@ -791,7 +860,7 @@ $final_residents = [
 
         setTimeout(() => {
             showDialogue("Umzug fertig! Alle Positionen neu berechnet.");
-            $('#btnExpand').text("🏗️ STADT ERWEITERN");
+            $('#btnExpand').text("🏗️ STADT ERWEITERN").prop('disabled', false);
             updateStats();
             highlightNextResident();
         }, currentCapacity * 30 + 500);
@@ -800,11 +869,15 @@ $final_residents = [
     // --- Calc Logic ---
     $('#hashButton').click(function() {
         if(dialogueIdx <= dialogues.length) return;
-        let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
+        if($('#nameInput').val().trim() === '' || $('#nameInput').val().trim() === undefined || $('#nameInput').val().trim() === null){
+            showDialogue("Niemand eingetragen zum Rechnen!");
+            return;
+        }
+        let name = $('#nameInput').val().trim();
         let sum = getAsciiSum(name);
         h1 = sum % currentCapacity;
         $('#hashResult').text(`Hausnummer: ${h1}`);
-        $('#hashButton').prop('disabled', true);
+        updateStats();
     });
 
     $('#btnCalcH2').click(function() {
@@ -855,6 +928,7 @@ $final_residents = [
     $('.house').click(function() {
         if(h1 === null) return;
         let clickedIndex = $(this).data('index');
+        let residentsHere = placedResidents.filter(r => r.houseIndex === clickedIndex).map(r => r.name);
         let $el = $(this);
         let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
 
@@ -862,13 +936,14 @@ $final_residents = [
         if (gameMode === 'chaining') {
             if (clickedIndex === h1) {
                 playSound('click');
-                if(isSearchPhase) handleSearchClick(clickedIndex, $el, name);
+                if(isSearchPhase) handleSearchClick(clickedIndex, residentsHere, $el, name);
                 else placeResident(clickedIndex, name);
             } else {
                 fails++;
                 playSound('error');
                 failFeedback("Falsches Haus! Rechne nochmal nach.");
             }
+            updateStats();
             return;
         }
 
@@ -882,9 +957,7 @@ $final_residents = [
 
         // Case A: User clicked the FINAL CORRECT EMPTY spot directly
         if (clickedIndex === correctTarget) {
-            fails = 0;
             playSound('click');
-
             // Check Load Factor Limit
             let futureLF = (placedResidents.length + 1) / currentCapacity;
             if (futureLF > 0.76) {
@@ -892,26 +965,39 @@ $final_residents = [
                 return;
             }
 
-            if(isSearchPhase) handleSearchClick(clickedIndex, $el, name);
-            else placeResident(clickedIndex, name);
+            if(isSearchPhase){
+                $(this).addClass('show-family');
+                $(this).find('.house-occupant').text(currentSearchTarget.name);
+                handleSearchClick(clickedIndex, residentsHere, $el, name);
+            }
+            placeResident(clickedIndex, name);
+            updateStats();
             return;
         }
 
         // Case B: User clicked a Valid but Occupied spot (Collision path)
         if (validPath.includes(clickedIndex)) {
             playSound('click');
+            if(isSearchPhase){
+                $(this).addClass('show-family');
+                $(this).find('.house-occupant').text(residentsHere[0]);
+                handleSearchClick(clickedIndex, residentsHere, $el, name);
+                updateStats();
+                return;
+            }
             $el.addClass('collision-highlight');
             setTimeout(() => $el.removeClass('collision-highlight'), 500);
-
             // Unlock Double Hashing Calc if appropriate
             if (gameMode === 'double') {
                 $('#stepCalcBox').addClass('active');
                 if($('#h2Result').text() === '-') $('#btnCalcH2').prop('disabled', false);
+            }else {
+                fails++;
+                if(fails >= 3){
+                    failGame("Du hast zu viele falsche Versuche gehabt!")
+                }
             }
-            fails++;
-            if(fails >= 3){
-                failGame("Du hast zu viele falsche Versuche gehabt!")
-            }
+            updateStats();
             return;
         }
 
@@ -923,36 +1009,83 @@ $final_residents = [
             failGame("Du hast zu viele falsche Versuche gehabt!")
         }
         failFeedback("Falsches Haus! Rechne nochmal nach.");
+        updateStats();
     });
 
-    function handleSearchClick(clickedIndex, $el, targetName) {
+    function handleSearchClick(clickedIndex, residentsHere, $el, targetName) {
         // Simplified search logic reusing the placement check
         // In search phase, we just check if person is there
-        let residentsHere = placedResidents.filter(r => r.houseIndex === clickedIndex).map(r => r.name);
-
-        if (residentsHere.includes(targetName)) {
-            $el.addClass('found-highlight');
-            showDialogue(`Gefunden! ${targetName} wohnt in Haus ${clickedIndex}.`);
-            searchQueue.shift();
-            $(`#search-0`).remove();
-            setTimeout(() => startNextSearch(), 1500);
-        } else {
+        if (!residentsHere.includes(targetName)) {
             // If empty or wrong person
             // If it was part of the valid probe path (calculated in click handler), we gave hint.
             // If it's the correct target but empty (should not happen if logic matches)
             $el.addClass('collision-highlight');
             setTimeout(() => $el.removeClass('collision-highlight'), 500);
-            if (gameMode === 'double') {
-                showDialogue(`${targetName} nicht hier. Berechne Step!`);
+            if (gameMode === 'double' && h1 === clickedIndex) {
+                showDialogue(`${targetName} ist nicht hier. Berechne Step!`);
                 $('#stepCalcBox').addClass('active');
                 if($('#h2Result').text() === '-') $('#btnCalcH2').prop('disabled', false);
-            } else {
-                showDialogue(`${targetName} nicht hier. Rechne weiter...`);
+            } else if (h1 === clickedIndex){
+                showDialogue(`${targetName} ist nicht hier. Gehe weiter...`);
+            }else{
+                showDialogue(`Dieses Haus kommt für ${targetName} nicht in Frage.`)
+                fails++;
+            }
+        } else {
+            if (gameMode !== "chaining"){
+                $el.addClass('found-highlight');
+                showDialogue(`Gefunden! ${targetName} wohnt in Haus ${clickedIndex}.`);
+                searchQueue.shift();
+                fails = 0;
+                setTimeout(() => startNextSearch(), 1500);
+            }else {
+                // Richtiges Haus gefunden
+                if (gameMode !== "chaining") {
+                    $el.addClass('found-highlight');
+                    showDialogue(`Gefunden! ${targetName} wohnt in Haus ${clickedIndex}.`);
+                    searchQueue.shift();
+                    fails = 0;
+                    setTimeout(() => startNextSearch(), 1500);
+                } else {
+                    // --- Separate Chaining: Pro Klick nur einen Bewohner anzeigen ---
+                    let $nameBadgeContainer = $el.find('.name-badge-container');
+
+                    // Falls Container noch nicht existiert, erstellen
+                    if ($nameBadgeContainer.length === 0) {
+                        $nameBadgeContainer = $('<div>', {
+                            class: 'name-badge-container',
+                            id: `names-${clickedIndex}`
+                        }).appendTo($el);
+                    }
+
+                    // Zähle bereits angezeigte Bewohner
+                    let revealedNames = $nameBadgeContainer.find('.resident-name.revealed').map((i, el) => $(el).text()).get();
+                    let nextName = residentsHere.find(name => !revealedNames.includes(name));
+
+                    // Falls noch Bewohner übrig sind, einen neuen anzeigen
+                    if (nextName) {
+                        const $newNameElement = $('<div>', {
+                            class: 'resident-name revealed',
+                            text: nextName
+                        }).appendTo($nameBadgeContainer);
+
+                        // Wenn der angezeigte Name der gesuchte ist, markiere ihn als gefunden
+                        if (nextName === targetName) {
+                            $newNameElement.addClass('found');
+                            $el.addClass('found-highlight');
+                            showDialogue(`Gefunden! ${targetName} wohnt in Haus ${clickedIndex}.`);
+                            searchQueue.shift();
+                            fails = 0;
+                            setTimeout(() => startNextSearch(), 1500);
+                        }
+                    }
+                }
             }
         }
     }
 
     function placeResident(idx, name) {
+        fails = 0;
         placedResidents.push({ name: name, houseIndex: idx });
         let count = placedResidents.filter(r => r.houseIndex === idx).length;
         updateHouseVisual($(`#house-${idx}`), count);
@@ -965,28 +1098,44 @@ $final_residents = [
     function initSearchPhase() {
         isSearchPhase = true;
         let shuffled = [...placedResidents].sort(() => 0.5 - Math.random());
-        searchQueue = shuffled.slice(0, 3);
-        showDialogue("Alle platziert! Finde nun die 3 gesuchten Personen!");
-        $('#btnExpand').prop('disabled', true);
-        $('#resList').empty();
-        searchQueue.forEach((p, index) => {
-            $('#resList').append(`<li class="list-group-item search-item" id="search-${index}">${p.name}</li>`);
-        });
+        searchQueue = [];
+
+        // Solange die Suchliste nicht voll ist und noch Bewohner übrig sind
+        while (searchQueue.length < 3 && shuffled.length > 0) {
+            // Nächster zufälliger Bewohner
+            const candidate = shuffled.shift();
+            // Prüfe, ob bereits ein Bewohner aus demselben Haus in der Suchliste ist
+            const isHouseAlreadyInQueue = searchQueue.some(
+                resident => resident.houseIndex === candidate.houseIndex
+            );
+
+            // Falls nicht, füge den Bewohner zur Suchliste hinzu
+            if (!isHouseAlreadyInQueue) {
+                searchQueue.push(candidate);
+            }
+        }
+
+        $('#btnExpand').hide();
+        $('#nameInput').prop('readonly', false);
         startNextSearch();
     }
 
     function startNextSearch() {
         if(searchQueue.length === 0) { winGame(); return; }
-        currentSearchTarget = searchQueue[0];
-        $('.list-group-item').removeClass('search-target');
-        $(`#search-0`).addClass('search-target');
+        $('#nameInput').val('');
+        currentSearchTarget = searchQueue.shift();
+        if (searchIdx === 0){
+            showDialogue(`Alle platziert! Suche nun ${currentSearchTarget.name}.`);
+        }else{
+            showDialogue(`Suche: ${currentSearchTarget.name}.`);
+        }
+        searchIdx++;
         h1 = null; h2 = null;
-        $('#hashResult').text('-');
+        $('#hashResult').text('Ergebnis ...');
         $('#h2Result').text('-');
         $('#stepCalcBox').removeClass('active');
         $('#hashButton').prop('disabled', false);
         $('.house').removeClass('collision-highlight found-highlight');
-        showDialogue(`Suche: ${currentSearchTarget.name}.`);
     }
 
     // --- Helpers ---
