@@ -726,12 +726,6 @@ $bewohner_liste = [
                     var nameTag = $('<div class="resident-name">' + currentName + '</div>');
                     $nameContainer.append(nameTag);
 
-                    // Asset Update logic (simplified for brevity)
-                    // ... (Hier deine bestehende Asset-Logik einfügen, falls nötig, oder so lassen) ...
-                    // Da deine Asset-Logik etwas komplexer war (mit Extensions), habe ich sie hier verkürzt angedeutet.
-                    // Du kannst deinen Original-Block hier reinkopieren.
-
-                    // Asset Logik (Wiederhergestellt):
                     const currentAsset = $houseElement.find('.img-house-base').attr('src');
                     const assetName = currentAsset.split('/').pop();
                     let matchingPair = null;
