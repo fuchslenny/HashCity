@@ -10,7 +10,11 @@
 
 $final_residents = [
         "Julia", "Max", "Sven", "Lara", "Tom",
-
+        "Sarah", "Ben", "Lea", "Paul", "Anna",
+        "Jan", "Tim", "Lisa", "Kevin", "Eva",
+        "Nico", "Maja", "Olaf", "Nina", "Kai",
+        "Ute", "Roy", "Pia", "Ali", "Zoe",
+        "Leo", "Amy", "Ian", "Rex", "Sam"
 ];
 
 ?>
