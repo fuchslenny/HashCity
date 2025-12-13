@@ -1089,6 +1089,7 @@ $final_residents = [
 
     function placeResident(idx, name) {
         fails = 0;
+        h1 = null;
         placedResidents.push({ name: name, houseIndex: idx });
         let count = placedResidents.filter(r => r.houseIndex === idx).length;
         updateHouseVisual($(`#house-${idx}`), count);
