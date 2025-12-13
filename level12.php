@@ -781,6 +781,9 @@ $final_residents = [
             $('#btnExpand').hide();
         }
         $('#queueCount').text(isSearchPhase ? searchQueue.length : residents.length - currentResIdx);
+        if(fails >= 3){
+            failGame("Du hast zu viele falsche Versuche gehabt!")
+        }
     }
 
     // --- EXPANSION LOGIC ---
@@ -996,9 +999,6 @@ $final_residents = [
                 if($('#h2Result').text() === '-') $('#btnCalcH2').prop('disabled', false);
             }else {
                 fails++;
-                if(fails >= 3){
-                    failGame("Du hast zu viele falsche Versuche gehabt!")
-                }
             }
             updateStats();
             return;
@@ -1008,9 +1008,6 @@ $final_residents = [
 
         playSound('error');
         fails++;
-        if(fails >= 3){
-            failGame("Du hast zu viele falsche Versuche gehabt!")
-        }
         failFeedback("Falsches Haus! Rechne nochmal nach.");
         updateStats();
     });
