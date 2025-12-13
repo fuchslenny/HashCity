@@ -566,7 +566,7 @@ $bewohner_liste = [
             }
         }
 
-        // --- Intro Logic (Vereinheitlicht!) ---
+        // --- Intro Logic ---
         function showNextDialogue() {
             if (isFading || gamePhase !== "intro") return;
 
