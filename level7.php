@@ -747,6 +747,27 @@ $familien_liste = [
         const soundSuccess = new Audio('./assets/sounds/success.mp3');
         const soundError   = new Audio('./assets/sounds/error.mp3');
 
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl7/Lvl7_1.mp3'),
+            new Audio('./assets/sounds/Lvl7/Lvl7_2.mp3'),
+            new Audio('./assets/sounds/Lvl7/Lvl7_3.mp3'),
+            new Audio('./assets/sounds/Lvl7/Lvl7_4.mp3'),
+            new Audio('./assets/sounds/Lvl7/Lvl7_5.mp3')
+        ];
+
+        let currentAudioObj = null;
+
+        function playDialogueAudio(index) {
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio blocked:", e));
+            }
+        }
+
         function playSound(type) {
             let audio;
             if (type === 'click') audio = soundClick;
@@ -814,7 +835,7 @@ $familien_liste = [
             "Dazu brauchen wir eine zweite Formel, die bestimmt, wie weit jemand springt. Ich habe dir dafür rechts unten einen zweiten Rechner freigeschaltet.",
             "Leg los! Berechne wie immer erst die normale Hausnummer. Nur wenn das Haus voll ist, nutzen wir die Sprungfeder, also den 2. Hash."
         ];
-        let dialogueIdx = 0;
+        let currentDialogue = -1;
         // --- Helper Functions ---
         function getAsciiSum(name) {
             let sum = 0;
@@ -838,11 +859,12 @@ $familien_liste = [
                 });
             });
         }
-        function advanceDialogue() {
+        function showNextDialogue() {
             if(isFading) return;
-            if (dialogueIdx < dialogues.length) {
-                showDialogue(dialogues[dialogueIdx]);
-                dialogueIdx++;
+            currentDialogue++;
+            if (currentDialogue < dialogues.length) {
+                playDialogueAudio(currentDialogue);
+                showDialogue(dialogues[currentDialogue]);
             } else {
                 if (phase === 'intro') {
                     $('#dialogueContinue').fadeOut();
@@ -854,11 +876,11 @@ $familien_liste = [
         }
         // Interaktion
         $('#dialogueBox').click(function() {
-            if (phase === 'intro') advanceDialogue();
+            if (phase === 'intro') showNextDialogue();
         });
         $(document).keydown(function(e) {
             if(e.key === 'Enter' || e.key === ' ') {
-                if (phase === 'intro') advanceDialogue();
+                if (phase === 'intro') showNextDialogue();
             }
         });
 
@@ -1110,8 +1132,8 @@ $familien_liste = [
             $('#successOverlay').css('display', 'flex');
         }
         // Start
-        advanceDialogue();
-        // Globale Funktionen für Modal-Buttons
+        $('#dialogueText').text("...");
+        $('#dialogueContinue').show();        // Globale Funktionen für Modal-Buttons
         window.restartLevel = function() {
             location.reload();
         };

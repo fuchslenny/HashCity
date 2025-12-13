@@ -780,11 +780,11 @@ $bewohner_liste = [
 
                 if (clickedHouse === currentHash && residentList.includes(SEARCH_TARGET)) {
                     if ($thomasElement.hasClass('revealed')) {
-                        playSound('success');
                         $('#dialogueText').text("Da ist er ja! Danke für deine Hilfe!");
                         $('#majorMikeImage').attr('src', './assets/wink_major.png');
                         $thomasElement.addClass('found');
                         setTimeout(function() { $('#successOverlay').fadeIn(); }, 1000);
+                        playSound('success');
                     } else {
                         playSound('click');
                         $('#dialogueText').text("Er wohnt in diesem Haus. Klicke weiter, um ihn in der Liste zu finden!");
