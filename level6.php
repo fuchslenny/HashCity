@@ -462,7 +462,7 @@
             z-index: 10;
         }
         .list-group-item.to-do-family.list-group-item-success {
-            opacity: 0.3;
+            opacity: 1;
             background: #e0e0e0;
             cursor: not-allowed;
             text-decoration: line-through;
@@ -773,16 +773,6 @@
         <p class="success-message" id="successMessage">
             Danke für deine Hilfe!
         </p>
-        <div class="success-stats">
-            <div class="stat-box">
-                <div class="stat-label">Versuche</div>
-                <div class="stat-value" id="finalAttempts">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Familien eingetragen</div>
-                <div class="stat-value" id="finalOccupied">0</div>
-            </div>
-        </div>
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
             <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 7 →</button>
@@ -801,7 +791,6 @@
         const HASH_SIZE = 20;
         let stadt = new Array(HASH_SIZE).fill(null);
         let occupiedHouses = 0;
-        let attempts = 0;
         let gameStarted = false; // Startet FALSE!
         let gameCompleted = false;
         let searchMode = false;
@@ -815,7 +804,7 @@
         // Texte
         const introText = "Das sieht ja schon richtig gut aus. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür <strong>Quadratic Probing</strong>, falls es zu Kollisionen kommt.<br><strong>Wichtig:</strong> Wenn du beim Rechnen über 19 kommst, fang vorne wieder bei 0 an!";
         const successDialogue = "Danke für deine Hilfe!";
-        const errorDialogue = "Dieses Haus kommt nicht in Frage. Versuche es erneut (Quadratic Probing!).";
+        const errorDialogue = "Dieses Haus ist es nicht. Versuche es erneut (Quadratic Probing!).";
         const leviSearchDialogue = "Kannst du mir die Hausnummer von Levi geben? Ich habe noch etwas mit ihm zu besprechen.";
         const chrisSearchDialogue = "Chris ist ein sehr guter Mathematiker. Kannst du für mich seine Hausnummer suchen?";
         const searchErrorDialogue = "Das war das falsche Haus.";
@@ -909,17 +898,15 @@
             let hash = getHash(key, size);
             let i = 1;
             let position = hash;
-            let attempts = 0;
-            while (stadt[position] !== null && attempts < 50) {
+            while (stadt[position] !== null) {
                 position = (hash + Math.pow(i, 2)) % size;
                 i++;
-                attempts++;
             }
             return position;
         }
 
         function initFamilyList() {
-            $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
+            $('.to-do-family').off('click');
             // Nur aktivieren, wenn Spiel gestartet!
             if (gameStarted) {
                 const currentFamily = families[currentFamilyIndex];
@@ -974,22 +961,18 @@
                     $house.find('.house-family').text(occupant);
                     if (searchTarget === 'Levi' && occupant === 'Levi') {
                         playSound('click');
-                        attempts++;
                         $('#dialogueText').text(chrisSearchDialogue);
                         searchTarget = 'Chris';
                         $('#nameInput').val('').prop('readonly', false);
                         $('#hashButton').prop('disabled', false);
                     } else if (searchTarget === 'Chris' && occupant === 'Chris') {
                         playSound('success');
-                        attempts++;
                         $('#successMessage').html(`<strong style="color: #667eea;">Major Mike sagt:</strong><br>"${successDialogue}"`);
-                        $('#finalAttempts').text(attempts);
                         $('#finalOccupied').text(occupiedHouses);
                         $('#successOverlay').css('display', 'flex');
                         gameCompleted = true;
                     } else {
                         playSound('error');
-                        attempts++;
                         $('#dialogueText').text(searchErrorDialogue);
                     }
                 } else {

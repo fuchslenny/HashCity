@@ -716,20 +716,10 @@
 <div class="success-overlay" id="successOverlay">
     <div class="success-modal">
         <div class="success-icon">🎉</div>
-        <h2 class="success-title">Familie gefunden!</h2>
+        <h2 class="success-title">Level 1 geschafft!</h2>
         <p class="success-message" id="successMessage">
-            Gut gemacht! Du hast Sophie gefunden!
+            Danke für deine Hilfe, so funktioniert alles viel besser!
         </p>
-        <div class="success-stats">
-            <div class="stat-box">
-                <div class="stat-label">Versuche</div>
-                <div class="stat-value" id="finalAttempts">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Familien eingetragen</div>
-                <div class="stat-value" id="finalOccupied">0</div>
-            </div>
-        </div>
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
             <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 2 →</button>
@@ -746,7 +736,6 @@
         const HASH_SIZE = 5;
         let stadt = new Array(HASH_SIZE + 1).fill(null);
         let occupiedHouses = 0;
-        let attempts = 0;
         let gameStarted = false;
         let gameCompleted = false;
         let searchMode = false;
@@ -910,7 +899,6 @@
                         "Danke für deine Hilfe! So funktioniert alles viel besser!<br>
                         Lass uns im nächsten Level noch mehr über Hash-Funktionen lernen!"
                     `);
-                    $('#finalAttempts').text(attempts);
                     $('#finalOccupied').text(occupiedHouses);
                     $('#successOverlay').css('display', 'flex');
                     gameCompleted = true;
@@ -940,7 +928,6 @@
                             "Danke für deine Hilfe! So funktioniert alles viel besser!<br>
                             Lass uns im nächsten Level noch mehr über Hash-Funktionen lernen!"
                         `);
-                        $('#finalAttempts').text(attempts);
                         $('#finalOccupied').text(occupiedHouses);
                         $('#successOverlay').css('display', 'flex');
                         gameCompleted = true;
