@@ -9,12 +9,7 @@
  */
 
 $final_residents = [
-        "Julia", "Max", "Sven", "Lara", "Tom",
-        "Sarah", "Ben", "Lea", "Paul", "Anna",
-        "Jan", "Tim", "Lisa", "Kevin", "Eva",
-        "Nico", "Maja", "Olaf", "Nina", "Kai",
-        "Ute", "Roy", "Pia", "Ali", "Zoe",
-        "Leo", "Amy", "Ian", "Rex", "Sam"
+        "Julia", "Max", "Sven"
 ];
 ?>
 <!DOCTYPE html>
@@ -354,6 +349,160 @@ $final_residents = [
             from { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
             to { box-shadow: 0 0 0 10px rgba(211, 47, 47, 0); }
         }
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        .success-modal {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 650px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: slideUp 0.5s ease;
+            border: 5px solid #4CAF50;
+        }
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: bounce 1s infinite;
+        }
+        .success-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #4CAF50;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .success-message {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+        .success-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-primary, .btn-secondary {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 3px solid #667eea;
+        }
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .fail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .fail-modal {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 650px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: slideUp 0.5s ease;
+            border: 5px solid #f44336;
+        }
+
+        .fail-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: shake 0.5s infinite;
+        }
+
+        .fail-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #f44336;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .fail-message {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .fail-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Unique Button-Klassen für den Fail-Screen */
+        .btn-primary-fail {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+        }
+
+        .btn-primary-fail:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(244, 67, 54, 0.4);
+        }
 
     </style>
 </head>
@@ -497,12 +646,29 @@ $final_residents = [
     </div>
 </div>
 
-<div class="overlay" id="endOverlay">
-    <div class="modal-box" id="endModal">
-        <div style="font-size:5rem" id="endIcon">🏆</div>
-        <h2 style="font-family:'Orbitron'" id="endTitle">Titel</h2>
-        <p id="endMessage">Nachricht</p>
-        <button class="btn btn-primary" onclick="location.reload()">Neustart</button>
+<div class="fail-overlay" id="failOverlay" style="display: none">
+    <div class="fail-modal">
+        <div class="fail-icon">💥</div>
+        <h2 class="fail-title">SPIEL VERLOREN!</h2>
+        <p class="fail-message" id="failMessage"></p>
+        <div class="fail-buttons">
+            <button class="btn-primary-fail" onclick="location.reload()">↻ Nochmal versuchen</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="success-overlay" id="successOverlay" style="display: none">
+    <div class="success-modal">
+        <div class="success-icon">🎓</div>
+        <h2 class="success-title">ABSCHLUSS BESTANDEN!</h2>
+        <p class="success-message" id="successMessage">
+            Du hast HashCity gemeistert.<br>Keine Hilfen, maximaler Stress.<br>Glückwunsch!
+        </p>
+        <div class="success-buttons">
+            <button class="btn-secondary" onclick="location.reload()">↻ Nochmal spielen</button>
+            <button class="btn-primary" onclick="window.location.href='certificate.php'" id="certificateBtn">Zertifikat</button>
+        </div>
     </div>
 </div>
 
@@ -1146,22 +1312,13 @@ $final_residents = [
 
     function winGame() {
         playSound('success');
-        $('#endModal').removeClass('modal-fail').addClass('modal-win');
-        $('#endIcon').text("🎓");
-        $('#endTitle').text("ABSCHLUSS BESTANDEN!");
-        $('#endMessage').html(`Du hast HashCity gemeistert.<br>Keine Hilfen, maximaler Stress.<br>Glückwunsch!`);
-        $('.btn-primary').text("Zertifikat").attr('onclick', "window.location.href='certificate.php'");
-        $('#endOverlay').fadeIn();
+        $('#successOverlay').css('display', 'flex');
     }
 
     function failGame(reason) {
         playSound('error');
-        $('#endModal').removeClass('modal-win').addClass('modal-fail');
-        $('#endIcon').text("☠️");
-        $('#endTitle').text("Gescheitert");
-        $('#endMessage').text(reason);
-        $('.btn-primary').text("Neustart").attr('onclick', 'location.reload()');
-        $('#endOverlay').fadeIn();
+        $('#failMessage').text(reason);
+        $('#failOverlay').css('display', 'flex');
     }
 </script>
 </body>
