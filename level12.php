@@ -119,7 +119,10 @@ $final_residents = [
         }
         .img-house-extension.top-floor {animation: fallDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
 
-        @keyframes fallDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fallDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         .house-number {
             position: absolute;
@@ -314,7 +317,11 @@ $final_residents = [
         .resident-name.revealed {
             display: block;
             opacity: 1;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: namepopIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes namepopIn {
+            0% { transform: scale(0) translateY(-25px); }
+            100% { transform: scale(1) translateY(-25px); }
         }
         .resident-name.found {
             background: #4CAF50; color: white; border-color: #fff; transform: scale(1.3) translateY(-25px); z-index: 100;
@@ -1119,7 +1126,7 @@ $final_residents = [
             } else {
                 fails++;
                 playSound('error');
-                failFeedback("Falsches Haus! Rechne nochmal nach.");
+                failFeedback("Falsches Haus! Prüfe nochmal nach.");
             }
             updateStats();
             return;
@@ -1180,11 +1187,12 @@ $final_residents = [
 
         playSound('error');
         fails++;
-        failFeedback("Falsches Haus! Rechne nochmal nach.");
+        failFeedback("Falsches Haus! Prüfe nochmal nach.");
         updateStats();
     });
 
     function handleSearchClick(clickedIndex, residentsHere, $el, targetName) {
+        let hashName = $('#nameInput').val();
         // Simplified search logic reusing the placement check
         // In search phase, we just check if person is there
         if (!residentsHere.includes(targetName)) {
@@ -1197,7 +1205,7 @@ $final_residents = [
                 showDialogue(`${targetName} ist nicht hier. Berechne Step!`);
                 $('#stepCalcBox').addClass('active');
                 if($('#h2Result').text() === '-') $('#btnCalcH2').prop('disabled', false);
-            } else if (h1 === clickedIndex){
+            } else if (h1 === clickedIndex && targetName  === hashName){
                 showDialogue(`${targetName} ist nicht hier. Gehe weiter...`);
             }else{
                 showDialogue(`Dieses Haus kommt für ${targetName} nicht in Frage.`)
