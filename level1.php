@@ -637,9 +637,7 @@
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">
-                    Guck mal, das ist einer der neuen Stadtteile. Hier ziehen demnächst die neuen Stadtbewohner ein.
-                    Damit das nicht so unübersichtlich wie im vorherigen Stadtteil wird, habe ich mir etwas ganz Besonderes überlegt.
-                    Dafür dürfen keine Namen doppelt existieren.
+                    ...
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue">
                     Klicken oder Enter ↵
@@ -826,7 +824,7 @@
             "Danach rechnet er diese Zahl noch modulu der Größe des Stadtviertels, hier also 5.<br> Hashmaps machen das ganz ähnlich."
         ];
         const sophieDialogue = "Ich sehe, du hast für alle Bewohner ein Haus gefunden. Ich habe noch einen Termin mit Sophie, kannst du mir helfen sie zu finden? Nutze den Hash-Rechner, um ihre Hausnummer zu berechnen.";
-        let currentDialogue = 0;
+        let currentDialogue = -1;
         let isFading = 0;
         // --- Hash-Funktion (identisch zur PHP-Logik) ---
         function getHash(key, size) {
@@ -836,59 +834,43 @@
             }
             return (sum % size);
         }
-        // --- Dialog-Steuerung ---
-        // Funktion zum Anzeigen des Textes
-        function showDialogue() {
-            if (isFading) return;
-            isFading = true;
-
-            $('#dialogueText').fadeOut(200, function() {
-                $(this).html(dialogues[currentDialogue]).fadeIn(200, function() {
-                    isFading = false;
-                });
-            });
-        }
-
-        // Funktion zum Weiterschalten
-        function nextStep() {
-            // Blockieren, wenn Spiel schon läuft oder gerade eine Animation läuft
-            if (gameStarted || isFading) return;
-
-            // Sind wir noch innerhalb der Dialog-Liste?
-            if (currentDialogue < dialogues.length - 1) {
-                currentDialogue++;
-                showDialogue(); // Normaler Fade für Dialoge
-            } else {
-                // Intro ist zu Ende -> Sanfter Übergang zum Spielstart
-                isFading = true; // Klicks sperren während der Transition
-                $('#dialogueContinue').fadeOut();
-
+        // --- Dialog Steuerung ---
+        function showNextDialogue() {
+            if (isFading || gameStarted) return;
+            currentDialogue++;
+            // Intro Dialoge (0 bis 3)
+            if (currentDialogue < dialogues.length) {
+                playDialogueAudio(currentDialogue); // Audio 0-3
+                isFading = true;
                 $('#dialogueText').fadeOut(200, function() {
-                    $(this).html('Okay, lass uns anfangen! Wähle die erste Familie aus der Liste.');
-                    $(this).fadeIn(200, function() {
-                        gameStarted = true; // Spiel jetzt freigeben
-                        isFading = false;   // Sperre aufheben
+                    $(this).html(dialogues[currentDialogue]).fadeIn(200, function() {
+                        isFading = false;
                     });
                 });
             }
+            // Nach dem letzten Dialog -> Spiel starten
+            else {
+                $('#dialogueContinue').fadeOut();
+                gameStarted = true;
+                $('#dialogueText').text("Okay, lass uns anfangen! Wähle die erste Familie aus der Liste.");
+            }
         }
 
-        // Initialisierung (Text 1 sofort setzen ohne Animation)
-        $('#dialogueText').text(dialogues[0]);
-        $('#dialogueContinue').show();
+        // --- Event Listener für Dialoge ---
+        $('.dialogue-box').click(function() {
+            if (!gameStarted) showNextDialogue();
+        });
 
-        // --- Listener für Dialoge ---
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
-                nextStep();
+                showNextDialogue();
             }
         });
 
-        $('.dialogue-box').click(function() {
-            if (!gameStarted) {
-                nextStep();
-            }
-        });
+        // --- Initiale Anzeige ---
+        $('#dialogueText').text("...");
+        $('#dialogueContinue').show();
+
         // --- Level 1 Spielmechanik ---
         // 1. Familie aus der Liste auswählen
         $('#familienListe .to-do-family').click(function() {
