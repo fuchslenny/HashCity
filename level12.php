@@ -9,8 +9,10 @@
  */
 
 $final_residents = [
-        "Julia", "Max", "Sven"
+        "Julia", "Max", "Sven", "Lara", "Tom",
+
 ];
+
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -60,6 +62,7 @@ $final_residents = [
         .street.hidden { display: none; }
 
         .house {
+            margin-bottom: 2px;
             position: relative;
             display: flex;
             flex-direction: column-reverse;
@@ -93,6 +96,7 @@ $final_residents = [
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         }
         .img-house-base {
+            margin-bottom: 5px;
             width: 100%;       /* Füllt die Breite des Eltern-Containers */
             height: auto;     /* Höhe automatisch anpassen, um das Seitenverhältnis zu wahren */
             max-width: 100%;  /* Maximale Breite begrenzen */
