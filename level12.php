@@ -777,12 +777,15 @@ $final_residents = [
         } else {
             $lfBox.addClass('lf-good');
         }
-
+        if(expansionCount >= maxExpansions) {
+            $('#btnExpand').hide();
+        }
         $('#queueCount').text(isSearchPhase ? searchQueue.length : residents.length - currentResIdx);
     }
 
     // --- EXPANSION LOGIC ---
     $('#btnExpand').click(function() {
+        if(expansionCount >= maxExpansions) return;
         if(placedResidents.length === 0) {
             showDialogue("Niemand da zum Umziehen!");
             return;
