@@ -57,7 +57,6 @@ $allLevels = [
         ['title' => 'Double Hashing', 'description' => 'Verwende eine zweite Hash-Funktion für die Schrittweite'],
         ['title' => 'Double-Hashing-2', 'description' => 'Perfektioniere Double Hashing bei hoher Auslastung'],
         ['title' => 'Separate-Chaining', 'description' => 'Verkette Einträge mit gleichem Index in Listen'],
-        ['title' => 'Separate-Chaining-2', 'description' => 'Verwalte längere Ketten effizient'],
         ['title' => 'Load-Factor', 'description' => 'Verstehe den Füllgrad und seine Auswirkungen'],
         ['title' => 'Re-Hashing', 'description' => 'Vergrößere die Tabelle und ordne alle Elemente neu zu'],
         ['title' => 'Finale', 'description' => 'Zeige dein Können in der finalen Herausforderung'],
