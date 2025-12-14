@@ -1453,7 +1453,7 @@ if ($lastLevel !== 7 || !$hasNextPage) {
                     level_name = "Quadratic-Probing-2";
                     break;
                 case 7:
-                    level_name = "Double Hashing";
+                    level_name = "Double-Hashing";
                     break;
                 case 8:
                     level_name = "Double-Hashing-2";
