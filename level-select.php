@@ -1000,7 +1000,7 @@ if (!in_array(7, $levelsDone) || !$hasNextPage) {
         audioBg.loop = true;
         audioBg.volume = 0.9; // 30% Lautstärke
 
-        const audioDrive = new Audio('./assets/sounds/drive.mp3');
+        const audioDrive = new Audio('./assets/sounds/drive.wav');
         const audioStop = new Audio('./assets/sounds/stop.mp3');
 
         // Versuch: Sofort abspielen
