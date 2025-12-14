@@ -822,16 +822,29 @@ $familien_liste = [
 
         let currentDialogue = -1;
         // --- Helper Functions ---
-        function getAsciiSum(name) {
+        function getHash(key, size=HASH_SIZE) {
             let sum = 0;
-            for(let i=0; i<name.length; i++) sum += name.charCodeAt(i);
-            return sum;
+            for (let i = 0; i < key.length; i++) sum += key.charCodeAt(i);
+            return sum % size;
         }
-        function calcH1(name) { return getAsciiSum(name) % HASH_SIZE; }
-        function calcH2(name) { return (getAsciiSum(name) % HASH_SIZE_2) + 1; }
-        function getRandomHouseAsset() {
-            const randomIndex = Math.floor(Math.random() * housePairs.length);
-            return housePairs[randomIndex].filled;
+
+
+
+        function calcH1(name) { return getHash(name, HASH_SIZE); }
+        function calcH2(name) {
+            return getHash(name, HASH_SIZE_2) + 1;
+        }
+
+        function doubleHashing(key, size, stadt) {
+            let hash = getHash(key, size);
+            let i = 1;
+            let position = hash;
+            let jump = calcH2(key);
+            while (stadt[position] !== null) {
+                position = (hash + i * jump) % size;
+                i++;
+            }
+            return position;
         }
         // --- UI Updates ---
         function showDialogue(text, image = 'card_major.png') {
@@ -932,7 +945,6 @@ $familien_liste = [
                 handleSearchClick(houseIdx, $house);
                 return;
             }
-            console.log("phase: " + phase);
             if (phase === 'place_h1') {
                 if (houseIdx !== h1Value) {
                     playSound('error');
@@ -947,7 +959,8 @@ $familien_liste = [
             }
             else if (phase === 'place_apply_step') {
                 let expectedIdx = (currentProbeIndex + h2Value) % HASH_SIZE;
-                if (houseIdx !== expectedIdx) {
+                let finalIndex = doubleHashing(selectedFamily, HASH_SIZE, city);
+                if (houseIdx !== expectedIdx && houseIdx !== finalIndex) {
                     playSound('error');
                     showDialogue(`Falsch! Wir waren bei ${currentProbeIndex}. Plus Schrittweite ${h2Value} (modulo 10) ist Haus ${expectedIdx}.`);
                     return;
@@ -959,7 +972,6 @@ $familien_liste = [
                     currentProbeIndex = houseIdx;
                     showDialogue(`Oha! Haus ${houseIdx} ist AUCH besetzt. Wir müssen NOCHMAL springen. Addiere wieder ${h2Value}!`, 'sad_major.png');
                     $('.house').removeClass('highlight-target');
-                    let nextTarget = (currentProbeIndex + h2Value) % HASH_SIZE;
                 }
             }
         });
