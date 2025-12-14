@@ -1054,7 +1054,6 @@ $final_residents = [
     $('#hashButton').click(function() {
         if(dialogueIdx <= dialogues.length) return;
         if($('#nameInput').val().trim() === '' || $('#nameInput').val().trim() === undefined || $('#nameInput').val().trim() === null){
-            showDialogue("Niemand eingetragen zum Rechnen!");
             return;
         }
         let name = $('#nameInput').val().trim();
