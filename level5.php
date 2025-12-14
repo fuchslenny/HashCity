@@ -491,7 +491,7 @@
                     playSound('error');
                     attempts++;
                     $(this).addClass('show-family').find('.house-family').text(occupant);
-                    $('#dialogueText').text(`Nein, hier wohnt ${occupant}. Wir suchen Thomas!`);
+                    $('#dialogueText').text(`Nein, hier wohnt ${occupant}. Wir suchen Thomas! Vollziehe die Schritte von Quadratic Probing beim Suchen nach.`);
                 } else {
                     playSound('error');
                     attempts++;
