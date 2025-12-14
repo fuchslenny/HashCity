@@ -211,7 +211,6 @@
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
-            margin-bottom: 0.5rem;
             padding: 0 1rem;
             position: relative;
             z-index: 2;
@@ -221,13 +220,13 @@
             width: 100%;
             height: 60px;
             background-image: url('./assets/Strasse.svg');
-            background-size: cover;
+            Background-size: cover;
             background-position: center;
             background-repeat: repeat-x;
             position: relative;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            z-index: 1;
+            z-index: 10;
         }
         .street::before {
             content: '';
@@ -258,6 +257,8 @@
             z-index: 2;
         }
         .house {
+            margin-bottom: -10px;
+            z-index: 0;
             aspect-ratio: 1;
             background: transparent;
             border: none;
@@ -636,9 +637,7 @@
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">
-                    Guck mal, das ist einer der neuen Stadtteile. Hier ziehen demnächst die neuen Stadtbewohner ein.
-                    Damit das nicht so unübersichtlich wie im vorherigen Stadtteil wird, habe ich mir etwas ganz Besonderes überlegt.
-                    Dafür dürfen keine Namen doppelt existieren.
+                    ...
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue">
                     Klicken oder Enter ↵
@@ -713,47 +712,33 @@
         </div>
     </div>
 </div>
-<!-- Success Modal -->
 <div class="success-overlay" id="successOverlay">
     <div class="success-modal">
         <div class="success-icon">🎉</div>
-        <h2 class="success-title">Familie gefunden!</h2>
+        <h2 class="success-title">Level 1 geschafft!</h2>
         <p class="success-message" id="successMessage">
-            Gut gemacht! Du hast Sophie gefunden!
+            Danke für deine Hilfe, so funktioniert alles viel besser!
         </p>
-        <div class="success-stats">
-            <div class="stat-box">
-                <div class="stat-label">Versuche</div>
-                <div class="stat-value" id="finalAttempts">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Familien eingetragen</div>
-                <div class="stat-value" id="finalOccupied">0</div>
-            </div>
-        </div>
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
             <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 2 →</button>
         </div>
     </div>
 </div>
-<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // --- Level 1 Setup ---
+        // --- Konfiguration ---
         const HASH_SIZE = 5;
         let stadt = new Array(HASH_SIZE + 1).fill(null);
         let occupiedHouses = 0;
-        let attempts = 0;
         let gameStarted = false;
         let gameCompleted = false;
         let searchMode = false;
         let selectedFamily = null;
         let hash = null;
-        // Paare der neuen Assets für JavaScript
+
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
             { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
@@ -766,7 +751,49 @@
             { empty: "WohnhauGruenBraunLeerNeu.svg", filled: "WohnhauGruenBraunBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
         ];
-        // Funktion zum Setzen des Haus-Assets
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        soundSuccess.volume = 0.4;
+        soundError.volume = 0.3;
+        soundClick.volume = 0.5;
+
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl1/Lvl1_1.mp3'),
+            new Audio('./assets/sounds/Lvl1/Lvl1_2.mp3'),
+            new Audio('./assets/sounds/Lvl1/Lvl1_3.mp3'),
+            new Audio('./assets/sounds/Lvl1/Lvl1_4.mp3'),
+            new Audio('./assets/sounds/Lvl1/Lvl1_5.mp3')
+        ];
+        let currentAudioObj = null;
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
+
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
+
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
             const assetName = currentAsset.split('/').pop();
@@ -781,13 +808,15 @@
             houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
         }
         const dialogues = [
-            "Guck mal, das ist einer der neuen Stadtteile. Hier ziehen demnächst die neuen Stadtbewohner ein. Damit das nicht so unübersichtlich wie im vorherigen Stadtteil wird, habe ich mir etwas ganz Besonderes überlegt. Dafür dürfen keine Namen doppelt existieren.",
-            "Hier rechts befindet sich unser Stadtplaner. Dort siehst du, welche Hausnummer zu welchem Namen gehört. Klicke einfach auf einen Namen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechnen Haus-Nr.'."
+            "Schau mal, das ist einer der neuen Stadtteile. Hier ziehen demnächst die neuen Stadtbewohner ein. Damit das nicht so unübersichtlich wie im vorherigen Stadtteil wird, habe ich mir etwas ganz Besonderes überlegt. Dafür dürfen keine Namen doppelt existieren.",
+            "Hier rechts befindet sich unser Stadtplaner. Dort siehst du, welche Hausnummer zu welchem Namen gehört. Klicke einfach auf einen Namen aus der Liste, um den Rechner zu füllen, und klicke dann auf 'Berechne Haus-Nr.'.",
+            "Unser Stadtplaner funktioniert ganz ähnlich wie ein Hashrechner bei einem Computer! Zunächst berechnet er die Summe der einzelnen ASCII-Zeichen der Namen unserer Bewohner.",
+            "Danach rechnet er diese Zahl noch modulu der Größe des Stadtviertels, hier also 5.<br> Hashmaps machen das ganz ähnlich."
         ];
         const sophieDialogue = "Ich sehe, du hast für alle Bewohner ein Haus gefunden. Ich habe noch einen Termin mit Sophie, kannst du mir helfen sie zu finden? Nutze den Hash-Rechner, um ihre Hausnummer zu berechnen.";
-        let currentDialogue = 0;
+        let currentDialogue = -1;
         let isFading = 0;
-        // --- Hash-Funktion (identisch zur PHP-Logik) ---
+        // --- Hash-Funktion ---
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) {
@@ -795,60 +824,40 @@
             }
             return (sum % size);
         }
-        // --- Dialog-Steuerung ---
-        // Funktion zum Anzeigen des Textes
-        function showDialogue() {
-            if (isFading) return;
-            isFading = true;
-
-            $('#dialogueText').fadeOut(200, function() {
-                $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
-                    isFading = false;
-                });
-            });
-        }
-
-        // Funktion zum Weiterschalten
-        function nextStep() {
-            // Blockieren, wenn Spiel schon läuft oder gerade eine Animation läuft
-            if (gameStarted || isFading) return;
-
-            // Sind wir noch innerhalb der Dialog-Liste?
-            if (currentDialogue < dialogues.length - 1) {
-                currentDialogue++;
-                showDialogue(); // Normaler Fade für Dialoge
-            } else {
-                // Intro ist zu Ende -> Sanfter Übergang zum Spielstart
-                isFading = true; // Klicks sperren während der Transition
-                $('#dialogueContinue').fadeOut();
-
+        // Dialog Logik
+        function showNextDialogue() {
+            if (isFading || gameStarted) return;
+            currentDialogue++;
+            if (currentDialogue < dialogues.length) {
+                playDialogueAudio(currentDialogue);
+                isFading = true;
                 $('#dialogueText').fadeOut(200, function() {
-                    $(this).text('Okay, lass uns anfangen! Wähle die erste Familie aus der Liste.');
-                    $(this).fadeIn(200, function() {
-                        gameStarted = true; // Spiel jetzt freigeben
-                        isFading = false;   // Sperre aufheben
+                    $(this).html(dialogues[currentDialogue]).fadeIn(200, function() {
+                        isFading = false;
                     });
                 });
             }
+            else {
+                $('#dialogueContinue').fadeOut();
+                gameStarted = true;
+                $('#dialogueText').text("Okay, lass uns anfangen! Wähle die erste Familie aus der Liste.");
+            }
         }
 
-        // Initialisierung (Text 1 sofort setzen ohne Animation)
-        $('#dialogueText').text(dialogues[0]);
-        $('#dialogueContinue').show();
+        $('.dialogue-box').click(function() {
+            if (!gameStarted) showNextDialogue();
+        });
 
-        // --- Listener für Dialoge ---
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
-                nextStep();
+                showNextDialogue();
             }
         });
 
-        $('.dialogue-box').click(function() {
-            if (!gameStarted) {
-                nextStep();
-            }
-        });
-        // --- Level 1 Spielmechanik ---
+        // --- init ---
+        $('#dialogueText').text("...");
+        $('#dialogueContinue').show();
+
         // 1. Familie aus der Liste auswählen
         $('#familienListe .to-do-family').click(function() {
             if (gameCompleted || !gameStarted || searchMode) return;
@@ -877,7 +886,7 @@
             const family = $('#hashInput').val().trim();
             if (!family) return;
             hash = getHash(family, HASH_SIZE);
-            $('#hashResult').text(`Initial-Hash: ${hash}`);
+            $('#hashResult').text(`Hausnummer: ${hash}`);
             if (searchMode) {
                 if (family === 'Sophie' && hash === 4) {
                     $('.house[data-house="4"]').addClass('found show-family');
@@ -887,7 +896,6 @@
                         "Danke für deine Hilfe! So funktioniert alles viel besser!<br>
                         Lass uns im nächsten Level noch mehr über Hash-Funktionen lernen!"
                     `);
-                    $('#finalAttempts').text(attempts);
                     $('#finalOccupied').text(occupiedHouses);
                     $('#successOverlay').css('display', 'flex');
                     gameCompleted = true;
@@ -910,34 +918,39 @@
                     $house.find('.house-family').text(occupant);
                     $('#dialogueText').text(`In Haus ${houseNumber} wohnt ${occupant}.`);
                     if (occupant === 'Sophie') {
+                        playSound('success');
                         $house.addClass('found');
                         $('#successMessage').html(`
                             <strong style="color: #667eea;">Major Mike sagt:</strong><br>
                             "Danke für deine Hilfe! So funktioniert alles viel besser!<br>
                             Lass uns im nächsten Level noch mehr über Hash-Funktionen lernen!"
                         `);
-                        $('#finalAttempts').text(attempts);
                         $('#finalOccupied').text(occupiedHouses);
                         $('#successOverlay').css('display', 'flex');
                         gameCompleted = true;
+                    } else {
+                        playSound('error');
                     }
                 }
             } else {
                 if (gameCompleted || !gameStarted || !selectedFamily) {
                     if(gameStarted && !gameCompleted) $('#dialogueText').text(`Du musst erst eine Familie auswählen und ihren Hash berechnen!`);
+                    playSound('error');
                     return;
                 }
-                console.log(hash);
                 if(hash === null){
                     $('#dialogueText').text(`Berechne erst den Hash mit dem Hashrechner!`);
+                    playSound('error');
                     return;
                 }
                 if (houseNumber !== hash) {
                     $('#dialogueText').text(`Halt! Der Rechner hat Haus ${hash} für Familie ${selectedFamily} berechnet, nicht Haus ${houseNumber}.`);
+                    playSound('error');
                     return;
                 }
                 const currentOccupant = stadt[houseNumber];
                 if (currentOccupant === null) {
+                    playSound('click');
                     stadt[houseNumber] = selectedFamily;
                     setHouseAsset($house, true);
                     $house.addClass('checked');
@@ -963,7 +976,7 @@
                 }
             }
         });
-        // --- Global functions for buttons ---
+
         window.restartLevel = function() {
             location.reload();
         };
@@ -971,7 +984,7 @@
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'Level-Auswahl?completed=1&next=2';
+                window.location.href = 'Level-Auswahl?page=1&completed=1&level=2';
             }, 500);
         };
     });

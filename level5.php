@@ -43,13 +43,46 @@
         .grid-title { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; color: #2E7D32; text-align: center; margin-bottom: 2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
         .street-block { position: relative; margin-bottom: 2.5rem; }
         .street-block:last-child { margin-bottom: 0; }
-        .houses-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 0.5rem; padding: 0 1rem; position: relative; z-index: 2; }
-        .street { width: 100%; height: 60px; background-image: url('./assets/Strasse.svg'); background-size: cover; background-position: center; position: relative; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 1; }
+        .houses-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
+        }
+        .street {
+            width: 100%;
+            height: 60px;
+            background-image: url('./assets/Strasse.svg');
+            Background-size: cover;
+            background-position: center;
+            background-repeat: repeat-x;
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
         .street::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%); border-radius: 8px; z-index: -1; }
         .street::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px); transform: translateY(-50%); z-index: 2; }
 
         /* House Elements */
-        .house { aspect-ratio: 1; background: transparent; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; position: relative; border-radius: 10px; padding: 0.3rem; }
+        .house {
+            margin-bottom: -10px;
+            z-index: 0;
+            aspect-ratio: 1;
+            background: transparent;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 10px;
+            padding: 0.3rem;
+        }
         .house:hover:not(.checked):not(.found) { transform: translateY(-8px) scale(1.08); z-index: 10; }
 
         /* Highlight Targets */
@@ -214,16 +247,7 @@
         <div class="success-icon">🎉</div>
         <h2 class="success-title">Familie gefunden!</h2>
         <p class="success-message" id="successMessage">Vielen Dank! Nun ist auch dieser Stadtteil fertig.</p>
-        <div class="success-stats">
-            <div class="stat-box">
-                <div class="stat-label">Versuche</div>
-                <div class="stat-value" id="finalAttempts">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Familien eingetragen</div>
-                <div class="stat-value" id="finalOccupied">5</div>
-            </div>
-        </div>
+
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
             <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 6 →</button>
@@ -234,12 +258,11 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // --- Setup ---
+        // --- Konfiguration ---
         const HASH_SIZE = 10;
         $('#nameInput').val('');
         const families = ["Levi", "Emil", "Lars", "Thomas", "Noah"];
 
-        // Assets
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
             { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
@@ -254,7 +277,6 @@
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
         ];
 
-        // --- State ---
         let stadt = new Array(HASH_SIZE).fill(null);
         let currentFamilyIndex = 0;
         let selectedFamily = null;
@@ -263,16 +285,55 @@
         let occupiedHouses = 0;
         let attempts = 0;
 
-        // --- Dialoge (NEU: Weicherer Einstieg) ---
         const dialogues = [
             "Willkommen zurück! Das 'Linear Probing' aus dem letzten Stadtteil hat leider zu 'Clustern' geführt – also Grüppchenbildung, die die Suche verlangsamt.",
-            "Deshalb nutzen wir heute <strong>Quadratic Probing</strong>. Wenn ein Haus besetzt ist, gehen wir nicht einfach zum Nachbarn (+1, +2...), sondern springen in Quadrat-Schritten weiter: +1² (1), +2² (4), +3² (9) usw.",
+            "Deshalb nutzen wir nun <strong>Quadratic Probing</strong>. Wenn ein Haus besetzt ist, gehen wir nicht einfach zum Nachbarn (+1, +2...), sondern springen in Quadrat-Schritten weiter. (+1² (1), +2² (4), +3² (9) usw.)",
             "Dadurch verteilen sich die Bewohner viel besser in der Stadt. Probieren wir es direkt aus! Klicke auf 'Levi' in der Liste."
         ];
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        soundSuccess.volume = 0.4;
+        soundError.volume = 0.3;
+        soundClick.volume = 0.5;
+
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl5/Lvl5_1.mp3'),
+            new Audio('./assets/sounds/Lvl5/Lvl5_2.mp3'),
+            new Audio('./assets/sounds/Lvl5/Lvl5_3.mp3')
+        ];
+
         let currentDialogue = 0;
         let isFading = false;
+        let currentAudioObj = null;
 
-        // --- Logic Helper ---
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
+
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) sum += key.charCodeAt(i);
@@ -306,26 +367,26 @@
             $('.house').removeClass('highlight-target quadratic-target');
         }
 
-        // --- Dialog Steuerung ---
+        // --- Dialog Logik ---
         function nextDialogueStep() {
             if (isFading) return;
 
             if (currentDialogue < dialogues.length) {
+                playDialogueAudio(currentDialogue);
                 isFading = true;
                 $('#dialogueText').fadeOut(200, function() {
-                    $(this).html(dialogues[currentDialogue]); // .html für Fettdruck
+                    $(this).html(dialogues[currentDialogue]);
                     currentDialogue++;
                     $(this).fadeIn(200, function() { isFading = false; });
                 });
             } else {
-                // Intro fertig -> Spiel starten
                 $('#dialogueContinue').fadeOut();
                 gameStarted = true;
                 initFamilyList();
             }
         }
 
-        // --- Main Game Loop ---
+        // main loop
         function initFamilyList() {
             if (currentFamilyIndex >= families.length) {
                 startSearchPhase();
@@ -337,14 +398,12 @@
             const currentFamily = families[currentFamilyIndex];
             const $item = $(`.to-do-family[data-family="${currentFamily}"]`);
 
-            // Aktivieren
             $item.removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick);
         }
 
         function handleFamilyClick() {
             if (!gameStarted || searchMode) return;
 
-            // UI Update
             $('.to-do-family').removeClass('active');
             $(this).addClass('active');
             selectedFamily = $(this).data("family");
@@ -353,15 +412,6 @@
             $('#nameInput').val($(this).data('family'));
             $('#hashResult').text('Ergebnis ...');
             $('#hashButton').prop('disabled', false); // Button freischalten
-
-            // Kontext-Texte
-            if (selectedFamily === "Thomas") {
-                $('#dialogueText').text("Achtung bei Thomas! Hier wird gleich eine Kollision passieren. Klicke auf Berechnen.");
-            } else if (selectedFamily === "Noah") {
-                $('#dialogueText').text("Auch bei Noah müssen wir aufpassen. Berechne seine Position!");
-            } else {
-                $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
-            }
         }
 
         // Klick: Berechnen
@@ -399,7 +449,7 @@
 
             // Einzugs-Modus Logik
             if (selectedFamily === "Thomas") {
-                // Kollision visualisieren (Tutorial)
+                // Kollision visualisieren
                 steps.slice(0, -1).forEach(idx => $(`.house[data-house=${idx}]`).addClass('quadratic-target')); // ROT
                 $(`.house[data-house=${target}]`).addClass('highlight-target'); // GOLD
 
@@ -422,32 +472,37 @@
             if (!gameStarted) return;
             const houseIdx = parseInt($(this).data('house'));
 
-            // --- SUCH MODUS (Ende) ---
+            // --- such modus ---
             if (searchMode) {
                 if(selectedFamily === null) return;
                 const occupant = stadt[houseIdx];
                 if (occupant === 'Thomas') {
-                    // GEWONNEN
+                    // gewonnen
+                    playSound('success');
                     $(this).addClass('show-family').find('.house-family').text('Thomas');
                     $('#successOverlay').css('display', 'flex');
                     $('#finalAttempts').text(attempts);
                 } else if (occupant) {
+                    playSound('error');
                     attempts++;
                     $(this).addClass('show-family').find('.house-family').text(occupant);
-                    $('#dialogueText').text(`Nein, hier wohnt ${occupant}. Wir suchen Thomas!`);
+                    $('#dialogueText').text(`Nein, hier wohnt ${occupant}. Wir suchen Thomas! Vollziehe die Schritte von Quadratic Probing beim Suchen nach.`);
                 } else {
+                    playSound('error');
                     attempts++;
                     $('#dialogueText').text("Hier wohnt niemand.");
                 }
                 return;
             }
 
-            // --- PLATZIERUNGS MODUS ---
+            // --- platzierungs Modus ---
             if (!selectedFamily) {
+                playSound('error');
                 $('#dialogueText').text("Bitte wähle erst einen Namen aus der Liste.");
                 return;
             }
             if ($('#hashResult').text().includes('Ergebnis')) {
+                playSound('error');
                 $('#dialogueText').text("Bitte klicke erst auf 'Berechnen'!");
                 return;
             }
@@ -455,6 +510,7 @@
             const result = quadraticProbing(selectedFamily, HASH_SIZE, stadt);
 
             if (houseIdx !== result.finalIndex) {
+                playSound('error');
                 $('#dialogueText').text("Falsches Haus! Achte auf die Berechnung und die Markierungen.");
                 return;
             }
@@ -466,7 +522,6 @@
                 $(this).addClass('checked');
                 $(this).find('.house-family').text(selectedFamily);
 
-                // Aufräumen
                 clearMarkers();
                 $(`.to-do-family[data-family="${selectedFamily}"]`).removeClass('active').addClass('list-group-item-success').css("opacity", 1);
 
@@ -476,11 +531,24 @@
                 $('#hashResult').text('Ergebnis ...');
                 selectedFamily = null;
 
-                // Weiter
                 currentFamilyIndex++;
                 if (currentFamilyIndex < families.length) {
+                    playSound('click');
                     $('#dialogueText').text("Sehr gut! Nächster Bewohner.");
                     setTimeout(initFamilyList, 500);
+                    const nextFamily = families[currentFamilyIndex];
+                    $('.to-do-family').removeClass('active');
+                    $(`.to-do-family[data-family="${nextFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick).addClass('active');
+                    selectedFamily = nextFamily;
+                    $('#nameInput').val(selectedFamily);
+                    $('#hashButton').prop('disabled', false);
+                    if (selectedFamily === "Thomas") {
+                        $('#dialogueText').text("Achtung bei Thomas! Hier wird gleich eine Kollision passieren. Klicke auf Berechnen.");
+                    } else if (selectedFamily === "Noah") {
+                        $('#dialogueText').text("Auch bei Noah müssen wir aufpassen. Berechne seine Position!");
+                    } else {
+                        $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
+                    }
                 } else {
                     startSearchPhase();
                 }
@@ -492,16 +560,13 @@
             $('#dialogueText').text("Alle Häuser sind voll! Aber wo wohnt Thomas? Ich brauche seine Unterschrift.");
             $('#majorMikeImage').attr('src', './assets/card_major.png');
 
-            // Input manipulieren
             $('.to-do-family').removeClass('active').addClass('disabled');
             $('#nameInput').prop('readonly', false);
 
-            // Button wieder freigeben
             $('#hashButton').prop('disabled', false).text('Berechne Haus-Nr.');
             $('#hashResult').text('Suche...');
         }
 
-        // --- Inputs ---
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
                 nextDialogueStep();
@@ -513,12 +578,12 @@
             }
         });
 
-        // --- Global ---
         window.restartLevel = function() { location.reload(); };
-        window.nextLevel = function() { window.location.href = 'Level-Auswahl?completed=5&next=6'; };
+        window.nextLevel = function() { window.location.href = 'Level-Auswahl?page=1&completed=5&level=6'; };
 
         // Start
-        nextDialogueStep();
+        $('#dialogueText').text("...");
+        $('#dialogueContinue').show();
     });
 </script>
 </body>

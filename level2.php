@@ -216,7 +216,6 @@ $prefilled_haeuser = [
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
-            margin-bottom: 0.5rem;
             padding: 0 1rem;
             position: relative;
             z-index: 2;
@@ -226,13 +225,13 @@ $prefilled_haeuser = [
             width: 100%;
             height: 60px;
             background-image: url('./assets/Strasse.svg');
-            background-size: cover;
+            Background-size: cover;
             background-position: center;
             background-repeat: repeat-x;
             position: relative;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            z-index: 1;
+            z-index: 10;
         }
         .street::before {
             content: '';
@@ -263,6 +262,8 @@ $prefilled_haeuser = [
             z-index: 2;
         }
         .house {
+            margin-bottom: -10px;
+            z-index: 0;
             aspect-ratio: 1;
             background: transparent;
             border: none;
@@ -634,7 +635,7 @@ $prefilled_haeuser = [
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">
-                    Ich habe hier mal etwas vorbereitet. Drei Bewohner sind bereits eingezogen.
+                    ...
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue">
                     Klicken oder Enter ↵
@@ -724,11 +725,60 @@ $prefilled_haeuser = [
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
         const dialogues = [
-            "Wir verwenden jetzt unser neues Hash-System, um die Häuser zuzuweisen. Das ist viel schneller als das lineare Suchen aus Level 0!",
+            "Wir verwenden jetzt unser neues Hash-System, um die Häuser zuzuweisen. Das ist viel schneller als das lineare Suchen aus Level 0.",
             "Der Hash-Rechner rechts berechnet für jeden Namen die exakte Hausnummer. Deine Aufgabe ist es, den nächsten Bewohner zuzuweisen.",
             "Der nächste Bewohner ist Dieter. Wähle ihn jetzt aus der Liste aus, um zu starten!"
         ];
-        let currentDialogue = 0;
+        let currentDialogue = -1;
+        // Sound-Dateien
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        soundSuccess.volume = 0.4;
+        soundError.volume = 0.3;
+        soundClick.volume = 0.5;
+
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl2/Lvl2_1.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_2.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_3.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_4.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_5.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_7.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_8.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_9.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_10.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_11.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_12.mp3'),
+            new Audio('./assets/sounds/Lvl2/Lvl2_13.mp3')
+        ];
+        let currentAudioObj = null;
+
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
+
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) {
@@ -742,6 +792,8 @@ $prefilled_haeuser = [
         }
         function showNextDialogue() {
             if (isFading || currentDialogue >= dialogues.length) return;
+            currentDialogue++;
+            playDialogueAudio(currentDialogue);
             isFading = true;
             $('#dialogueText').fadeOut(200, function() {
                 $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
@@ -752,7 +804,6 @@ $prefilled_haeuser = [
                     $('#dialogueContinue').fadeOut();
                     gameStarted = true;
                 }
-                currentDialogue++;
             });
         }
         $('.house').each(function() {
@@ -793,6 +844,7 @@ $prefilled_haeuser = [
             $('.to-do-family').removeClass('active');
             $item.addClass('active');
             $('.house').removeClass('highlight-target');
+            playDialogueAudio(7);
             $('#dialogueText').text(`Okay, Familie ${selectedFamily}. Berechne jetzt die Hausnummer!`);
         });
         $('#hashButton').click(function() {
@@ -801,6 +853,7 @@ $prefilled_haeuser = [
             const hash = getHash(family, HASH_SIZE);
             if (gameCompleted) {
                 $('#hashResult').text(`Hausnummer: ${hash}`);
+                playDialogueAudio(11);
                 $('#dialogueText').html(
                     "Siehst du das?! Der Hash von <strong>Dieter</strong> ist 0... und der Hash von <strong>Chris</strong> ist AUCH 0! <br>Zwei verschiedene Namen führen zur gleichen Hausnummer. Das nennen wir eine <strong>Kollision</strong>! Mein System ist wohl doch nicht perfekt..."
                 );
@@ -810,6 +863,7 @@ $prefilled_haeuser = [
             }
             else {
                 $('#hashResult').text(`Hausnummer: ${hash}`);
+                playDialogueAudio(8);
                 $('#dialogueText').text(`Perfekt! Laut Rechner gehört Familie ${family} in Haus ${hash}. Klicke auf das Haus, um sie einziehen zu lassen.`);
                 $('.house').removeClass('highlight-target');
                 $(`.house[data-house=${hash}]`).addClass('highlight-target');
@@ -818,12 +872,13 @@ $prefilled_haeuser = [
         });
         $('.house').click(function() {
             if (investigationMode && $(this).data('house') === 0) {
+                playSound('click');
                 selectedFamily = $(this).data('family');
                 $('#hashButton').prop('disabled', false);
-                $('#hashResult').text('Ergebnis ...');
                 $('.house').removeClass('highlight-target');
                 $(this).addClass('highlight-target');
                 $('#hashInput').val(selectedFamily);
+                playDialogueAudio(10);
                 $('#dialogueText').text(`Okay, '${selectedFamily}' ist ausgewählt. Klick jetzt bitte auf 'Berechnen'. Ich will sehen, was sein Hash-Wert ist!`);
                 investigationMode = false;
                 gameCompleted = true;
@@ -831,6 +886,8 @@ $prefilled_haeuser = [
             }
             if (gameCompleted || !gameStarted || waitingForCollisionConfirm || investigationMode) return;
             if (!selectedFamily || $('#hashResult').text() === 'Ergebnis ...') {
+                playSound('error');
+                playDialogueAudio(4)
                 $('#dialogueText').text(`Du musst erst 'Dieter' aus der Liste wählen und auf 'Berechnen' klicken!`);
                 return;
             }
@@ -838,16 +895,19 @@ $prefilled_haeuser = [
             const houseNumber = $house.data('house');
             const targetHash = getHash(ZIEL_FAMILIE, HASH_SIZE);
             if (houseNumber !== targetHash) {
+                playSound('error');
+                playDialogueAudio(3);
                 $('#dialogueText').text("Das war das falsche Haus. Das Ziel war Haus 0.");
                 $('#hashButton').prop('disabled', false);
-                $('#hashResult').text('Ergebnis ...');
                 $('.house').removeClass('highlight-target');
                 return;
             }
             const currentOccupant = stadt[houseNumber];
             if (currentOccupant !== null) {
+                playSound('error');
                 $house.addClass('found');
                 $('#majorMikeImage').attr('src', './assets/sad_major.png');
+                playDialogueAudio(9);
                 $('#dialogueText').html(
                     "Halt! Da wohnt doch schon Chris! Warum schickt dich der Rechner zu Haus 0? Das ist seltsam... Klick mal bitte auf Haus 0, um den Namen 'Chris' in den Rechner zu laden."
                 );
@@ -864,6 +924,12 @@ $prefilled_haeuser = [
                 <br><br>
                 "Wir müssen im nächsten Level eine Lösung für diese <strong>Kollision</strong> finden."
             `;
+            // aktuellen Dialog stoppen
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+            playSound('success');
             $('#successMessage').html(successMsg);
             $('#successOverlay').css('display', 'flex');
         }
@@ -872,7 +938,7 @@ $prefilled_haeuser = [
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'Level-Auswahl?completed=2&next=3';
+                window.location.href = 'Level-Auswahl?page=1&completed=2&level=3';
             }, 500);
         };
     });

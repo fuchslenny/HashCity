@@ -1,10 +1,6 @@
 <?php
 /**
  * HashCity - Level 0: Einführung
- *
- * Lernziel: Das Problem der linearen Suche demonstrieren
- * Spielmechanik: Spieler muss linear durch alle Häuser suchen, um Familie Müller zu finden
- * Familie Müller befindet sich in Haus 15
  */
 $familien = [
         0 => "Schmidt",
@@ -235,7 +231,6 @@ $familien = [
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
-            margin-bottom: 0.5rem;
             padding: 0 1rem;
             position: relative;
             z-index: 2;
@@ -251,7 +246,7 @@ $familien = [
             position: relative;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            z-index: 1;
+            z-index: 10;
         }
         .street::before {
             content: '';
@@ -282,6 +277,8 @@ $familien = [
             z-index: 2;
         }
         .house {
+            margin-bottom: -10px;
+            z-index: 0;
             aspect-ratio: 1;
             background: transparent;
             border: none;
@@ -526,9 +523,8 @@ $familien = [
             font-weight: 500;
         }
         .success-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
+            display: flex;
+            justify-content: center;
             margin-bottom: 2rem;
         }
         .stat-box {
@@ -537,6 +533,8 @@ $familien = [
             border-radius: 15px;
             border: 3px solid #4CAF50;
             box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+            width: 100%;
+            text-align: center;
         }
         .stat-label {
             font-size: 0.95rem;
@@ -665,7 +663,7 @@ $familien = [
             <div class="major-mike-name">🎖️ Major Mike 🎖️</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">
-                    Willkommen in HashCity! Ich bin Major Mike, der Bürgermeister!
+                    ...
                 </div>
                 <div class="dialogue-continue" id="dialogueContinue" style="display: none;">
                     Klicken oder Enter ↵
@@ -737,10 +735,6 @@ $familien = [
                 <div class="info-label">Überprüfte Häuser:</div>
                 <div class="info-value" id="checkedCount">0 / 20</div>
             </div>
-            <div class="info-item">
-                <div class="info-label">Anzahl Versuche:</div>
-                <div class="info-value" id="attemptsCount">0</div>
-            </div>
         </div>
     </div>
 </div>
@@ -753,10 +747,6 @@ $familien = [
             Gut gemacht! Du hast Familie Müller in Haus 15 gefunden!
         </p>
         <div class="success-stats">
-            <div class="stat-box">
-                <div class="stat-label">Versuche</div>
-                <div class="stat-value" id="finalAttempts">0</div>
-            </div>
             <div class="stat-box">
                 <div class="stat-label">Häuser geprüft</div>
                 <div class="stat-value" id="finalChecked">0</div>
@@ -788,14 +778,54 @@ $familien = [
             { empty: "WohnhauRotBraunLeerNeu.svg", filled: "WohnhauRotBraunBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
+        // Sound-Dateien
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
 
-        // --- Zufällige Auswahl der Assets für die Häuser ---
+        soundSuccess.volume = 0.4;
+        soundError.volume = 0.3;
+        soundClick.volume = 0.5;
+
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl0/Lvl0_1.mp3'),
+            new Audio('./assets/sounds/Lvl0/Lvl0_2.mp3'),
+            new Audio('./assets/sounds/Lvl0/Lvl0_3.mp3'),
+            new Audio('./assets/sounds/Lvl0/Lvl0_4.mp3')
+        ];
+        let currentAudioObj = null;
+
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
+
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
             return housePairs[randomIndex];
         }
 
-        // --- Initialisierung der Häuser mit zufälligen Assets (als leer) ---
+        // --- Initialisierung der Häuser mit zufälligen Assets ---
         $('.house').each(function() {
             const $house = $(this);
             const pair = getRandomHousePair();
@@ -804,25 +834,32 @@ $familien = [
             $house.data('filled-asset', pair.filled);
         });
 
-        // --- Spielvariablen ---
+        // --- Konfiguraiton ---
         let checkedHouses = 0;
         let attempts = 0;
         let gameStarted = false;
         let gameCompleted = false;
+        let isFading = false;
         const dialogues = [
             "Hallo! Willkommen in HashCity! Ich bin Major Mike, der Bürgermeister dieser wunderschönen Stadt. Schön, dass du hier bist!",
             "Ich habe ein kleines Problem... Ich habe meinen Stadtplan verloren und weiß nicht mehr genau, wo welche Familie wohnt. 😅",
             "Ich muss dringend mit Familie Müller sprechen! Kannst du mir helfen, sie zu finden? Klicke einfach die Häuser an, um zu sehen, wer dort wohnt.",
             "Perfekt! Dann fangen wir an. Viel Erfolg beim Suchen! 🔍"
         ];
-        let currentDialogue = 0;
+        let currentDialogue = -1;
 
-        // --- Dialoge anzeigen ---
         function showNextDialogue() {
+            if (isFading) return;
             currentDialogue++;
             if (currentDialogue < dialogues.length) {
+                isFading = true;
+                playDialogueAudio(currentDialogue);
                 $('#dialogueText').fadeOut(200, function() {
-                    $(this).text(dialogues[currentDialogue]).fadeIn(200);
+                    $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
+                        isFading = false;
+                    });
+
+                    // Bilder-Logik
                     if (currentDialogue === 1) {
                         $('#majorMikeImage').attr('src', './assets/sad_major.png');
                     } else if (currentDialogue === 2) {
@@ -830,12 +867,14 @@ $familien = [
                     } else if (currentDialogue === 3) {
                         $('#majorMikeImage').attr('src', './assets/card_major.png');
                     }
-                    if (currentDialogue === dialogues.length - 1) {
-                        $('#dialogueContinue').fadeOut();
-                        gameStarted = true;
-                        $('.house').css('cursor', 'pointer');
-                    }
                 });
+            }
+            // Wenn Dialoge vorbei sind -> Spiel starten
+            else {
+                $('#dialogueContinue').fadeOut();
+                gameStarted = true;
+                $('.house').css('cursor', 'pointer');
+                $(`.house[data-house=0]`).addClass('highlight-target');
             }
         }
 
@@ -845,13 +884,13 @@ $familien = [
         }, 1000);
 
         $(document).keydown(function(e) {
-            if ((e.key === 'Enter' || e.key === ' ') && currentDialogue < dialogues.length - 1) {
+            if ((e.key === 'Enter' || e.key === ' ') && currentDialogue < dialogues.length) {
                 showNextDialogue();
             }
         });
 
         $('.dialogue-box').click(function() {
-            if (currentDialogue < dialogues.length - 1) {
+            if (currentDialogue < dialogues.length) {
                 showNextDialogue();
             }
         });
@@ -861,16 +900,33 @@ $familien = [
             if (!gameStarted || gameCompleted) return;
 
             const $house = $(this);
-            if ($house.hasClass('checked') || $house.hasClass('found')) {
+            const clickedHouseNum = $house.data('house');
+
+            // Man darf nur das Haus klicken, das der aktuellen Anzahl geprüfter Häuser entspricht (0, dann 1, dann 2...)
+            if (clickedHouseNum !== checkedHouses) {
+                if (clickedHouseNum > checkedHouses) {
+                    playSound('error');
+                    $('#dialogueText').text(`Halt! Wir müssen der Reihe nach suchen. Prüfe zuerst Haus ${checkedHouses}.`);
+                    $('#majorMikeImage').attr('src', './assets/card_major.png');
+                } else {
+                    playSound('error');
+                    $('#dialogueText').text(`In Haus ${clickedHouseNum} waren wir schon. Weiter geht's bei Haus ${checkedHouses}.`);
+                }
                 return;
             }
 
+            // Richtiger Klick -> Weiter
+            playSound('click');
             attempts++;
             checkedHouses++;
-            const houseNumber = $house.data('house');
-            const family = $house.data('family');
 
-            // Haus als "geprüft" markieren
+            // Nächstes Ziel highlighten
+            $('.house').removeClass('highlight-target');
+            if (checkedHouses < 20) {
+                $(`.house[data-house=${checkedHouses}]`).addClass('highlight-target');
+            }
+
+            const family = $house.data('family');
             $house.find('.house-icon').attr('src', `./assets/${$house.data('filled-asset')}`);
             $house.addClass('checked show-family');
 
@@ -881,26 +937,12 @@ $familien = [
                 showSuccessModal();
             } else {
                 $('#majorMikeImage').attr('src', './assets/sad_major.png');
-                const responses = [
-                    `Nein, in Haus ${houseNumber} wohnt Familie ${family}. Weiter suchen!`,
-                    `Das ist Familie ${family} in Haus ${houseNumber}. Das sind nicht die Müllers!`,
-                    `Haus ${houseNumber}: Familie ${family}. Falsche Familie, versuch's weiter!`,
-                    `Hmm, Familie ${family}... nicht die Richtigen. Probier ein anderes Haus!`,
-                    `Familie ${family}? Nein, das sind nicht die Müllers. Mach weiter!`
-                ];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                $('#dialogueText').text(randomResponse);
-                setTimeout(function() {
-                    if (!gameCompleted) {
-                        $('#majorMikeImage').attr('src', './assets/card_major.png');
-                    }
-                }, 2000);
+                $('#dialogueText').text(`Haus ${clickedHouseNum}: Familie ${family}. Nicht die Müllers. Weiter zum nächsten Haus!`);
             }
 
             updateStats();
         });
 
-        // --- Statistiken aktualisieren ---
         function updateStats() {
             $('#checkedCount').text(checkedHouses + ' / 20');
             $('#attemptsCount').text(attempts);
@@ -908,35 +950,30 @@ $familien = [
             $('#progressBar').css('width', progress + '%').text(Math.round(progress) + '%');
         }
 
-        // --- Erfolg-Modal anzeigen ---
         function showSuccessModal() {
-            $('#finalAttempts').text(attempts);
-            $('#finalChecked').text(checkedHouses);
-            let performanceMsg = '';
-            if (attempts <= 5) {
-                performanceMsg = 'Wow, du hattest Glück! Aber ';
-            } else if (attempts <= 10) {
-                performanceMsg = 'Nicht schlecht! Aber ';
-            } else if (attempts <= 16) {
-                performanceMsg = 'Das hat eine Weile gedauert! ';
-            } else {
-                performanceMsg = 'Oh je, das hat wirklich lange gedauert! ';
-            }
+            playSound('success');
+            const statsHtml = `
+                <div class="stat-box">
+                    <div class="stat-label">Häuser geprüft</div>
+                    <div class="stat-value">${checkedHouses}</div>
+                </div>
+            `;
+            $('.success-stats').html(statsHtml);
+
             const successMsg = `
                 <strong style="color: #667eea;">Major Mike sagt:</strong><br>
-                "${performanceMsg}Stell dir vor, wir hätten 1000 Häuser in unserer Stadt!
-                Das lineare Durchsuchen ist viel zu langsam. Es <em>muss</em> eine bessere Methode geben!
+                "Puh, das hat gedauert! Wir mussten ${checkedHouses} Häuser prüfen.<br>
+                Stell dir vor, wir hätten 1000 Häuser! Das lineare Durchsuchen ist viel zu langsam.
+                Es <em>muss</em> eine bessere Methode geben!
                 Lass uns im nächsten Level etwas Neues lernen: <strong>Hash-Funktionen!</strong>"
             `;
             $('#successMessage').html(successMsg);
             $('#successOverlay').css('display', 'flex');
         }
 
-        // --- Globale Funktionen ---
         window.restartLevel = function() {
             location.reload();
         };
-
         window.nextLevel = function() {
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');

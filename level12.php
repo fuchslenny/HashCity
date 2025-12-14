@@ -1,11 +1,6 @@
 <?php
 /**
- * HashCity - Level 12: Das Finale (Hardcore Mode + Smart Probing + Level 7/11 Features)
- *
- * Updates:
- * - "Stadtplanung" statt "Verwaltung"
- * - Smart Probing: Erlaubt direktes Klicken des Zielhauses ODER Kollisions-Feedback beim Klicken besetzter Häuser.
- * - Integration Level 11 Animation & Level 7 Double Hashing Design.
+ * HashCity - Level 12: Finale
  */
 
 $final_residents = [
@@ -16,6 +11,7 @@ $final_residents = [
         "Ute", "Roy", "Pia", "Ali", "Zoe",
         "Leo", "Amy", "Ian", "Rex", "Sam"
 ];
+
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -58,15 +54,22 @@ $final_residents = [
         .street-block { position: relative; margin-bottom: 2rem; transition: opacity 0.5s; }
         .street-block.hidden { display: none; }
 
-        .houses-row { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.5rem; margin-bottom: 0.5rem; padding: 0 0.5rem; position: relative; z-index: 2; align-items: end; min-height: 120px; }
-
-        .street { width: 100%; height: 60px; background-image: url('./assets/Strasse.svg'); background-size: cover; background-position: center; position: relative; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 1; margin-top: -15px; }
+        .houses-row { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.5rem; margin-bottom: 0.5rem; padding: 0 0.5rem; position: relative; z-index: 2; transition: all 0.5s ease; }
+        .street { width: 100%; height: 60px; background-image: url('./assets/Strasse.svg'); background-size: cover; background-position: center; position: relative; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 50; margin-top: -15px; }
         .street::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%); border-radius: 8px; z-index: -1; }
         .street::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px); transform: translateY(-50%); z-index: 2; }
         .street.hidden { display: none; }
 
-        /* House Logic */
-        .house { position: relative; cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column-reverse; align-items: center; width: 100%; }
+        .house {
+            margin-bottom: 2px;
+            position: relative;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
         .house.hidden { display: none; }
         .house:hover { transform: translateY(-5px) scale(1.05); z-index: 10; }
 
@@ -84,33 +87,148 @@ $final_residents = [
         .house.pop-in { animation: popIn 0.4s ease-out forwards; }
 
         /* Images */
-        .house-icon { width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2)); }
-        .img-house-base { width: 100%; height: auto; z-index: 1; display: block; position: relative; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
-        .img-house-extension { width: 100%; height: auto; z-index: 10; display: block; position: relative; margin-bottom: -5px; animation: fallDown 0.4s ease-out; }
-        @keyframes fallDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .house-icon {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+        .img-house-base {
+            margin-bottom: 5px;
+            width: 100%;       /* Füllt die Breite des Eltern-Containers */
+            height: auto;     /* Höhe automatisch anpassen, um das Seitenverhältnis zu wahren */
+            max-width: 100%;  /* Maximale Breite begrenzen */
+            max-height: 100%; /* Maximale Höhe begrenzen */
+            object-fit: contain; /* Bild wird vollständig angezeigt, ohne Verzerrung */
+            display: block;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+        .img-house-extension {
+            width: 100%;       /* Füllt die Breite des Eltern-Containers */
+            height: auto;     /* Höhe automatisch anpassen */
+            max-width: 100%;  /* Maximale Breite begrenzen */
+            object-fit: contain; /* Bild wird vollständig angezeigt */
+            display: block;
+            position: relative;
+            margin-bottom: -5px; /* Überlappung für den "Stapel"-Effekt */
+            z-index: 10;
+        }
+        .img-house-extension.top-floor {animation: fallDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
 
-        .house-number { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: 900; color: white; background: #333; padding: 2px 6px; border-radius: 4px; z-index: 20; }
-        .house-occupant { display: none !important; }
+        @keyframes fallDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .house-number {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+        }
 
         /* Info Panel */
-        .info-panel { background: rgba(255, 255, 255, 0.85); border-radius: 25px; padding: 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15); height: fit-content; position: sticky; top: 100px; border: 4px solid #fff; }
-        .info-title { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; color: #2E7D32; margin-bottom: 1.2rem; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-        .info-item { background: #fff; padding: 1rem; border-radius: 15px; margin-bottom: 1rem; border: 3px solid #4CAF50; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15); }
-        .info-label { font-weight: 700; color: #666; font-size: 0.95rem; margin-bottom: 0.4rem; }
+        .info-panel {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            border: 4px solid #fff;
+        }
+        .info-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 1.2rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .info-item {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border: 3px solid #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15);
+        }
+        .info-label {
+            font-weight: 700;
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+        }
 
         .load-factor-box { text-align: center; padding: 0.5rem; background: #f0f0f0; border-radius: 10px; margin-bottom: 1rem; border: 2px solid #ccc; transition: all 0.5s ease; }
         .lf-value { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: bold; color: #333; }
         .lf-label { font-size: 0.8rem; color: #666; }
-        .lf-good { color: #4CAF50; border-color: #4CAF50; background: #e8f5e9; }
-        .lf-medium { color: #FF9800; border-color: #FF9800; background: #fff3e0; }
-        .lf-bad { color: #D32F2F; border-color: #D32F2F; background: #FFEBEE; animation: pulseRed 2s infinite; }
+        /* Ampel-Farben für Load Factor */
+        .lf-good {
+            color: #4CAF50;
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        } /* <= 0.5 */
+        .lf-medium {
+            color: #FF9800;
+            border-color: #FF9800;
+            background: #fff3e0;
+        } /* 0.5 - 0.75 */
+        .lf-bad {
+            color: #D32F2F;
+            border-color: #D32F2F;
+            background: #FFEBEE;
+        }
         @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(211, 47, 47, 0); } 100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); } }
 
-        .hash-calculator { background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%); border-color: #2196F3; }
-        .calculator-result { margin-top: 0.5rem; padding: 0.8rem; background: #f8f9fa; border: 2px dashed #4CAF50; border-radius: 10px; text-align: center; font-family: 'Orbitron', sans-serif; font-weight: 700; color: #2E7D32; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .hash-calculator {
+            background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
+            border-color: #2196F3;
+        }
+        .calculator-result {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #2E7D32;
+            font-size: 1.1rem;
+        }
         .calculator-button { width: 100%; padding: 0.8rem; background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%); color: white; border: none; border-radius: 10px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3); margin-top: 0.5rem; }
         .calculator-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4); }
         .calculator-button:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; transform: none; }
+        .calculator-input {
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 0.7rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            transition: border-color 0.3s ease;
+        }
+        .calculator-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
 
         .expand-btn { background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%); font-size: 1.1rem; margin-bottom: 1.5rem; }
 
@@ -121,10 +239,31 @@ $final_residents = [
         .calc2-button { padding: 0.6rem 1.5rem; border: none; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: white; width: 100%; margin-top: 0.5rem; }
         .hash-result-value { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 900; color: #667eea; text-align: center; margin: 0.5rem 0; }
 
-        .family-list-container { max-height: 250px; padding: 0 5px; overflow-y: auto; }
-        .list-group-item { cursor: pointer; font-weight: bold; transition: 0.2s; border: 1px solid #ddd; margin-bottom: 4px; border-radius: 6px; }
+        .family-list-container {
+            max-height: 250px;
+            padding: 0 5px;
+            overflow-y: auto;
+        }
+        .list-group-item.to-do-family {
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+            border: 2px solid #aab8c2;
+            margin-bottom: 0.5rem;
+            border-radius: 10px !important;
+        }
         .list-group-item.active { background: #667eea; color: white; transform: scale(1.02); border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .list-group-item.done { text-decoration: line-through; opacity: 0.5; background: #eee; color: #888; cursor: default; }
+        .list-group-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .list-group-item.done {
+            opacity: 1;
+            background: #e0e0e0;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
         .list-group-item.search-target { background: #FF9800; color: white; animation: pulseSearch 2s infinite; border: 2px solid #E65100; }
         @keyframes pulseSearch { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
 
@@ -137,9 +276,243 @@ $final_residents = [
         .mode-card h4 { color: #667eea; font-weight: 900; font-family: 'Orbitron'; }
 
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 4000; }
-        .modal-box { background: white; border-radius: 30px; padding: 3rem; text-align: center; border: 5px solid; max-width: 600px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .modal-box { background: white; border-radius: 30px; padding: 3rem; text-align: center; border: 5px solid; max-width: 90%; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
         .modal-win { border-color: #4CAF50; }
         .modal-fail { border-color: #D32F2F; }
+        .dialogue-continue { position: absolute; bottom: 10px; right: 15px; font-size: 0.85rem; color: #667eea; font-style: italic; font-weight: 700; animation: blink 1.5s infinite; }
+        .house-occupant { z-index: 20; position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: white; font-weight: 700; text-align: center; opacity: 0; transition: opacity 0.3s ease; background: rgba(0, 0, 0, 0.7); padding: 0.3rem 0.6rem; border-radius: 8px; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); pointer-events: none; }
+        .house.show-family .house-occupant { opacity: 1; }
+        .name-badge-container {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 8px;
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        .resident-name {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border: 2px solid #667eea;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transform: translateY(-25px);
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .resident-name.revealed {
+            display: block;
+            opacity: 1;
+            animation: namepopIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes namepopIn {
+            0% { transform: scale(0) translateY(-25px); }
+            100% { transform: scale(1) translateY(-25px); }
+        }
+        .resident-name.found {
+            background: #4CAF50; color: white; border-color: #fff; transform: scale(1.3) translateY(-25px); z-index: 100;
+        }
+        .fail-counter-box {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border: 3px solid #D32F2F;
+            box-shadow: 0 4px 15px rgba(211, 47, 47, 0.15);
+            text-align: center;
+        }
+
+        .fail-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #D32F2F;
+            margin: 0.5rem 0;
+        }
+
+        .fail-limit {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Warnung bei kritischem Zustand */
+        .fail-counter-box.warning {
+            border-color: #FF9800;
+            animation: pulseWarning 1s infinite alternate;
+        }
+
+        @keyframes pulseWarning {
+            from { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
+            to { box-shadow: 0 0 0 10px rgba(211, 47, 47, 0); }
+        }
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        .success-modal {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 650px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: slideUp 0.5s ease;
+            border: 5px solid #4CAF50;
+        }
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: bounce 1s infinite;
+        }
+        .success-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #4CAF50;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .success-message {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+        .success-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-primary, .btn-secondary {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 3px solid #667eea;
+        }
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .fail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .fail-modal {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 650px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: slideUp 0.5s ease;
+            border: 5px solid #f44336;
+        }
+
+        .fail-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: shake 0.5s infinite;
+        }
+
+        .fail-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #f44336;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .fail-message {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .fail-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Unique Button-Klassen für den Fail-Screen */
+        .btn-primary-fail {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+        }
+
+        .btn-primary-fail:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(244, 67, 54, 0.4);
+        }
 
     </style>
 </head>
@@ -148,7 +521,7 @@ $final_residents = [
 <div class="mode-overlay" id="modeOverlay">
     <div class="mode-box">
         <h1 style="font-family: 'Orbitron'; font-weight: 900; color: #333;">Level 12: Die finale Prüfung</h1>
-        <p>30 Einwohner. Keine Hilfslinien. Du bist auf dich allein gestellt.</p>
+        <p>30 Einwohner. Keine Hilfestellung. Du bist auf dich allein gestellt.</p>
         <div class="mode-grid">
             <div class="mode-card" onclick="selectMode('linear')">
                 <h4>Linear Probing</h4>
@@ -191,6 +564,9 @@ $final_residents = [
             <div class="major-mike-name">🎖️ Major Mike</div>
             <div class="dialogue-box">
                 <div class="dialogue-text" id="dialogueText">Zeig was du gelernt hast!</div>
+                <div class="dialogue-continue" id="dialogueContinue">
+                    Klicken oder Enter ↵
+                </div>
             </div>
         </div>
 
@@ -239,20 +615,24 @@ $final_residents = [
 
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-
-            <div class="load-factor-box" id="lfBox">
-                <div class="lf-label">Load Factor</div>
-                <div class="lf-value" id="lfValue">0.00</div>
-                <div class="lf-label" id="lfText">Limit: 0.75</div>
+            <div class="info-item">
+                <div class="info-label">Warteschlange (<span id="queueCount">30</span>):</div>
+                <div class="family-list-container">
+                    <ul class="list-group" id="resList">
+                        <?php foreach($final_residents as $idx => $name): ?>
+                            <li class="list-group-item to-do-family disabled" id="res-<?php echo $idx; ?>" data-name="<?php echo $name; ?>">
+                                <?php echo $name; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
             </div>
 
-            <button id="btnExpand" class="calculator-button expand-btn" disabled>🏗️ STADT ERWEITERN</button>
-
             <div class="info-item hash-calculator">
-                <div class="info-label">Rechner <span style="float:right; font-size:0.8rem">Mod <span id="modBase">10</span></span></div>
-
-                <div class="calculator-result" id="calcResult">-</div>
-                <button id="btnCalc1" class="calculator-button" disabled>1. Hash Berechnen</button>
+                <div class="info-label">Bewohnername:</div>
+                <input type="text" id="nameInput" class="calculator-input" placeholder="Namen eingeben..." readonly>
+                <button id="hashButton" class="calculator-button">Berechne Haus-Nr.</button>
+                <div class="calculator-result" id="hashResult">Ergebnis ...</div>
             </div>
 
             <div class="info-item step-calculator" id="stepCalcBox">
@@ -261,37 +641,67 @@ $final_residents = [
                 <div class="hash-result-value" id="h2Result">-</div>
                 <button id="btnCalcH2" class="calc2-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
             </div>
-
-            <div class="info-item">
-                <div class="info-label">Warteschlange (<span id="queueCount">30</span>):</div>
-                <div class="family-list-container">
-                    <ul class="list-group" id="resList">
-                        <?php foreach($final_residents as $idx => $name): ?>
-                            <li class="list-group-item" id="res-<?php echo $idx; ?>" data-name="<?php echo $name; ?>">
-                                <?php echo $name; ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
+            <div class="load-factor-box" id="lfBox">
+                <div class="lf-label">Load Factor</div>
+                <div class="lf-value" id="lfValue">0.00</div>
+                <div class="lf-label" id="lfText">Limit: 0.75</div>
+            </div>
+            <button id="btnExpand" class="calculator-button expand-btn" disabled>🏗️ STADT ERWEITERN</button>
+            <div class="info-item fail-counter-box">
+                <div class="info-label">Fehlversuche:</div>
+                <div class="fail-value" id="failValue">0</div>
+                <div class="fail-limit">Limit: 3</div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="overlay" id="endOverlay">
-    <div class="modal-box" id="endModal">
-        <div style="font-size:5rem" id="endIcon">🏆</div>
-        <h2 style="font-family:'Orbitron'" id="endTitle">Titel</h2>
-        <p id="endMessage">Nachricht</p>
-        <button class="btn btn-primary" onclick="location.reload()">Neustart</button>
+<div class="fail-overlay" id="failOverlay" style="display: none">
+    <div class="fail-modal">
+        <div class="fail-icon">💥</div>
+        <h2 class="fail-title">SPIEL VERLOREN!</h2>
+        <p class="fail-message" id="failMessage"></p>
+        <div class="fail-buttons">
+            <button class="btn-primary-fail" onclick="location.reload()">↻ Nochmal versuchen</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="success-overlay" id="successOverlay" style="display: none">
+    <div class="success-modal">
+        <div class="success-icon">🎓</div>
+        <h2 class="success-title">ABSCHLUSS BESTANDEN!</h2>
+        <p class="success-message" id="successMessage">
+            Du hast HashCity gemeistert.<br>Keine Hilfen, maximaler Stress.<br>Glückwunsch!
+        </p>
+        <div class="success-buttons">
+            <button class="btn-secondary" onclick="location.reload()">↻ Nochmal spielen</button>
+            <button class="btn-primary" onclick="window.location.href='certificate.php'" id="certificateBtn">Zertifikat</button>
+        </div>
     </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-    // --- Configuration ---
     const residents = <?php echo json_encode($final_residents); ?>;
-    const MAX_PROBE_STEPS = 5;
+    const dialogues = [
+        "Nach all der Arbeit, all den Berechnungen, all den Kollisionen, den Cluster-Problemen und dem Rehashing brauche ich dringend eine Pause. Ich gehe also in den Urlaub! Du sollst ab jetzt die komplette Stadtverwaltung übernehmen. Die Stadt ist groß geworden, gut strukturiert – und du bist mittlerweile mehr als qualifiziert, alles selbst zu regeln.",
+
+        "Ein Stadtteil ist noch frei, den du nun vervollständigen sollst, während ich im Urlaub bin. Nutze ihn um Sachen auszuprobieren. Natürlich habe ich noch ein paar Regeln für dich:",
+
+        "der Load Factor muss unter 0,75 bleiben, dir stehen maximal 40 Häuser zur Verfügung, du hast zwei Rehashings zur Verfügung, du darfst höchstens 2 Mal hintereinander danebenliegen.",
+
+        "Als Fehler zählen dieses mal auch die Klicks auf Häuser, die zwar durch das Probing möglich, jedoch aber bereits belegt sind. Ausgenommen ist natürlich das Freischalten des Sprungrechners beim Double Hashing durch Klicken auf das Initialhaus.",
+
+        "Du entscheidest also: wann gerehasht wird, wie du die Bewohner verteilst und wie du sicherstellst, dass die Stadt effizient bleibt. Ich gebe dir nur die Regeln vor – die Umsetzung liegt bei dir.",
+
+        "Damit steht deiner erfolgreichen Verwaltung des letzten Stadtteils nichts mehr im Weg. Ich verabschiede mich jetzt offiziell in den Urlaub. Mach du hier weiter.",
+
+        "Viel Erfolg und herzlichen Glückwunsch! Du hast das Finale erreicht. Jetzt zeig, was du gelernt hast."
+    ];
+    const urlaubmsg = "Major Mike befindet sich derzeit im Urlaub...";
+
 
     // Assets
     const housePairsProbing = [
@@ -302,13 +712,19 @@ $final_residents = [
         { base: "WohnhauGruenBraunLeerNeu.svg", fill: "WohnhauGruenBraunBesetztNeu.svg" },
     ];
     const housePairsChaining = [
-        { base: "Wohnhaus2BlauBraun.svg", extension: "WohnhausBlauBraunErweiterung.svg" },
-        { base: "Wohnhaus2BlauGrau.svg", extension: "WohnhausBlauGrauErweiterung.svg" },
-        { base: "Wohnhaus2BlauRot.svg", extension: "WohnhausBlauRotErweiterung.svg" },
-        { base: "Wohnhaus2GrauBraun.svg", extension: "WohnhausGrauBraunErweiterung.svg" },
+        {empty: "WH2BlauBraunLeer.svg", filled: "WH2BlauBraun.svg", extension: "WHBlauBraunErweiterung.svg"},
+        {empty: "WH2BlauGrauLeer.svg", filled: "WH2BlauGrau.svg", extension: "WHBlauGrauErweiterung.svg"},
+        {empty: "WH2BlauRotLeer.svg", filled: "WH2BlauRot.svg", extension: "WHBlauRotErweiterung.svg"},
+        {empty: "WH2GrauBraunLeer.svg", filled: "WH2GrauBraun.svg", extension: "WHGrauBraunErweiterung.svg"},
+        {empty: "WH2GruenBraunLeer.svg", filled: "WH2GruenBraun.svg", extension: "WHGruenBraunErweiterung.svg"},
+        {empty: "WH2GruenGrauLeer.svg", filled: "WH2GruenGrau.svg", extension: "WHGruenGrauErweiterung.svg"},
+        {empty: "WH2GelbBraunLeer.svg", filled: "WH2GelbBraun.svg", extension: "WHGelbBraunErweiterung.svg"},
+        {empty: "WH2GelbRotLeer.svg", filled: "WH2GelbRot.svg", extension: "WHGelbRotErweiterung.svg"},
+        {empty: "WH2RotBraunLeer.svg", filled: "WH2RotBraun.svg", extension: "WHRotBraunErweiterung.svg"},
+        {empty: "WH2RotRotLeer.svg", filled: "WH2RotRot.svg", extension: "WHRotRotErweiterung.svg"}
     ];
 
-    // --- Global State ---
+    // --- Konfiguration ---
     let gameMode = null;
     let currentCapacity = 10;
     let placedResidents = [];
@@ -318,8 +734,53 @@ $final_residents = [
     let currentSearchTarget = null;
     let h1 = null, h2 = null;
     let expansionCount = 0;
+    let isFading = false;
     const maxExpansions = 2;
+    let dialogueIdx = 1;
+    let fails = 0;
+    let searchIdx = 0;
 
+    // Sound-Dateien laden
+    const soundClick   = new Audio('./assets/sounds/click.mp3');
+    const soundSuccess = new Audio('./assets/sounds/success.mp3');
+    const soundError   = new Audio('./assets/sounds/error.mp3');
+
+    soundSuccess.volume = 0.4;
+    soundError.volume = 0.3;
+    soundClick.volume = 0.5;
+
+    const dialogueAudios = [
+        new Audio('./assets/sounds/Lvl12/Lvl12_1.wav'),
+        new Audio('./assets/sounds/Lvl12/Lvl12_2.wav'),
+        new Audio('./assets/sounds/Lvl12/Lvl12_3.wav'),
+        new Audio('./assets/sounds/Lvl12/Lvl12_4.wav'),
+        new Audio('./assets/sounds/Lvl12/Lvl12_5.wav'),
+        new Audio('./assets/sounds/Lvl12/Lvl12_6.wav')
+    ];
+    let currentAudioObj = null;
+
+    function playDialogueAudio(index) {
+        if (currentAudioObj) {
+            currentAudioObj.pause();
+            currentAudioObj.currentTime = 0;
+        }
+        if (index >= 0 && index < dialogueAudios.length) {
+            currentAudioObj = dialogueAudios[index];
+            currentAudioObj.play().catch(e => console.log("Audio blocked", e));
+        }
+    }
+
+    function playSound(type) {
+        let audio;
+        if (type === 'click') audio = soundClick;
+        else if (type === 'success') audio = soundSuccess;
+        else if (type === 'error') audio = soundError;
+
+        if (audio) {
+            audio.currentTime = 0; // Spult zum Anfang zurück
+            audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+        }
+    }
     // --- Initialization ---
     function selectMode(mode) {
         gameMode = mode;
@@ -340,9 +801,41 @@ $final_residents = [
 
         $('#modeBadge').text(modeName);
         $('#dialogueText').text(`Modus: ${modeName}. Keine Hilfen. Viel Erfolg!`);
+        $('#btnExpand').prop('disabled',false);
         initVisuals();
         updateStats();
-        highlightNextResident();
+        playDialogueAudio(0);
+        showDialogue(dialogues[0]);
+    }
+
+    $('#dialogueText').click(() => {
+        advanceDialogue();
+    });
+    $(document).keydown(e => { if((e.key === 'Enter')) advanceDialogue(); });
+
+    function advanceDialogue() {
+        if(isFading || dialogueIdx>dialogues.length) return;
+        if (dialogueIdx < dialogues.length) {
+            playDialogueAudio(dialogueIdx);
+            showDialogue(dialogues[dialogueIdx]);
+            dialogueIdx++;
+        }else{
+            if(currentAudioObj) currentAudioObj.pause();
+            dialogueIdx++;
+            highlightNextResident();
+            $('#dialogueContinue').hide();
+            $('#mmAvatar').attr('src', './assets/holiday_major.png');
+
+            showDialogue(urlaubmsg);
+        }
+    }
+
+    function showDialogue(text) {
+        if (isFading && text !== dialogues[0]) return;
+        isFading = true;
+        $('#dialogueText').fadeOut(150, function() {
+            $(this).html(text).fadeIn(150, function() { isFading = false; });
+        });
     }
 
     function updateStepFormula() {
@@ -363,7 +856,7 @@ $final_residents = [
         $el.empty();
         $el.append(`<div class="house-number">${$el.data('index')}</div>`);
         $el.append(`<div class="house-occupant"></div>`);
-        if(gameMode === 'chaining') $el.append(`<img src="./assets/${pair.base}" class="img-house-base">`);
+        if(gameMode === 'chaining') $el.append(`<img src="./assets/${pair.empty}" class="img-house-base">`);
         else $el.append(`<img src="./assets/${pair.base}" class="house-icon">`);
     }
 
@@ -377,16 +870,22 @@ $final_residents = [
         $el.append(`<div class="house-occupant"></div>`);
 
         if (gameMode === 'chaining') {
-            $el.append(`<img src="./assets/${pair.base}" class="img-house-base">`);
             if (count > 1) {
-                for(let i = 1; i < count; i++) {
-                    $el.append(`<img src="./assets/${pair.extension}" class="img-house-extension" style="z-index:${10+i}">`);
+                $el.append(`<img src="./assets/${pair.filled}" class="img-house-base">`);
+                for (let i = 1; i < count; i++) {
+                    const $extension = $(`<img src="./assets/${pair.extension}" class="img-house-extension">`);
+                    if (i === count - 1) { // Nur die oberste Etage
+                        $extension.addClass('top-floor');
+                    }
+                    $el.append($extension);
                 }
+            }else if(count === 1) {
+                $el.append(`<img src="./assets/${pair.filled}" class="img-house-base">`);
+            }else{
+                $el.append(`<img src="./assets/${pair.empty}" class="img-house-base">`);
             }
-            if(count > 0) {
-                let names = placedResidents.filter(r => r.houseIndex == idx).map(r => r.name).join(', ');
-                $el.find('.house-occupant').text(names);
-            }
+            let names = placedResidents.filter(r => r.houseIndex == idx).map(r => r.name).join(', ');
+            $el.find('.house-occupant').text(names);
         } else {
             let img = (count > 0) ? pair.fill : pair.base;
             $el.append(`<img src="./assets/${img}" class="house-icon">`);
@@ -403,28 +902,28 @@ $final_residents = [
         return sum;
     }
 
-    // --- Game Flow ---
     function highlightNextResident() {
         if(currentResIdx >= residents.length) {
             initSearchPhase();
             return;
         }
         $('.list-group-item').removeClass('active');
-        $(`#res-${currentResIdx}`).addClass('active');
+        $(`#res-${currentResIdx}`).removeClass('disabled').addClass('active');
 
         let container = $('.family-list-container');
         let scrollTo = $(`#res-${currentResIdx}`);
+        let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
         if(scrollTo.length) {
             container.animate({ scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop() - 50 });
         }
 
         h1 = null; h2 = null;
-        $('#calcResult').text('-');
+        $('#hashResult').text('Ergebnis ...');
         $('#h2Result').text('-');
         $('#stepCalcBox').removeClass('active');
-        $('#btnCalc1').prop('disabled', false).text('1. Hash Berechnen');
+        $('#hashButton').prop('disabled', false).text('Berechne Hausnummer');
         $('#btnCalcH2').prop('disabled', true);
-
+        $('#nameInput').val(name);
         $('.house').removeClass('collision-highlight found-highlight');
         updateStats();
     }
@@ -437,7 +936,7 @@ $final_residents = [
             const uniqueHouses = new Set(placedResidents.map(r => r.houseIndex));
             lf = uniqueHouses.size / currentCapacity;
         }
-
+        $('#failValue').text(fails);
         $('#lfValue').text(lf.toFixed(2));
         $('#modBase').text(currentCapacity);
 
@@ -458,20 +957,19 @@ $final_residents = [
         } else {
             $lfBox.addClass('lf-good');
         }
-
-        if(!isSearchPhase && expansionCount < maxExpansions && h1 === null) {
-            $('#btnExpand').prop('disabled', false);
-        } else {
-            $('#btnExpand').prop('disabled', true);
+        if(expansionCount >= maxExpansions) {
+            $('#btnExpand').hide();
         }
-
         $('#queueCount').text(isSearchPhase ? searchQueue.length : residents.length - currentResIdx);
+        if(fails >= 3){
+            failGame("Du hast zu viele falsche Versuche gehabt!")
+        }
     }
 
-    // --- EXPANSION LOGIC ---
     $('#btnExpand').click(function() {
+        if(expansionCount >= maxExpansions) return;
         if(placedResidents.length === 0) {
-            $('#dialogueText').text("Niemand da zum Umziehen!");
+            showDialogue("Niemand da zum Umziehen!");
             return;
         }
 
@@ -481,7 +979,7 @@ $final_residents = [
         currentCapacity *= 2;
         updateStepFormula();
 
-        $('#dialogueText').text(`Erweitere Stadt auf ${currentCapacity}. Rehashing...`);
+        showDialogue(`Erweitere Stadt auf ${currentCapacity}. Rehashing...`);
 
         if(currentCapacity >= 20) {
             $('#block-1').removeClass('hidden');
@@ -546,22 +1044,24 @@ $final_residents = [
         }
 
         setTimeout(() => {
-            $('#dialogueText').text("Umzug fertig! Alle Positionen neu berechnet.");
-            $('#btnExpand').text("🏗️ STADT ERWEITERN");
+            showDialogue("Umzug fertig! Alle Positionen neu berechnet.");
+            $('#btnExpand').text("🏗️ STADT ERWEITERN").prop('disabled', false);
             updateStats();
             highlightNextResident();
         }, currentCapacity * 30 + 500);
     }
 
-    // --- Calc Logic ---
-    $('#btnCalc1').click(function() {
-        let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
+    $('#hashButton').click(function() {
+        if(dialogueIdx <= dialogues.length) return;
+        if($('#nameInput').val().trim() === '' || $('#nameInput').val().trim() === undefined || $('#nameInput').val().trim() === null){
+            showDialogue("Niemand eingetragen zum Rechnen!");
+            return;
+        }
+        let name = $('#nameInput').val().trim();
         let sum = getAsciiSum(name);
         h1 = sum % currentCapacity;
-        $('#calcResult').text(`H1: ${h1}`);
-        let msg = isSearchPhase ? `Suche ${name}: 1. Hash ist ${h1}.` : `1. Hash ist ${h1}.`;
-        $('#dialogueText').text(msg);
-        $('#btnCalc1').prop('disabled', true);
+        $('#hashResult').text(`Hausnummer: ${h1}`);
+        updateStats();
     });
 
     $('#btnCalcH2').click(function() {
@@ -570,19 +1070,15 @@ $final_residents = [
         let hashSize2 = Math.floor(currentCapacity / 2);
         h2 = (sum % hashSize2) + 1;
         $('#h2Result').text(h2);
-        $('#dialogueText').html(`Sprungweite (H2) ist <b>${h2}</b>.`);
         $('#btnCalcH2').prop('disabled', true);
     });
 
-    // --- INTELLIGENT PROBING LOGIC ---
-    // Returns { path: [indices], target: int, stepsNeeded: int }
     function calculateProbingPath(startH1, name) {
         let path = [];
-        let limit = currentCapacity * 2; // Safety break
+        let limit = currentCapacity * 2;
         let step = 0;
         let sum = getAsciiSum(name);
 
-        // Calculate H2 locally if needed (auto-calc for validation if not yet done)
         let localH2 = 1;
         if(gameMode === 'double') {
             let hashSize2 = Math.floor(currentCapacity / 2);
@@ -595,175 +1091,228 @@ $final_residents = [
             else if (gameMode === 'quadratic') idx = (startH1 + step*step) % currentCapacity;
             else if (gameMode === 'double') idx = (startH1 + step*localH2) % currentCapacity;
 
-            // Check occupancy (ignoring current person if in search mode logic, but here we place)
-            // Note: placedResidents check
             let isOccupied = placedResidents.some(r => r.houseIndex === idx);
 
             if (!isOccupied) {
-                // Found empty spot
                 return { path: path, target: idx, steps: step };
             }
-            path.push(idx); // Add occupied spot to path
+            path.push(idx);
             step++;
         }
-        return { path: path, target: -1, steps: step }; // Should not happen in solvable game
+        return { path: path, target: -1, steps: step };
     }
 
     // --- Click Handler ---
     $('.house').click(function() {
         if(h1 === null) return;
         let clickedIndex = $(this).data('index');
+        let residentsHere = placedResidents.filter(r => r.houseIndex === clickedIndex).map(r => r.name);
         let $el = $(this);
         let name = isSearchPhase ? currentSearchTarget.name : residents[currentResIdx];
 
         // 1. Chaining (Simple)
         if (gameMode === 'chaining') {
             if (clickedIndex === h1) {
-                if(isSearchPhase) handleSearchClick(clickedIndex, $el, name);
+                playSound('click');
+                if(isSearchPhase) handleSearchClick(clickedIndex, residentsHere, $el, name);
                 else placeResident(clickedIndex, name);
             } else {
-                failFeedback("Falsches Haus! Modulo Rechnen!");
+                fails++;
+                playSound('error');
+                failFeedback("Falsches Haus! Prüfe nochmal nach.");
             }
+            updateStats();
             return;
         }
 
-        // 2. Probing Modes (Linear, Quad, Double)
-        // Calculate the "Truth" path
         let result = calculateProbingPath(h1, name);
-        let validPath = result.path; // Indices that are correct but occupied
-        let correctTarget = result.target; // The final empty spot
+        let validPath = result.path;
+        let correctTarget = result.target;
 
-        // --- LOGIC: Direct Hit or Path Clicking ---
 
-        // Case A: User clicked the FINAL CORRECT EMPTY spot directly
         if (clickedIndex === correctTarget) {
-            // Check strict limit
-            if (result.steps > MAX_PROBE_STEPS) {
-                failGame(`Zu viele Schritte (${result.steps}) nötig! Erweiterung war überfällig.`);
-                return;
-            }
-
-            // Check Load Factor Limit
+            playSound('click');
             let futureLF = (placedResidents.length + 1) / currentCapacity;
             if (futureLF > 0.76) {
                 failGame("Load Factor Limit (0.75) überschritten! Das System ist zu langsam.");
                 return;
             }
 
-            if(isSearchPhase) handleSearchClick(clickedIndex, $el, name);
-            else placeResident(clickedIndex, name);
+            if(isSearchPhase){
+                $(this).addClass('show-family');
+                $(this).find('.house-occupant').text(currentSearchTarget.name);
+                handleSearchClick(clickedIndex, residentsHere, $el, name);
+            }
+            placeResident(clickedIndex, name);
+            updateStats();
             return;
         }
 
-        // Case B: User clicked a Valid but Occupied spot (Collision path)
         if (validPath.includes(clickedIndex)) {
+            playSound('click');
+            if(isSearchPhase){
+                $(this).addClass('show-family');
+                $(this).find('.house-occupant').text(residentsHere[0]);
+                handleSearchClick(clickedIndex, residentsHere, $el, name);
+                updateStats();
+                return;
+            }
             $el.addClass('collision-highlight');
             setTimeout(() => $el.removeClass('collision-highlight'), 500);
-
-            // Unlock Double Hashing Calc if appropriate
             if (gameMode === 'double') {
-                $('#dialogueText').html(`Haus ${clickedIndex} belegt! Kollision.<br>Rechne weiter (Step).`);
                 $('#stepCalcBox').addClass('active');
                 if($('#h2Result').text() === '-') $('#btnCalcH2').prop('disabled', false);
-            } else {
-                $('#dialogueText').text(`Haus belegt! Kollision. Wo musst du als nächstes hin?`);
+            }else {
+                fails++;
             }
+            updateStats();
             return;
         }
 
-        // Case C: Wrong House
-        failFeedback("Falsches Haus! Rechne nochmal nach.");
+
+        playSound('error');
+        fails++;
+        failFeedback("Falsches Haus! Prüfe nochmal nach.");
+        updateStats();
     });
 
-    function handleSearchClick(clickedIndex, $el, targetName) {
-        // Simplified search logic reusing the placement check
-        // In search phase, we just check if person is there
-        let residentsHere = placedResidents.filter(r => r.houseIndex === clickedIndex).map(r => r.name);
-
-        if (residentsHere.includes(targetName)) {
-            $el.addClass('found-highlight');
-            $('#dialogueText').text(`Gefunden! ${targetName} wohnt in Haus ${clickedIndex}.`);
-            searchQueue.shift();
-            $(`#search-0`).remove();
-            setTimeout(() => startNextSearch(), 1500);
-        } else {
-            // If empty or wrong person
-            // If it was part of the valid probe path (calculated in click handler), we gave hint.
-            // If it's the correct target but empty (should not happen if logic matches)
+    function handleSearchClick(clickedIndex, residentsHere, $el, targetName) {
+        let hashName = $('#nameInput').val();
+        if (!residentsHere.includes(targetName)) {
             $el.addClass('collision-highlight');
             setTimeout(() => $el.removeClass('collision-highlight'), 500);
-            if (gameMode === 'double') {
-                $('#dialogueText').text(`${targetName} nicht hier. Berechne Step!`);
+            if (gameMode === 'double' && h1 === clickedIndex) {
+                showDialogue(`${targetName} ist nicht hier. Berechne Step!`);
                 $('#stepCalcBox').addClass('active');
                 if($('#h2Result').text() === '-') $('#btnCalcH2').prop('disabled', false);
-            } else {
-                $('#dialogueText').text(`${targetName} nicht hier. Rechne weiter...`);
+            } else if (h1 === clickedIndex && targetName  === hashName){
+                showDialogue(`${targetName} ist nicht hier. Gehe weiter...`);
+            }else{
+                showDialogue(`Dieses Haus kommt für ${targetName} nicht in Frage.`)
+                fails++;
+            }
+        } else {
+            if (gameMode !== "chaining"){
+                $el.addClass('found-highlight');
+                showDialogue(`Gefunden! ${targetName} wohnt in Haus ${clickedIndex}.`);
+                searchQueue.shift();
+                fails = 0;
+                setTimeout(() => startNextSearch(), 1500);
+            }else {
+                // Richtiges Haus gefunden
+                if (gameMode !== "chaining") {
+                    $el.addClass('found-highlight');
+                    showDialogue(`Gefunden! ${targetName} wohnt in Haus ${clickedIndex}.`);
+                    searchQueue.shift();
+                    fails = 0;
+                    setTimeout(() => startNextSearch(), 1500);
+                } else {
+                    // --- Separate Chaining: Pro Klick nur einen Bewohner anzeigen ---
+                    let $nameBadgeContainer = $el.find('.name-badge-container');
+
+                    // Falls Container noch nicht existiert, erstellen
+                    if ($nameBadgeContainer.length === 0) {
+                        $nameBadgeContainer = $('<div>', {
+                            class: 'name-badge-container',
+                            id: `names-${clickedIndex}`
+                        }).appendTo($el);
+                    }
+
+                    // Zähle bereits angezeigte Bewohner
+                    let revealedNames = $nameBadgeContainer.find('.resident-name.revealed').map((i, el) => $(el).text()).get();
+                    let nextName = residentsHere.find(name => !revealedNames.includes(name));
+
+                    // Falls noch Bewohner übrig sind, einen neuen anzeigen
+                    if (nextName) {
+                        const $newNameElement = $('<div>', {
+                            class: 'resident-name revealed',
+                            text: nextName
+                        }).appendTo($nameBadgeContainer);
+
+                        // Wenn der angezeigte Name der gesuchte ist, markiere ihn als gefunden
+                        if (nextName === targetName) {
+                            $newNameElement.addClass('found');
+                            $el.addClass('found-highlight');
+                            showDialogue(`Gefunden! ${targetName} wohnt in Haus ${clickedIndex}.`);
+                            searchQueue.shift();
+                            fails = 0;
+                            setTimeout(() => startNextSearch(), 1500);
+                        }
+                    }
+                }
             }
         }
     }
 
     function placeResident(idx, name) {
+        fails = 0;
+        h1 = null;
         placedResidents.push({ name: name, houseIndex: idx });
         let count = placedResidents.filter(r => r.houseIndex === idx).length;
         updateHouseVisual($(`#house-${idx}`), count);
         $(`#res-${currentResIdx}`).addClass('done');
         currentResIdx++;
-        $('#dialogueText').text(`${name} wohnt jetzt in Haus ${idx}.`);
         setTimeout(() => { highlightNextResident(); }, 800);
     }
 
-    // --- Search Phase Init ---
+    // --- Such Phase Init ---
     function initSearchPhase() {
         isSearchPhase = true;
         let shuffled = [...placedResidents].sort(() => 0.5 - Math.random());
-        searchQueue = shuffled.slice(0, 3);
-        $('#dialogueText').text("Alle platziert! Finde nun die 3 gesuchten Personen!");
-        $('#mmAvatar').attr('src', './assets/wink_major.png');
-        $('#btnExpand').prop('disabled', true);
-        $('#resList').empty();
-        searchQueue.forEach((p, index) => {
-            $('#resList').append(`<li class="list-group-item search-item" id="search-${index}">${p.name}</li>`);
-        });
+        searchQueue = [];
+
+        // Solange die Suchliste nicht voll ist und noch Bewohner übrig sind
+        while (searchQueue.length < 3 && shuffled.length > 0) {
+            // Nächster zufälliger Bewohner
+            const candidate = shuffled.shift();
+            // Prüfe, ob bereits ein Bewohner aus demselben Haus in der Suchliste ist
+            const isHouseAlreadyInQueue = searchQueue.some(
+                resident => resident.houseIndex === candidate.houseIndex
+            );
+
+            // Falls nicht, füge den Bewohner zur Suchliste hinzu
+            if (!isHouseAlreadyInQueue) {
+                searchQueue.push(candidate);
+            }
+        }
+
+        $('#btnExpand').hide();
+        $('#nameInput').prop('readonly', false);
         startNextSearch();
     }
 
     function startNextSearch() {
         if(searchQueue.length === 0) { winGame(); return; }
-        currentSearchTarget = searchQueue[0];
-        $('.list-group-item').removeClass('search-target');
-        $(`#search-0`).addClass('search-target');
+        $('#nameInput').val('');
+        currentSearchTarget = searchQueue.shift();
+        if (searchIdx === 0){
+            showDialogue(`Alle platziert! Suche nun ${currentSearchTarget.name}.`);
+        }else{
+            showDialogue(`Suche: ${currentSearchTarget.name}.`);
+        }
+        searchIdx++;
         h1 = null; h2 = null;
-        $('#calcResult').text('-');
+        $('#hashResult').text('Ergebnis ...');
         $('#h2Result').text('-');
         $('#stepCalcBox').removeClass('active');
-        $('#btnCalc1').prop('disabled', false).text('1. Hash (Suche)');
+        $('#hashButton').prop('disabled', false);
         $('.house').removeClass('collision-highlight found-highlight');
-        $('#dialogueText').text(`Suche: ${currentSearchTarget.name}. Berechne den Hash!`);
     }
 
     // --- Helpers ---
     function failFeedback(msg) {
         $('#dialogueText').html(`<span style="color:red">⛔ ${msg}</span>`);
-        $('#mmAvatar').attr('src', './assets/sad_major.png');
-        setTimeout(() => $('#mmAvatar').attr('src', './assets/card_major.png'), 1500);
     }
 
     function winGame() {
-        $('#endModal').removeClass('modal-fail').addClass('modal-win');
-        $('#endIcon').text("🎓");
-        $('#endTitle').text("ABSCHLUSS BESTANDEN!");
-        $('#endMessage').html(`Du hast HashCity gemeistert.<br>Keine Hilfen, maximaler Stress.<br>Glückwunsch!`);
-        $('.btn-primary').text("Zertifikat").attr('onclick', "window.location.href='certificate.php'");
-        $('#endOverlay').fadeIn();
+        playSound('success');
+        $('#successOverlay').css('display', 'flex');
     }
 
     function failGame(reason) {
-        $('#endModal').removeClass('modal-win').addClass('modal-fail');
-        $('#endIcon').text("☠️");
-        $('#endTitle').text("Gescheitert");
-        $('#endMessage').text(reason);
-        $('.btn-primary').text("Neustart").attr('onclick', 'location.reload()');
-        $('#endOverlay').fadeIn();
+        playSound('error');
+        $('#failMessage').text(reason);
+        $('#failOverlay').css('display', 'flex');
     }
 </script>
 </body>

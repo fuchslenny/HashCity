@@ -84,13 +84,13 @@ $bewohner_liste = [
         @keyframes blink { 0%, 50%, 100% { opacity: 1; } 25%, 75% { opacity: 0.5; } }
         /* --- HAUS DESIGN --- */
         .houses-grid {
-            background: rgba(255, 255, 255, 0.8); border-radius: 25px; padding: 2rem;
+            background: rgba(255, 255, 255, 0.8); border-radius: 25px; padding: 3rem;
             border: 4px solid #fff; display: flex; flex-direction: column; justify-content: center;
         }
         .street-block { margin-bottom: 6rem; position: relative; }
         .houses-row {
             display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem;
-            padding: 0 1rem; position: relative; z-index: 2;
+            padding: 0 1rem 15px 1rem; position: relative; z-index: 2;
             align-items: end;
             min-height: 250px;
         }
@@ -129,9 +129,19 @@ $bewohner_liste = [
             to { opacity: 1; transform: translateY(0); }
         }
         .house-number {
-            position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
-            background: #222; color: #fff; padding: 2px 10px; border-radius: 8px;
-            font-family: 'Orbitron', sans-serif; font-size: 0.9rem; z-index: 20;
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
         }
         /* --- NAMENS-LOGIK --- */
         .name-badge-container {
@@ -141,7 +151,7 @@ $bewohner_liste = [
             display: flex;
             flex-direction: column-reverse;
             align-items: center;
-            gap: 45px;
+            gap: 8px;
             z-index: 200;
             pointer-events: none;
         }
@@ -354,31 +364,6 @@ $bewohner_liste = [
             margin-bottom: 2rem;
             font-weight: 500;
         }
-        .success-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .stat-box {
-            background: #f8f9fa;
-            padding: 1.2rem;
-            border-radius: 15px;
-            border: 3px solid #4CAF50;
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
-        }
-        .stat-label {
-            font-size: 0.95rem;
-            color: #666;
-            font-weight: 700;
-            margin-bottom: 0.4rem;
-        }
-        .stat-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #2E7D32;
-        }
         .success-buttons {
             display: flex;
             gap: 1rem;
@@ -499,7 +484,7 @@ $bewohner_liste = [
             </div>
             <div class="info-item">
                 <div class="info-label">Eingetragene Familien:</div>
-                <div class="info-value" id="occupiedCount">0 / 10</div>
+                <div class="info-value" id="occupiedCount">0 / 11</div>
             </div>
         </div>
     </div>
@@ -511,16 +496,6 @@ $bewohner_liste = [
         <p class="success-message" id="successMessage">
             Danke für deine Hilfe!
         </p>
-        <div class="success-stats">
-            <div class="stat-box">
-                <div class="stat-label">Versuche</div>
-                <div class="stat-value" id="finalAttempts">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Familien eingetragen</div>
-                <div class="stat-value" id="finalOccupied">0</div>
-            </div>
-        </div>
         <div class="success-buttons">
             <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
             <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 10 →</button>
@@ -529,158 +504,144 @@ $bewohner_liste = [
 </div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-
     $(document).ready(function() {
-        // --- KONFIGURATION ---
+        // Konfiguration
         var HASH_SIZE = 10;
         var familien = <?php echo json_encode($bewohner_liste); ?>;
         var stadt = new Array(HASH_SIZE).fill(null).map(function() { return []; });
-        var introStep = 0;
         var gamePhase = "intro";
         var currentIdx = 0;
         var currentName = null;
         var currentHash = null;
         var inputLocked = false;
         var SEARCH_TARGET = "Thomas";
+        var occupiedHouses = 0;
+        let isFading = false;
 
-        // --- Haus-Paare für Assets ---
-        const housePairs = [
-            {
-                empty: "WH2BlauBraunLeer.svg",
-                filled: "WH2BlauBraun.svg",
-                extension: "WHBlauBraunErweiterung.svg"
-            },
-            {
-                empty: "WH2BlauGrauLeer.svg",
-                filled: "WH2BlauGrau.svg", // Annahme: WH2BlauGrau.svg ist die besetzte Variante
-                extension: "WHBlauGrauErweiterung.svg"
-            },
-            {
-                empty: "WH2BlauRotLeer.svg",
-                filled: "WH2BlauRot.svg", // Annahme: WH2BlauRot.svg ist die besetzte Variante
-                extension: "WHBlauRotErweiterung.svg"
-            },
-            {
-                empty: "WH2GrauBraunLeer.svg",
-                filled: "WH2GrauBraun.svg", // Annahme: WH2GrauBraun.svg ist die besetzte Variante
-                extension: "WHGrauBraunErweiterung.svg"
-            },
-            {
-                empty: "WH2GruenBraunLeer.svg",
-                filled: "WH2GruenBraun.svg", // Annahme: WH2GruenBraun.svg ist die besetzte Variante
-                extension: "WHGruenBraunErweiterung.svg" // Falls nicht vorhanden, weglassen
-            },
-            {
-                empty: "WH2GruenGrauLeer.svg",
-                filled: "WH2GruenGrau.svg", // Annahme: WH2GruenGrau.svg ist die besetzte Variante
-                extension: "WHGruenGrauErweiterung.svg"
-            },
-            {
-                empty: "WH2GelbBraunLeer.svg",
-                filled: "WH2GelbBraun.svg", // Annahme: WH2GelbBraun.svg ist die besetzte Variante
-                extension: "WHGelbBraunErweiterung.svg" // Keine Erweiterungsdatei vorhanden
-            },
-            {
-                empty: "WH2GelbRotLeer.svg",
-                filled: "WH2GelbRot.svg", // Annahme: WH2GelbRot.svg ist die besetzte Variante
-                extension: "WHGelbRotErweiterung.svg"
-            },
-            {
-                empty: "WH2RotBraunLeer.svg",
-                filled: "WH2RotBraun.svg",
-                extension: "WHRotBraunErweiterung.svg"
-            },
-            {
-                empty: "WH2RotRotLeer.svg",
-                filled: "WH2RotRot.svg", // Annahme: WH2RotRot.svg ist die besetzte Variante
-                extension: "WHRotRotErweiterung.svg"
-            }
+        var dialogues = [
+            "Willkommen zurück! Erinnerst du dich? Bisher mussten wir bei belegten Häusern immer lange nach einem freien Platz suchen (Probing). Das war mühsam.",
+            "Hier machen wir es schlauer: Wir suchen <strong>nicht</strong> weiter! Wenn ein Haus belegt ist, bauen wir einfach an.",
+            "Das Fachwort dafür ist <strong>Seperate Chaining</strong>. Wir erstellen quasi eine Liste von Bewohnern an derselben Adresse – wie in einem Mehrfamilienhaus.",
+            "Leg los! Berechne die Hausnummer. Ist das Haus voll? Kein Problem: Wir bauen einfach eine Etage drauf!"
         ];
 
-        const families = [
-            "Franz",    // Hash 3
-            "Heinrich", // Hash 0
-            "Nora",     // Hash 0 (Kollision)
-            "Thomas",   // Hash 0 (Kollision)
-            "Markus",   // Hash 7
-            "Emma",     // Hash 4
-            "Johannes", // Hash 2
-            "Katrin",   // Hash 7 (Kollision)
-            "Peter",    // Hash 2 (Kollision)
-            "Nina",     // Hash 0 (Kollision)
-            "Julia"     // Hash 1
-            ];
-        function initFamilyList() {
-            $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
-            const currentFamily = families[currentIdx];
-            $(`.to-do-family[data-family="${currentFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', selectNextResident);
-            selectedFamily = currentFamily;
-        }
-        initFamilyList();
+        let currentDialogue = -1;
 
-        // --- Zufällige Auswahl der Assets für die Häuser ---
-        function getRandomHousePair() {
-            const randomIndex = Math.floor(Math.random() * housePairs.length);
-            return housePairs[randomIndex];
-        }
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
 
-        // --- Setzt das Haus-Asset ---
-        function setHouseAsset(houseElement, isExtension) {
-            const pair = getRandomHousePair();
-            if (!isExtension) {
-                houseElement.find('.img-house-base').attr('src', `./assets/${pair.empty}`);
-            } else {
-                return `./assets/${pair.extension}`;
+        soundSuccess.volume = 0.4;
+        soundError.volume = 0.3;
+        soundClick.volume = 0.5;
+
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl9/Lvl9_1.mp3'),
+            new Audio('./assets/sounds/Lvl9/Lvl9_2.mp3'),
+            new Audio('./assets/sounds/Lvl9/Lvl9_3.mp3'),
+            new Audio('./assets/sounds/Lvl9/Lvl9_4.mp3'),
+        ];
+
+        let currentAudioObj = null;
+
+        function playDialogueAudio(index) {
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio blocked:", e));
             }
         }
 
-        // --- Initialisierung der Häuser mit zufälligen Assets ---
-        $('.house-container').each(function() {
-            setHouseAsset($(this), false);
-        });
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => {});
+            }
+        }
 
-        // --- DIALOGE ---
-        var introTexts = [
-            "Die Effektivität von Double Hashing hängt stark von der zweiten Hashfunktion ab.",
-            "Wir führen nun <b>Mehrfamilienhäuser</b> ein (Separate Chaining). Bei einer Kollision dürfen Bewohner in dasselbe Haus!",
-            "Das funktioniert so: Wenn mehrere Bewohner ins selbe Haus sollen, entsteht ein Mehrfamilienhaus (Liste).",
-            "Trage nun die Bewohner ein. Berechne zuerst die Hausnummer. Nur bei einer Kollision entsteht ein Anbau."
-        ];
+        // --- Dialog Logik ---
+        function showNextDialogue() {
+            if (isFading || gamePhase !== "intro") return;
+            currentDialogue++;
+            if (currentDialogue < 4) {
+                playDialogueAudio(currentDialogue);
+                isFading = true;
 
-        $('#dialogueText').html(introTexts[0]);
+                $('#dialogueText').fadeOut(150, function() {
+                    $(this).html(dialogues[currentDialogue]).fadeIn(150, function() {
+                        isFading = false;
+                    });
 
-        // --- INTRO LOGIK ---
+                    if(currentDialogue === 1) $('#majorMikeImage').attr('src', './assets/card_major.png');
+
+                    if (currentDialogue === 3) {
+                        $('#dialogueContinue').fadeOut();
+                        setTimeout(startGamePlacement, 3000);
+                    }
+                });
+            }
+        }
+
+        // Listener für Dialoge
         $('#dialogueBox').click(function() {
-            if (gamePhase !== "intro") return;
-            introStep++;
-            if (introStep < introTexts.length) {
-                $('#dialogueText').fadeOut(100, function() { $(this).html(introTexts[introStep]).fadeIn(100); });
-                if(introStep === 1) $('#majorMikeImage').attr('src', './assets/card_major.png');
-            } else {
-                startGamePlacement();
-            }
+            if (gamePhase === "intro") showNextDialogue();
         });
 
         $(document).keydown(function(e) {
-            if ((e.key === 'Enter' || e.key === ' ')) {
-                if (gamePhase !== "intro") return;
-                introStep++;
-                if (introStep < introTexts.length) {
-                    $('#dialogueText').fadeOut(100, function() { $(this).html(introTexts[introStep]).fadeIn(100); });
-                    if(introStep === 1) $('#majorMikeImage').attr('src', './assets/card_major.png');
-                } else {
-                    startGamePlacement();
-                }
+            if ((e.key === 'Enter' || e.key === ' ') && gamePhase === "intro") {
+                showNextDialogue();
             }
         });
 
+        // Start
+        $('#dialogueText').text("...");
+        $('#dialogueContinue').show();
+
+        // --- Game Logic ---
         function startGamePlacement() {
             gamePhase = "placement_calc";
             $('#dialogueContinue').hide();
             $('#majorMikeImage').attr('src', './assets/card_major.png');
             selectNextResident();
         }
+
+        // Assets
+        const housePairs = [
+            { empty: "WH2BlauBraunLeer.svg", filled: "WH2BlauBraun.svg", extension: "WHBlauBraunErweiterung.svg" },
+            { empty: "WH2BlauGrauLeer.svg", filled: "WH2BlauGrau.svg", extension: "WHBlauGrauErweiterung.svg" },
+            { empty: "WH2BlauRotLeer.svg", filled: "WH2BlauRot.svg", extension: "WHBlauRotErweiterung.svg" },
+            { empty: "WH2GrauBraunLeer.svg", filled: "WH2GrauBraun.svg", extension: "WHGrauBraunErweiterung.svg" },
+            { empty: "WH2GruenBraunLeer.svg", filled: "WH2GruenBraun.svg", extension: "WHGruenBraunErweiterung.svg" },
+            { empty: "WH2GruenGrauLeer.svg", filled: "WH2GruenGrau.svg", extension: "WHGruenGrauErweiterung.svg" },
+            { empty: "WH2GelbBraunLeer.svg", filled: "WH2GelbBraun.svg", extension: "WHGelbBraunErweiterung.svg" },
+            { empty: "WH2GelbRotLeer.svg", filled: "WH2GelbRot.svg", extension: "WHGelbRotErweiterung.svg" },
+            { empty: "WH2RotBraunLeer.svg", filled: "WH2RotBraun.svg", extension: "WHRotBraunErweiterung.svg" },
+            { empty: "WH2RotRotLeer.svg", filled: "WH2RotRot.svg", extension: "WHRotRotErweiterung.svg" }
+        ];
+
+        function getRandomHousePair() { return housePairs[Math.floor(Math.random() * housePairs.length)]; }
+
+        $('.house-container').each(function() {
+            const pair = getRandomHousePair();
+            $(this).find('.img-house-base').attr('src', `./assets/${pair.empty}`);
+        });
+
+        function initFamilyList() {
+            $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
+            const currentFamily = familien[currentIdx];
+            $(`.to-do-family[data-family="${currentFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', selectNextResident);
+        }
+        initFamilyList();
 
         function selectNextResident() {
             if (currentIdx >= familien.length) {
@@ -702,7 +663,6 @@ $bewohner_liste = [
             return sum % HASH_SIZE;
         }
 
-        // --- BUTTON KLICK ---
         $('#hashButton').click(function() {
             if (gamePhase === "placement_calc") {
                 currentHash = getHash(currentName);
@@ -717,9 +677,8 @@ $bewohner_liste = [
                 if (currentName !== 'Thomas'){
                     $('#dialogueText').text(`Derzeit suchen wir nach ${SEARCH_TARGET} und nicht ${currentName}.`);
                     return;
-                }else{
-                    $('#dialogueText').text(`Laut Rechner wohnt Thomas in Haus ${currentHash}. Klicke nun mehrmals auf das Haus, um jede Etage durchzugehen.`);
                 }
+                $('#dialogueText').text(`Laut Rechner wohnt Thomas in Haus ${currentHash}. Klicke nun mehrmals auf das Haus, um jede Etage durchzugehen.`);
                 $('#hashResult').text(`Hausnummer: ${currentHash}`);
                 $(this).prop('disabled', true);
                 $('#house-' + currentHash).addClass('highlight-target');
@@ -727,16 +686,12 @@ $bewohner_liste = [
             }
         });
 
-        // --- GLOBALER CLICK LISTENER (Zum Schließen) ---
         $(document).click(function(event) {
             if (!$(event.target).closest('.house-container').length) {
-                if(gamePhase === "search_click") {
-                    $('.resident-name').removeClass('revealed');
-                }
+                if(gamePhase === "search_click") $('.resident-name').removeClass('revealed');
             }
         });
 
-        // --- HAUS KLICK ---
         $('.house-container').click(function(e) {
             e.stopPropagation();
             var clickedHouse = $(this).data('house');
@@ -744,12 +699,11 @@ $bewohner_liste = [
             var $nameContainer = $('#names-' + clickedHouse);
             var $houseElement = $(`#house-${clickedHouse}`);
 
-            // Andere Häuser schließen (nur in Search Phase sichtbar)
-            $('.house-container').not(this).find('.resident-name').removeClass('revealed');
-
-            // TRAVERSIEREN (Namen aufdecken)
+            // Search Traversing
             if (gamePhase === "search_click") {
+                $('.house-container').not(this).find('.resident-name').removeClass('revealed');
                 var $hiddenNames = $nameContainer.find('.resident-name').not('.revealed');
+
                 if ($hiddenNames.length > 0) {
                     $hiddenNames.first().addClass('revealed');
                 } else if ($nameContainer.find('.resident-name').length > 0) {
@@ -757,10 +711,11 @@ $bewohner_liste = [
                 }
             }
 
-            // --- PHASE: EINFÜGEN (VERTEILEN) ---
+            // Placement Phase
             if (gamePhase === "placement_click") {
                 if (inputLocked) return;
                 if (clickedHouse === currentHash) {
+                    playSound('click');
                     inputLocked = true;
                     $('#dialogueText').text("Sehr gut. Das war das richtige Haus.");
                     $('#majorMikeImage').attr('src', './assets/wink_major.png');
@@ -768,32 +723,25 @@ $bewohner_liste = [
                     var bewohnerAnzahl = stadt[clickedHouse].length;
                     var nameTag = $('<div class="resident-name">' + currentName + '</div>');
                     $nameContainer.append(nameTag);
-                    if(bewohnerAnzahl === 1){
-                        const currentAsset = $houseElement.find('.img-house-base').attr('src');
-                        const assetName = currentAsset.split('/').pop();
-                        let matchingPair = null;
-                        for (const pair of housePairs) {
-                            if (pair.empty === assetName || pair.filled === assetName) {
-                                matchingPair = pair;
-                                break;
-                            }
-                        }
-                        var newAsset = matchingPair.filled;
-                        $houseElement.find('.img-house-base').attr('src', `./assets/${newAsset}`);
 
-                    }else if (bewohnerAnzahl > 1) {
-                        const currentAsset = $houseElement.find('.img-house-base').attr('src');
-                        const assetName = currentAsset.split('/').pop();
-                        let matchingPair = null;
-                        for (const pair of housePairs) {
-                            if (pair.filled === assetName || pair.extension === assetName) {
-                                matchingPair = pair;
-                                break;
-                            }
+                    const currentAsset = $houseElement.find('.img-house-base').attr('src');
+                    const assetName = currentAsset.split('/').pop();
+                    let matchingPair = null;
+                    for (const pair of housePairs) {
+                        if (pair.empty === assetName || pair.filled === assetName || pair.extension === assetName) {
+                            matchingPair = pair; break;
                         }
-                        var extensionImg = matchingPair.extension;
-                        $houseContainer.append($('<img>', {src: `./assets/${extensionImg}`, alt: "Erweiterung", class: "img-house-extension"}));
                     }
+                    if(!matchingPair) matchingPair = housePairs[0];
+
+                    if(bewohnerAnzahl === 1){
+                        $houseElement.find('.img-house-base').attr('src', `./assets/${matchingPair.filled}`);
+                        occupiedHouses++;
+                    } else if (bewohnerAnzahl > 1) {
+                        $houseContainer.append($('<img>', {src: `./assets/${matchingPair.extension}`, alt: "Erweiterung", class: "img-house-extension"}));
+                        occupiedHouses++;
+                    }
+                    $('#occupiedCount').text(occupiedHouses + ' / 11');
 
                     $houseContainer.removeClass('highlight-target');
                     $('.to-do-family[data-family-index=' + currentIdx + ']').removeClass('active').addClass('list-group-item-success').css('opacity', '1');
@@ -810,11 +758,12 @@ $bewohner_liste = [
                         }
                     }, 1000);
                 } else {
+                    playSound('error');
                     $('#dialogueText').html("Falsches Haus! Achte auf die Berechnung.");
                     $('#majorMikeImage').attr('src', './assets/sad_major.png');
                 }
             }
-            // --- PHASE: SUCHEN (MIT DURCHKLICKEN) ---
+            // Such Logic (Check)
             else if (gamePhase === "search_click") {
                 var residentList = stadt[clickedHouse];
                 var $thomasElement = $nameContainer.find('.resident-name').filter(function() {
@@ -827,11 +776,14 @@ $bewohner_liste = [
                         $('#majorMikeImage').attr('src', './assets/wink_major.png');
                         $thomasElement.addClass('found');
                         setTimeout(function() { $('#successOverlay').fadeIn(); }, 1000);
+                        playSound('success');
                     } else {
+                        playSound('click');
                         $('#dialogueText').text("Er wohnt in diesem Haus. Klicke weiter, um ihn in der Liste zu finden!");
                         $('#majorMikeImage').attr('src', './assets/card_major.png');
                     }
                 } else {
+                    playSound('error');
                     $('#dialogueText').html("Falsches Haus. Thomas wohnt hier nicht.");
                     $('#majorMikeImage').attr('src', './assets/sad_major.png');
                 }
@@ -840,6 +792,8 @@ $bewohner_liste = [
 
         function startSearchPhase() {
             gamePhase = "search_calc";
+            playDialogueAudio(4);
+
             currentName = null;
             currentHash = null;
             $('#nameInput').prop('readonly', false).val('');
@@ -851,6 +805,9 @@ $bewohner_liste = [
             $('#majorMikeImage').attr('src', './assets/card_major.png');
             $('.resident-name').removeClass('revealed');
         }
+
+        window.restartLevel = function() { location.reload(); };
+        window.nextLevel = function() { window.location.href = 'Level-Auswahl?page=2&completed=9&level=10'; };
     });
 </script>
 </body>

@@ -206,7 +206,6 @@
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
-            margin-bottom: 0.5rem;
             padding: 0 1rem;
             position: relative;
             z-index: 2;
@@ -222,7 +221,7 @@
             position: relative;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            z-index: 1;
+            z-index: 10;
         }
         .street::before {
             content: '';
@@ -253,6 +252,8 @@
             z-index: 2;
         }
         .house {
+            margin-bottom: -10px;
+            z-index: 0;
             aspect-ratio: 1;
             background: transparent;
             border: none;
@@ -765,7 +766,7 @@
             </div>
             <div class="info-item">
                 <div class="info-label">Eingetragene Familien:</div>
-                <div class="info-value" id="occupiedCount">0 / 15</div>
+                <div class="info-value" id="occupiedCount">0 / 20</div>
             </div>
         </div>
     </div>
@@ -794,11 +795,12 @@
         let stadt = new Array(HASH_SIZE).fill(null);
         let occupiedHouses = 19;
         let gameCompleted = false;
-        let currentDialogueStep = 0;
+        let currentDialogueStep = -1;
         let probingActive = false;
         let maxProbes = 6;
         let houseAssets = [];
-
+        let hash = 0;
+        let phase = '';
         // Paare der neuen Assets (für JavaScript)
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
@@ -813,6 +815,50 @@
             { empty: "WohnhauGruenGrauLeerNeu.svg", filled: "WohnhauGruenGrauBesetztNeu.svg" },
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
         ];
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        soundSuccess.volume = 0.4;
+        soundError.volume = 0.3;
+        soundClick.volume = 0.5;
+
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl10/Lvl10_1.mp3'),
+            new Audio('./assets/sounds/Lvl10/Lvl10_2.mp3'),
+            new Audio('./assets/sounds/Lvl10/Lvl10_3.mp3'),
+            new Audio('./assets/sounds/Lvl10/Lvl10_4.mp3'),
+            new Audio('./assets/sounds/Lvl10/Lvl10_5.mp3'),
+            new Audio('./assets/sounds/Lvl10/Lvl10_6.mp3'),
+            new Audio('./assets/sounds/Lvl10/Lvl10_7.mp3'),
+            new Audio('./assets/sounds/Lvl10/Lvl10_8.mp3'),
+            new Audio('./assets/sounds/Lvl10/Lvl10_9.mp3')
+        ];
+        let currentAudioObj = null;
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
 
         // Funktion zum Setzen des Haus-Assets
         function setHouseAsset(houseElement, isFilled) {
@@ -841,11 +887,10 @@
             $('#occupiedCount').text(occupiedHouses + ' / 20');
         }
 
-        // Alle Dialoge in einer Liste
         const dialogueSequence = [
             "Separate Chaining erzeugt bei vielen Daten lange Listen, die die Such Performance beeinträchtigen. Außerdem können einige Speicherbereiche ungenutzt bleiben. Also entstehen sehr große Mehrfamilienhäuser, in denen man dann auch keine Bewohner schnell findet. Zudem können Häuser so auch leer stehen bleiben.",
             "Ich habe hier mal etwas vorbereitet. 19 Bewohner sind bereits eingezogen, somit sind die Häuser 0 bis 18 belegt.",
-            "Wähle nun Levi aus der Liste und berechne seinen Hash. Bei Kollisionen nutze bitte linear probing.",
+            "Nun trage Levi in diesen Stadtteil ein und nutze Linear Probing.",
             "Levi soll die Hausnummer 0 haben, leider ist sie belegt, aber nach dem Prinzip des Linear Probings können wir ja einfach das nächste freie Haus nehmen. Das sollte kein Problem sein, oder?",
             "Der Computer sieht nicht, welche Stelle im Speicher belegt ist oder nicht. Er muss jedes Haus einzeln prüfen. Das sollst du nun auch nachvollziehen, indem du jedes Haus der Reihe nach durchgehst!",
             "Ganz schön viel Aufwand, was? Die Stadt ist einfach zu voll, das könnte mit Hashmaps genauso passieren.",
@@ -856,24 +901,31 @@
 
         // Funktion zum Anzeigen eines bestimmten Dialogs
         function showDialogue(step) {
+            playDialogueAudio(step);
             $('#dialogueText').fadeOut(200, function() {
                 $(this).text(dialogueSequence[step]).fadeIn(200);
                 if (step === 3) {
                     probingActive = true;
-                    const startHash = parseInt($('#hashResult').text());
+                    const startHash = hash;
                     currentProbeIndex = startHash;
                     $(`.house[data-house="${currentProbeIndex}"]`).addClass('highlight-target');
                 }
                 if (step === 9) {
+                    playSound('success');
                     gameCompleted = true;
                     $('#successOverlay').css('display', 'flex');
                 }
             });
         }
 
-        // --- Listener für Dialoge ---
+        // Listener für Dialoge
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameCompleted) {
+                if (currentDialogueStep === -1) {
+                    currentDialogueStep = 0;
+                    showDialogue(0);
+                    return;
+                }
                 if (currentDialogueStep < 2 || (currentDialogueStep > 4 && currentDialogueStep < 9)) {
                     if(currentDialogueStep === 1){
                         $('#dialogueContinue').hide();
@@ -922,19 +974,22 @@
             }
         });
 
-        // 2. Hash-Wert berechnen (ereignisgebunden)
+        // 2. Hash-Wert berechnen
         $('#hashButton').click(function() {
-            if (gameCompleted) return;
+            if (gameCompleted || phase === 'block_button') return;
             const family = $('#nameInput').val().trim();
             if (!family) return;
             const startHash = getHash(family, HASH_SIZE);
-            $('#hashResult').text(startHash);
+            hash = startHash;
+            $('#hashResult').text("Hausnummer: "+ startHash);
             currentDialogueStep = 3;
             showDialogue(currentDialogueStep);
+            phase = 'block_button';
         });
 
         // 3. Haus klicken, um zum nächsten Haus zu gehen
         $('.house').click(function() {
+            playSound('click');
             if (!probingActive || gameCompleted) return;
             const $house = $(this);
             const houseNumber = parseInt($house.data('house'));
@@ -956,7 +1011,7 @@
             }
         });
 
-        // --- Hash-Funktion (zero-based) ---
+        // --- Hash-Funktion ---
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) {
@@ -965,7 +1020,6 @@
             return sum % size;
         }
 
-        // --- Global functions for buttons ---
         window.restartLevel = function() {
             location.reload();
         };
@@ -974,12 +1028,14 @@
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-auswahl.php?completed=10&next=11';
+                window.location.href = 'Level-Auswahl?page=2&completed=10&level=11';
             }, 500);
         };
 
         // Stadt initialisieren
         initCity();
+        $('#dialogueText').text("...");
+        $('#dialogueContinue').show();
     });
 </script>
 </body>

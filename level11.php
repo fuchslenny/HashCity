@@ -1,6 +1,6 @@
 <?php
 /**
- * HashCity - Level 11: Rehashing (Final Polish)
+ * HashCity - Level 11: Rehashing
  */
 $anzahl_haeuser = 40;
 // Die 19 "Bestands-Bewohner" aus Level 10
@@ -53,8 +53,8 @@ $familien_liste = array_merge($old_residents, $new_residents);
         .grid-title { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; color: #2E7D32; text-align: center; margin-bottom: 2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
         .street-block { position: relative; margin-bottom: 2rem; }
         /* 40 Häuser -> 4 Reihen à 10 Häuser */
-        .houses-row { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.5rem; margin-bottom: 0.5rem; padding: 0 0.5rem; position: relative; z-index: 2; transition: all 0.5s ease; }
-        .street { width: 100%; height: 50px; background-image: url('./assets/Strasse.svg'); background-size: cover; background-position: center; position: relative; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 1; margin-bottom: 1rem;}
+        .houses-row { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.5rem; padding: 0 0.5rem; position: relative; z-index: 2; transition: all 0.5s ease; }
+        .street { width: 100%; height: 50px; background-image: url('./assets/Strasse.svg'); background-size: cover; background-position: center; position: relative; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 10; margin-bottom: 1rem;}
         .street::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%); border-radius: 8px; z-index: -1; }
         .street::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: repeating-linear-gradient(90deg, #fff 0px, #fff 30px, transparent 30px, transparent 50px); transform: translateY(-50%); z-index: 2; }
         .house.hidden { display: none; }
@@ -66,7 +66,15 @@ $familien_liste = array_merge($old_residents, $new_residents);
             100% { transform: scale(1); opacity: 1; }
         }
         .house.pop-in { animation: popIn 0.4s ease-out forwards; }
-        .house { aspect-ratio: 1; background: transparent; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; position: relative; border-radius: 8px; padding: 0.2rem; }
+        .house {
+            margin-bottom: -5px;
+            position: relative;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
         .house:hover:not(.checked):not(.found) { transform: translateY(-5px) scale(1.1); z-index: 10; }
         .house.highlight-target { transform: translateY(-8px) scale(1.2) !important; box-shadow: 0 0 25px 5px gold; z-index: 11; }
         .house-icon { width: 100%; height: 100%; object-fit: contain; transition: all 0.3s ease; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2)); }
@@ -314,7 +322,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
         </div>
         <div class="info-panel">
             <h3 class="info-title">📊 Stadtplanung</h3>
-            <div class="info-panel">
                 <div class="info-item">
                     <div class="info-label">Einziehende Familien:</div>
                     <div class="family-list-container">
@@ -343,9 +350,8 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 <button id="btnExpand" class="calculator-button expand-btn">🏗️ STADT ERWEITERN</button>
                 <div class="info-item">
                     <div class="info-label">Eingetragene Familien:</div>
-                    <div class="info-value" id="occupiedCount">0 / 10</div>
+                    <div class="info-value" id="occupiedCount">19 / 23</div>
                 </div>
-            </div>
         </div>
     </div>
 </div>
@@ -368,9 +374,9 @@ $familien_liste = array_merge($old_residents, $new_residents);
     $(document).ready(function() {
         // --- Konfiguration ---
         let currentHashSize = 20;
+        let occupiedHouses = 19;
         const TARGET_HASH_SIZE = 40;
         const families = <?php echo json_encode($familien_liste); ?>;
-        // Paare von leeren und gefüllten Häusern
         const housePairs = [
             { empty: 'WohnhauBlauBraunLeerNeu.svg', filled: 'WohnhauBlauBraunBesetztNeu.svg' },
             { empty: 'WohnhauBlauGrauLeerNeu.svg', filled: 'WohnhauBlauGrauBesetztNeu.svg' },
@@ -385,8 +391,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
         ];
         // Initial: 19/20 belegt
         let city = new Array(TARGET_HASH_SIZE).fill(null);
-        let occupiedCount = 19;
-        // Die "To-Do" Liste beginnt ab Index 19 (Levi)
         let currentFamilyIdx = 19;
         let selectedFamily = null;
         let phase = 'intro';
@@ -398,7 +402,53 @@ $familien_liste = array_merge($old_residents, $new_residents);
             "Die einzige Lösung: <strong>Rehashing</strong>! Wir verdoppeln die Stadt auf 40 Häuser und berechnen alle Positionen neu.",
             "Klicke auf 'STADT ERWEITERN', um das Problem zu lösen!"
         ];
-        let dialogueIdx = 0;
+        let currentDialogue = -1;
+
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        soundSuccess.volume = 0.4;
+        soundError.volume = 0.3;
+        soundClick.volume = 0.5;
+
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl11/Lvl11_1.wav'),
+            new Audio('./assets/sounds/Lvl11/Lvl11_2.wav'),
+            new Audio('./assets/sounds/Lvl11/Lvl11_3.wav'),
+            new Audio('./assets/sounds/Lvl11/Lvl11_4.wav'),
+            new Audio('./assets/sounds/Lvl11/Lvl11_5.wav'),
+            new Audio('./assets/sounds/Lvl11/Lvl11_6.wav')
+        ];
+
+        let currentAudioObj = null;
+
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
+
         // --- Helper ---
         function getAsciiSum(name) {
             let sum = 0;
@@ -406,12 +456,12 @@ $familien_liste = array_merge($old_residents, $new_residents);
             return sum;
         }
         function calcHash(name, size) { return getAsciiSum(name) % size; }
-        // Funktion, um ein zufälliges Haus-Paar zu wählen
+
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
             return housePairs[randomIndex];
         }
-        // Funktion, um das Asset zu setzen
+
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
             const assetName = currentAsset.split('/').pop();
@@ -425,12 +475,13 @@ $familien_liste = array_merge($old_residents, $new_residents);
             const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
             houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
         }
+        
         function updateLoadFactor() {
-            let lf = occupiedCount / currentHashSize;
+            let lf = currentFamilyIdx / currentHashSize;
             $('#lfValue').text(lf.toFixed(2));
             let $box = $('#lfBox');
             let $text = $('#lfText');
-            // --- Neue Ampel-Logik ---
+            // Load Factor Ampel
             $box.removeClass('lf-bad lf-medium lf-good');
             if (lf <= 0.5) {
                 $box.addClass('lf-good');
@@ -485,7 +536,8 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 }
             });
         }
-        // --- UI Logic ---
+
+        
         function showDialogue(text, image = 'card_major.png') {
             if (isFading && text !== dialogues[0]) return;
             isFading = true;
@@ -494,21 +546,22 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 $(this).html(text).fadeIn(150, function() { isFading = false; });
             });
         }
-        function advanceDialogue() {
+        function showNextDialogue() {
             if(isFading) return;
-            if (dialogueIdx < dialogues.length) {
-                if(dialogueIdx === dialogues.length -1){
-                    $('#dialogueContinue').hide();
-                    phase = "expand";
+            currentDialogue++;
+            if (currentDialogue < dialogues.length) {
+                playDialogueAudio(currentDialogue);
+                showDialogue(dialogues[currentDialogue]);
+                if(currentDialogue === dialogues.length - 1){
+                    $('#dialogueContinue').hide(); // Hinweis weg
+                    phase = "expand"; // Phase wechseln
                 }
-                showDialogue(dialogues[dialogueIdx]);
-                dialogueIdx++;
             }
         }
         $('#dialogueBox').click(() => {
-            if (phase === 'intro') advanceDialogue();
+            if (phase === 'intro') showNextDialogue();
         });
-        $(document).keydown(e => { if((e.key === 'Enter') && phase === 'intro') advanceDialogue(); });
+        $(document).keydown(e => { if((e.key === 'Enter') && phase === 'intro') showNextDialogue(); });
         // --- Expansion Logic ---
         $('#btnExpand').click(function() {
             if(phase === "intro") return;
@@ -519,26 +572,28 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 let $el = $(this);
                 setTimeout(() => {
                     $el.removeClass('hidden').addClass('pop-in');
-                }, i * 30);
+                }, i * 75);
             });
             $('.street.hidden').removeClass('hidden');
+            $('#occupiedCount').text(occupiedHouses + ' / 23');
             setTimeout(() => {
                 // 2. Logik Update
                 currentHashSize = 40;
-                $('#gridTitle').text("🏘️ Level 11: Re-Hashing");
-                updateLoadFactor(); // Load Factor halbiert sich (19/40)
+                updateLoadFactor();
                 $(this).hide();
+                playDialogueAudio(4);
                 showDialogue("Platz ist da! Aber alle wohnen noch an den 'alten' Adressen. Achtung, ich ordne jetzt ALLE neu an!", 'wink_major.png');
                 setTimeout(performAutoRehash, 3000);
             }, 1500);
         });
+
+        // Rehashen und animieren
         function performAutoRehash() {
             // Reset visuals
             // Reset Logic
             let tempResidents = [];
             for(let i=0; i<19; i++) tempResidents.push(families[i]);
             city.fill(null);
-            // --- NEUE ANIMATION (Welleneffekt über ALLE Häuser) ---
             // 1. Logik berechnen
             let newPositions = {};
             tempResidents.forEach(fam => {
@@ -553,7 +608,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 $house.removeClass('checked');
                 $house.removeClass('pop-in');
                 setTimeout(() => {
-                    $house.addClass('pop-in'); // "Schütteln" / Refresh Effekt
+                    $house.addClass('pop-in'); // Effekt beim Refreshen
                     // Wenn hier wer wohnt -> Bild rein
                     if (newPositions[i]) {
                         setHouseAsset($house, true);
@@ -561,34 +616,38 @@ $familien_liste = array_merge($old_residents, $new_residents);
                     }else{
                         setHouseAsset($house, false);
                     }
-                }, i * 30); // Schnelle Welle (1.2 Sek total)
+                }, i * 100); // Schnelligkeit der Welle
             }
             setTimeout(() => {
                 phase = 'select_family';
                 $('#calcContainer').css({opacity: 1, pointerEvents: 'all'});
-                showDialogue("Siehst du? Thomas (Hash 620) ist von Haus 0 auf Haus 20 gezogen. Jetzt ist Haus 0 endlich frei für Levi! Probier es aus.");
+                playDialogueAudio(5);
+                showDialogue(
+                    "Siehst du? Weil wir jetzt <strong>durch 40 teilen</strong> (statt 20), ändern sich die Hausnummern!<br>" +
+                    "Thomas (Hash 620) rechnet jetzt 620 % 40 = 20. Vorher war es 0.<br>" +
+                    "Dadurch ist Haus 0 endlich frei für Levi!",
+                    'wink_major.png'
+                );
                 placeNextFamily();
-            }, 40 * 30 + 1000);
+            }, 40 * 100 + 1000);
         }
 
         function placeNextFamily() {
-            if (currentFamilyIdx >= families.length) {
-                endLevel();
-                return;
-            }
             selectedFamily = families[currentFamilyIdx];
             $('#nameInput').val(selectedFamily);
             $('.list-group-item').removeClass('active');
             $(`.list-group-item[data-family-index="${currentFamilyIdx}"]`).removeClass('disabled').addClass('active');
             $('.family-list-container').animate({
-                scrollTop: $(`.list-group-item[data-family-index="${currentFamilyIdx}"]`).position().top
+                scrollTop: $('.family-list-container')[0].scrollHeight
             }, 300);
+
             h1Value = calcHash(selectedFamily, 40);
             phase = 'find_spot';
         }
 
 
         $('#hashButton').click(function() {
+            if (currentFamilyIdx >= families.length || phase !== "find_spot") return;
             h1Value = calcHash(selectedFamily, 40);
             $('#hashResult').text(`Hausnummer: ${h1Value}`);
             let msg = `Hash: ${h1Value}. Klicke auf das Haus.`;
@@ -603,16 +662,21 @@ $familien_liste = array_merge($old_residents, $new_residents);
         $('.house').click(function() {
             if (phase !== 'find_spot') return;
             let idx = $(this).data('index');
-            if (idx !== h1Value) { showDialogue(`Falsches Haus. Ziel ist ${h1Value}.`); return; }
+            if (idx !== h1Value) {
+                playSound('error');
+                showDialogue(`Falsches Haus. Ziel ist ${h1Value}.`);
+                return;
+            }
             if (city[idx] !== null) {
+                playSound('click');
                 h1Value = (h1Value + 1) % 40;
                 showDialogue("Kollision? Nimm das nächste freie.");
                 $('.house').removeClass('highlight-target');
                 $(`#house-${h1Value}`).addClass('highlight-target');
                 return;
             }
+            playSound('click');
             city[idx] = selectedFamily;
-            occupiedCount++;
             updateLoadFactor();
             let $house = $(this);
             setHouseAsset($house, true);
@@ -624,6 +688,8 @@ $familien_liste = array_merge($old_residents, $new_residents);
             showDialogue(`Super! ${selectedFamily} ist eingezogen.`);
             $('#hashInput').val('');
             currentFamilyIdx++;
+            $('#occupiedCount').text(currentFamilyIdx + ' / 23');
+            updateLoadFactor();
             if (currentFamilyIdx < families.length) {
                 phase = 'select_family';
                 placeNextFamily();
@@ -632,9 +698,11 @@ $familien_liste = array_merge($old_residents, $new_residents);
             }
         });
         function endLevel() {
+            $('#nameInput').val('');
             showDialogue("Fantastisch! Load Factor 0.55 (Okay). Rehashing hat funktioniert. Jetzt bist du bereit für das große Finale!", 'wink_major.png');
             $('.list-group-item').addClass('done');
             setTimeout(() => {
+                playSound('success');
                 $('#successMessage').text("Du hast gelernt, wie man eine überfüllte Hashmap rettet!");
                 $('#successOverlay').css('display', 'flex');
             }, 3000);
@@ -643,10 +711,11 @@ $familien_liste = array_merge($old_residents, $new_residents);
         window.nextLevel = function() {
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
-            setTimeout(() => window.location.href = 'level-select.php?completed=11&next=12', 500);
+            setTimeout(() => window.location.href = 'level-select.php?page=2&completed=11&level=12', 500);
         };
         initCity();
-        advanceDialogue();
+        $('#dialogueText').text("...");
+        $('#dialogueContinue').show();
     });
 </script>
 </body>

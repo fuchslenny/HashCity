@@ -219,7 +219,6 @@ $familien_liste = [
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
-            margin-bottom: 0.5rem;
             padding: 0 1rem;
             position: relative;
             z-index: 2;
@@ -235,7 +234,7 @@ $familien_liste = [
             position: relative;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            z-index: 1;
+            z-index: 10;
         }
         .street::before {
             content: '';
@@ -266,6 +265,8 @@ $familien_liste = [
             z-index: 2;
         }
         .house {
+            margin-bottom: -10px;
+            z-index: 0;
             aspect-ratio: 1;
             background: transparent;
             border: none;
@@ -691,7 +692,7 @@ $familien_liste = [
             </div>
             <div class="info-item step-calculator" id="stepCalcBox">
                 <div class="info-label">2. Hash (Schrittweite)</div>
-                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 5 + 1</div>
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 10 + 1</div>
                 <div class="hash-result-value" id="h2Result">-</div>
                 <button id="btnCalcH2" class="calc2-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
             </div>
@@ -730,13 +731,53 @@ $familien_liste = [
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" },
         ];
 
-        // --- Zufällige Auswahl der Assets für die Häuser ---
+        // Sound-Dateien laden
+        const soundClick   = new Audio('./assets/sounds/click.mp3');
+        const soundSuccess = new Audio('./assets/sounds/success.mp3');
+        const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        soundSuccess.volume = 0.4;
+        soundError.volume = 0.3;
+        soundClick.volume = 0.5;
+
+        const dialogueAudios = [
+            new Audio('./assets/sounds/Lvl8/Lvl8_1.mp3'),
+            new Audio('./assets/sounds/Lvl8/Lvl8_2.mp3')
+        ];
+
+        let currentAudioObj = null;
+        function playDialogueAudio(index) {
+            // 1. Altes Audio stoppen (falls noch läuft)
+            if (currentAudioObj) {
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+            }
+
+            // 2. Neues Audio holen und abspielen
+            if (index >= 0 && index < dialogueAudios.length) {
+                currentAudioObj = dialogueAudios[index];
+                currentAudioObj.play().catch(e => console.log("Audio play blocked:", e));
+            }
+        }
+
+        function playSound(type) {
+            let audio;
+            if (type === 'click') audio = soundClick;
+            else if (type === 'success') audio = soundSuccess;
+            else if (type === 'error') audio = soundError;
+
+            if (audio) {
+                audio.currentTime = 0; // Spult zum Anfang zurück
+                audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
+            }
+        }
+
+        // Zufällige Auswahl der Assets für die Häuser 
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
             return housePairs[randomIndex];
         }
-
-        // --- Setzt das Haus-Asset ---
+        
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
             const assetName = currentAsset.split('/').pop();
@@ -764,7 +805,6 @@ $familien_liste = [
         const HASH_SIZE = 20;
         const HASH_SIZE_2 = 10;
         const families = <?php echo json_encode($familien_liste); ?>;
-        // State
         let city = new Array(HASH_SIZE).fill(null);
         let currentFamilyIdx = 0;
         let selectedFamily = null;
@@ -775,30 +815,43 @@ $familien_liste = [
         const SEARCH_TARGET = "Paul";
         let searchH1 = null;
         let searchH2 = null;
-        // Sperr-Variable für Animationen
         let isFading = false;
-        // Dialoge
         const dialogues = [
             "Das sieht ja schon richtig gut aus! Du darfst jetzt diesen neuen Stadtteil allein bearbeiten.",
             "Verwende dafür Double Hashing, falls es zu Kollisionen kommt. Beachte dabei, dass du die Liste von oben nach unten abarbeitest.",
-            "Denk dran: Hinten rechnen wir immer **+1**, damit die Schrittweite nie 0 ist. Viel Erfolg!"
         ];
-        let dialogueIdx = 0;
-        // --- Helper Functions ---
-        function getAsciiSum(name) {
+
+        let currentDialogue = -1;
+
+        function getHash(key, size=HASH_SIZE) {
             let sum = 0;
-            for(let i=0; i<name.length; i++) sum += name.charCodeAt(i);
-            return sum;
+            for (let i = 0; i < key.length; i++) sum += key.charCodeAt(i);
+            return sum % size;
         }
-        function calcH1(name) { return getAsciiSum(name) % HASH_SIZE; }
-        function calcH2(name) { return (getAsciiSum(name) % HASH_SIZE_2) + 1; }
-        function getRandomHouseAsset() {
-            const randomIndex = Math.floor(Math.random() * housePairs.length);
-            return housePairs[randomIndex].filled;
+        
+        function calcH1(name) { 
+            return getHash(name, HASH_SIZE); 
         }
-        // --- UI Updates ---
+        
+        function calcH2(name) {
+            return getHash(name, HASH_SIZE_2) + 1;
+        }
+
+        function doubleHashing(key, size, stadt) {
+            let hash = getHash(key, size);
+            let i = 1;
+            let position = hash;
+            let jump = calcH2(key);
+            while (stadt[position] !== null) {
+                position = (hash + i * jump) % size;
+                i++;
+            }
+            return position;
+        }
+
         function showDialogue(text, image = 'card_major.png') {
             if (isFading && text !== dialogues[0]) return;
+            playDialogueAudio(currentDialogue);
             isFading = true;
             $('#majorMikeImage').attr('src', './assets/' + image);
             $('#dialogueText').fadeOut(150, function() {
@@ -807,11 +860,11 @@ $familien_liste = [
                 });
             });
         }
-        function advanceDialogue() {
+        function showNextDialogue() {
             if(isFading) return;
-            if (dialogueIdx < dialogues.length) {
-                showDialogue(dialogues[dialogueIdx]);
-                dialogueIdx++;
+            if (currentDialogue < dialogues.length) {
+                showDialogue(dialogues[currentDialogue]);
+                currentDialogue++;
             } else {
                 if (phase === 'intro') {
                     $('#dialogueContinue').fadeOut();
@@ -821,13 +874,14 @@ $familien_liste = [
                 }
             }
         }
+
         // Interaktion
         $('#dialogueBox').click(function() {
-            if (phase === 'intro') advanceDialogue();
+            if (phase === 'intro') showNextDialogue();
         });
         $(document).keydown(function(e) {
             if(e.key === 'Enter' || e.key === ' ') {
-                if (phase === 'intro') advanceDialogue();
+                if (phase === 'intro') showNextDialogue();
             }
         });
 
@@ -894,9 +948,9 @@ $familien_liste = [
                 handleSearchClick(houseIdx, $house);
                 return;
             }
-            console.log("phase: " + phase);
             if (phase === 'place_h1') {
                 if (houseIdx !== h1Value) {
+                    playSound('error');
                     showDialogue("Das war das falsche Haus. Der Rechner sagt " + h1Value + ".");
                     return;
                 }
@@ -908,21 +962,25 @@ $familien_liste = [
             }
             else if (phase === 'place_apply_step') {
                 let expectedIdx = (currentProbeIndex + h2Value) % HASH_SIZE;
-                if (houseIdx !== expectedIdx) {
+                let finalIndex = doubleHashing(selectedFamily, HASH_SIZE, city);
+                if (houseIdx !== expectedIdx && houseIdx !== finalIndex) {
+                    playSound('error');
                     showDialogue(`Falsch! Wir waren bei ${currentProbeIndex}. Plus Schrittweite ${h2Value} (modulo 10) ist Haus ${expectedIdx}.`);
                     return;
                 }
                 if (city[houseIdx] === null) {
                     placeFamily(houseIdx);
                 } else {
+                    playSound('error');
                     currentProbeIndex = houseIdx;
                     showDialogue(`Oha! Haus ${houseIdx} ist AUCH besetzt. Wir müssen NOCHMAL springen. Addiere wieder ${h2Value}!`, 'sad_major.png');
                     $('.house').removeClass('highlight-target');
-                    let nextTarget = (currentProbeIndex + h2Value) % HASH_SIZE;
                 }
             }
         });
+
         function placeFamily(idx) {
+            playSound('click');
             city[idx] = selectedFamily;
             let $house = $(`#house-${idx}`);
             setHouseAsset($house, true);
@@ -947,6 +1005,7 @@ $familien_liste = [
             }
         }
         function handleCollision(idx) {
+            playSound('error');
             showDialogue(`Mist! Haus ${idx} ist schon belegt. Eine Kollision! Wir brauchen Double Hashing. Klicke auf den 2. Hash Rechner!`, 'sad_major.png');
             $('#stepCalcBox').addClass('active');
             $('#btnCalcH1').prop('disabled', true);
@@ -975,7 +1034,7 @@ $familien_liste = [
             $('.house').removeClass('highlight-target');
             phase = 'place_apply_step';
         });
-        // --- Search Phase ---
+        // --- Such Phase ---
         function startSearchPhase() {
             phase = 'intro_search';
             showDialogue("Alle Bewohner sind untergebracht! Super Arbeit.", 'wink_major.png');
@@ -1028,12 +1087,14 @@ $familien_liste = [
             }
         }
         function endLevel() {
+            playSound('success');
             $('#successMessage').text("Danke für deine Hilfe, so funktioniert alles viel besser!");
             $('#successOverlay').css('display', 'flex');
         }
+
         // Start
-        advanceDialogue();
-        // Globale Funktionen für Modal-Buttons
+        showNextDialogue();
+
         window.restartLevel = function() {
             location.reload();
         };
@@ -1041,7 +1102,7 @@ $familien_liste = [
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-select.php?completed=7&next=8';
+                window.location.href = 'Level-Auswahl?page=2&completed=8&level=9';
             }, 500);
         };
     });
