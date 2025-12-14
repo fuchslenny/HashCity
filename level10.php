@@ -980,7 +980,7 @@
             const family = $('#nameInput').val().trim();
             if (!family) return;
             const startHash = getHash(family, HASH_SIZE);
-            $('#hashResult').text(startHash);
+            $('#hashResult').text("Hausnummer: "+ startHash);
             currentDialogueStep = 3;
             showDialogue(currentDialogueStep);
             phase = 'block_button';
