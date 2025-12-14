@@ -711,7 +711,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
         window.nextLevel = function() {
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
-            setTimeout(() => window.location.href = 'level-select.php?page=2&completed=11&level=12, 500);
+            setTimeout(() => window.location.href = 'level-select.php?page=2&completed=11&level=12', 500);
         };
         initCity();
         $('#dialogueText').text("...");
