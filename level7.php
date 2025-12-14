@@ -728,7 +728,6 @@ $familien_liste = [
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // --- Haus-Paare für Assets ---
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
             { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
@@ -784,13 +783,11 @@ $familien_liste = [
             }
         }
 
-        // --- Zufällige Auswahl der Assets für die Häuser ---
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
             return housePairs[randomIndex];
         }
 
-        // --- Setzt das Haus-Asset ---
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
             const assetName = currentAsset.split('/').pop();
@@ -818,7 +815,6 @@ $familien_liste = [
         const HASH_SIZE = 10;
         const HASH_SIZE_2 = 5;
         const families = <?php echo json_encode($familien_liste); ?>;
-        // State
         let city = new Array(HASH_SIZE).fill(null);
         let currentFamilyIdx = 0;
         let selectedFamily = null;
@@ -829,9 +825,8 @@ $familien_liste = [
         const SEARCH_TARGET = "Sarah";
         let searchH1 = null;
         let searchH2 = null;
-        // Sperr-Variable für Animationen
         let isFading = false;
-        // Dialoge
+
         const dialogues = [
             "Willkommen zu Level 7! In den letzten Stadtteilen hatten wir oft das Problem von 'Clustern' – also regelrechte Staus bei der Haussuche.",
             "Stell dir Linear Probing wie einen Stau vor: Wenn ein Auto steht, müssen alle dahinter warten. Das ist sehr ineffizient!",
@@ -840,7 +835,7 @@ $familien_liste = [
             "Leg los! Berechne wie immer erst die normale Hausnummer. Nur wenn das Haus voll ist, berechnest du die Sprungweite mit dem 2. Hash."
         ];
         let currentDialogue = -1;
-        // --- Helper Functions ---
+
         function getAsciiSum(name) {
             let sum = 0;
             for(let i=0; i<name.length; i++) sum += name.charCodeAt(i);
@@ -852,7 +847,7 @@ $familien_liste = [
             const randomIndex = Math.floor(Math.random() * housePairs.length);
             return housePairs[randomIndex].filled;
         }
-        // --- UI Updates ---
+
         function showDialogue(text, image = 'card_major.png') {
             if (isFading && text !== dialogues[0]) return;
             isFading = true;
@@ -1061,7 +1056,7 @@ $familien_liste = [
             $(`#house-${nextHouse}`).addClass('highlight-target');
             phase = 'place_apply_step';
         });
-        // --- Search Phase ---
+        // --- Such Phase ---
         function startSearchPhase() {
             phase = 'intro_search';
             showDialogue("Alle Bewohner sind untergebracht! Super Arbeit.", 'wink_major.png');
@@ -1080,7 +1075,7 @@ $familien_liste = [
         function handleSearchClick(houseIdx, $house) {
             // --- Phase 1: Erster Check (Start-Hash) ---
             if (phase === 'search_check_h1') {
-                // Sperre: Nur das berechnete Start-Haus darf geklickt werden
+                // Nur das berechnete Start-Haus darf geklickt werden
                 if (houseIdx !== searchH1) {
                     playSound('error');
                     showDialogue(`Halt! Der Rechner hat <b>Haus ${searchH1}</b> berechnet. Bitte prüfe zuerst dieses Haus.`);
@@ -1105,7 +1100,7 @@ $familien_liste = [
             else if (phase === 'search_check_step') {
                 let expected = (searchH1 + searchH2) % HASH_SIZE;
 
-                // Sperre: Nur das berechnete Ziel-Haus darf geklickt werden
+                // Nur das berechnete Ziel-Haus darf geklickt werden
                 if (houseIdx !== expected) {
                     playSound('error');
                     let summe = searchH1 + searchH2;
@@ -1135,9 +1130,11 @@ $familien_liste = [
             $('#successMessage').text("Danke für deine Hilfe, so funktioniert alles viel besser!");
             $('#successOverlay').css('display', 'flex');
         }
-        // Start
+        // init
         $('#dialogueText').text("...");
-        $('#dialogueContinue').show();        // Globale Funktionen für Modal-Buttons
+        $('#dialogueContinue').show();
+
+
         window.restartLevel = function() {
             location.reload();
         };

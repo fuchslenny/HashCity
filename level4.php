@@ -348,7 +348,6 @@ $familien_liste = [
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // --- Haus-Paare für Assets ---
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
             { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
@@ -374,7 +373,7 @@ $familien_liste = [
         const dialogueAudios = [
             new Audio('./assets/sounds/Lvl4/Lvl4_1.mp3')
         ];
-        // --- Level 4 Setup ---
+        // --- Konfig ---
         const HASH_SIZE = <?php echo $anzahl_haeuser; ?>;
         const familien = <?php echo json_encode($familien_liste); ?>;
         let stadt = new Array(HASH_SIZE).fill(null);
@@ -386,11 +385,11 @@ $familien_liste = [
         let correctTargetHouse = null;
         let initialHash = null;
         const families = ["Sophie", "Emil", "Grit", "Sara", "Dieter", "Marie", "Nele", "Claudia", "Nils", "Sammy"];
-        // Ziel 1: SARA (Existiert)
+        // Ziel 1: sara (Existiert)
         const SEARCH_TARGET_1 = "Sara";
         let search1InitialHash = null;
         let search1CorrectHouse = null;
-        // Ziel 2: TINA (Existiert NICHT)
+        // Ziel 2: Tina (Existiert nicht)
         const SEARCH_TARGET_2 = "Tina";
         let search2InitialHash = null;
         const search2CorrectHouse = 8;
@@ -416,7 +415,7 @@ $familien_liste = [
             else if (type === 'error') audio = soundError;
 
             if (audio) {
-                audio.currentTime = 0; // Spult zum Anfang zurück (wichtig bei schnellen Klicks!)
+                audio.currentTime = 0; // Spult zum Anfang zurück
                 audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
             }
         }
@@ -424,12 +423,12 @@ $familien_liste = [
             $('.to-do-family').addClass('disabled').css('opacity', '0.5').off('click');
         }
         initFamilyListUI();
-        // --- Zufällige Auswahl der Assets für die Häuser ---
+
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
             return housePairs[randomIndex];
         }
-        // --- Setzt das Haus-Asset ---
+
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
             const assetName = currentAsset.split('/').pop();
@@ -453,13 +452,13 @@ $familien_liste = [
             $house.data('empty-asset', pair.empty);
             $house.data('filled-asset', pair.filled);
         });
-        // --- Hash-Funktion ---
+
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) { sum += key.charCodeAt(i); }
             return (sum % size);
         }
-        // --- Helper: Berechnet das finale Haus (Placement) ---
+
         function calculateFinalIndex(startHash) {
             let finalIndex = startHash;
             let probeCount = 0;
@@ -470,7 +469,7 @@ $familien_liste = [
             }
             return finalIndex;
         }
-        // --- Helper: Findet Haus (Search) ---
+        // findet Haus (search)
         function findFamilyByProbing(startHash, familyName) {
             let finalIndex = startHash;
             let probeCount = 0;
@@ -482,7 +481,7 @@ $familien_liste = [
             }
             return -1;
         }
-        // --- Dialoge ---
+
         const dialogues = [
             "Das läuft ja schon sehr gut. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür <strong>Linear Probing</strong>, falls es zu Kollisionen kommt. Hier ist eine Liste der Bewohner. Beachte dabei, dass du diese von oben nach unten abarbeitest."
         ];
@@ -505,7 +504,7 @@ $familien_liste = [
                 selectNextFamily();
             }
         }
-        // --- UI Update-Funktionen ---
+        // familie platzieren
         function placeFamily($house, houseNumber, family) {
             stadt[houseNumber] = family;
             setHouseAsset($house, true);
@@ -538,7 +537,7 @@ $familien_liste = [
             $('.house').removeClass('highlight-target');
             $('#dialogueText').text(`Platziere jetzt: ${selectedFamily}. Klicke 'Berechnen'.`);
         }
-        // --- Button Klick ---
+
         $('#hashButton').click(function() {
             if (!selectedFamily) return;
             const name = $('#nameInput').val().trim();
@@ -574,7 +573,7 @@ $familien_liste = [
                 gamePhase = "search_tina_find";
             }
         });
-        // --- Haus Klick ---
+
         $('.house').click(function() {
             if (!gameStarted) return;
             const $house = $(this);
@@ -674,13 +673,14 @@ $familien_liste = [
             $('#dialogueText').html("Eine Frage noch: Wohnt eigentlich <strong>Tina</strong> hier? Berechne ihren Hash und prüf das mal.");
             $('#majorMikeImage').attr('src', './assets/card_major.png');
         }
-        // --- Success Modal ---
+
+
         function showSuccessModal() {
             playSound('success');
             $('#successMessage').text("Klasse! Du hast verstanden, wie man in einer Hashmap sucht (und auch, wie man sieht, dass etwas fehlt).");
             $('#successOverlay').css('display', 'flex');
         }
-        // --- Globale Funktionen ---
+
         window.restartLevel = function() { location.reload(); };
         window.nextLevel = function() {
             $('body').css('transition', 'opacity 0.5s ease');

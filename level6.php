@@ -765,7 +765,6 @@
         </div>
     </div>
 </div>
-<!-- Success Modal -->
 <div class="success-overlay" id="successOverlay">
     <div class="success-modal">
         <div class="success-icon">🎉</div>
@@ -779,9 +778,7 @@
         </div>
     </div>
 </div>
-<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -791,7 +788,7 @@
         const HASH_SIZE = 20;
         let stadt = new Array(HASH_SIZE).fill(null);
         let occupiedHouses = 0;
-        let gameStarted = false; // Startet FALSE!
+        let gameStarted = false;
         let gameCompleted = false;
         let searchMode = false;
         let selectedFamily = null;
@@ -801,7 +798,6 @@
 
         const families = ["Thomas", "Hans", "Dieter", "Lennard", "Chris", "Luise", "Jana", "Marie", "Hannah", "Sophie", "Levi", "Sammy", "Nele", "Georg", "Emma"];
 
-        // Texte
         const introText = "Das sieht ja schon richtig gut aus. Du darfst jetzt diesen neuen Stadtteil allein bearbeiten. Verwende dafür <strong>Quadratic Probing</strong>, falls es zu Kollisionen kommt.<br><strong>Wichtig:</strong> Wenn du beim Rechnen über 19 kommst, fang vorne wieder bei 0 an!";
         const successDialogue = "Danke für deine Hilfe!";
         const errorDialogue = "Dieses Haus ist es nicht. Versuche es erneut (Quadratic Probing!).";
@@ -809,7 +805,6 @@
         const chrisSearchDialogue = "Chris ist ein sehr guter Mathematiker. Kannst du für mich seine Hausnummer suchen?";
         const searchErrorDialogue = "Das war das falsche Haus.";
 
-        // --- Sound Setup ---
         const soundClick   = new Audio('./assets/sounds/click.mp3');
         const soundSuccess = new Audio('./assets/sounds/success.mp3');
         const soundError   = new Audio('./assets/sounds/error.mp3');
@@ -818,7 +813,7 @@
         soundError.volume = 0.3;
         soundClick.volume = 0.5;
 
-        const introAudio   = new Audio('./assets/sounds/Lvl6/Lvl6_1.mp3'); // Pfad prüfen!
+        const introAudio   = new Audio('./assets/sounds/Lvl6/Lvl6_1.mp3');
 
         function playSound(type) {
             let audio;
@@ -835,19 +830,17 @@
         function startLevelIntro() {
             // Sperre: Nicht starten, wenn schon läuft oder faded
             if (isFading || gameStarted) return;
-
             isFading = true;
-
-            // Audio versuchen (Fehler ignorieren, damit Text trotzdem kommt)
+            // Audio versuchen
             introAudio.play().catch(e => console.log("Audio blocked/missing", e));
 
             // Text anzeigen
             $('#dialogueText').fadeOut(150, function() {
                 $(this).html(introText).fadeIn(150, function() {
                     isFading = false;
-                    gameStarted = true; // JETZT geht das Spiel los
+                    gameStarted = true; // spiel starten
                     $('#dialogueContinue').fadeOut();
-                    initFamilyList(); // JETZT Liste freischalten
+                    initFamilyList(); // Liste freischalten
                 });
             });
         }
@@ -863,7 +856,6 @@
             }
         });
 
-        // --- Assets ---
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
             { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
@@ -912,7 +904,7 @@
 
         function initFamilyList() {
             $('.to-do-family').off('click');
-            // Nur aktivieren, wenn Spiel gestartet!
+            // Nur aktivieren, wenn Spiel gestartet
             if (gameStarted) {
                 const currentFamily = families[currentFamilyIndex];
                 $(`.to-do-family[data-family="${currentFamily}"]`).removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick);
@@ -1023,7 +1015,7 @@
                         $('#dialogueText').text(`Sehr gut! Familie ${selectedFamily} ist in Haus ${houseNumber} eingezogen.`);
                         initFamilyList(); // Nächste Familie aktivieren
 
-                        // Auto-Select für UX
+                        // Auto-Select für UI
                         const nextFamily = families[currentFamilyIndex];
                         $('#nameInput').val(nextFamily);
                         selectedFamily = nextFamily;
@@ -1048,9 +1040,9 @@
             setTimeout(function() { window.location.href = 'Level-Auswahl?page=1&completed=6&level=7'; }, 500);
         };
 
-        // --- Init State (WICHTIG!) ---
+        // init
         $('#dialogueText').text("...");
-        $('#dialogueContinue').css('display', 'block'); // Erzwinge Sichtbarkeit
+        $('#dialogueContinue').css('display', 'block');
     });
 </script>
 </body>

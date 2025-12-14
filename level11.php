@@ -1,6 +1,6 @@
 <?php
 /**
- * HashCity - Level 11: Rehashing (Final Polish)
+ * HashCity - Level 11: Rehashing
  */
 $anzahl_haeuser = 40;
 // Die 19 "Bestands-Bewohner" aus Level 10
@@ -377,7 +377,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
         let occupiedHouses = 19;
         const TARGET_HASH_SIZE = 40;
         const families = <?php echo json_encode($familien_liste); ?>;
-        // Paare von leeren und gefüllten Häusern
         const housePairs = [
             { empty: 'WohnhauBlauBraunLeerNeu.svg', filled: 'WohnhauBlauBraunBesetztNeu.svg' },
             { empty: 'WohnhauBlauGrauLeerNeu.svg', filled: 'WohnhauBlauGrauBesetztNeu.svg' },
@@ -392,7 +391,6 @@ $familien_liste = array_merge($old_residents, $new_residents);
         ];
         // Initial: 19/20 belegt
         let city = new Array(TARGET_HASH_SIZE).fill(null);
-        // Die "To-Do" Liste beginnt ab Index 19 (Levi)
         let currentFamilyIdx = 19;
         let selectedFamily = null;
         let phase = 'intro';
@@ -458,12 +456,12 @@ $familien_liste = array_merge($old_residents, $new_residents);
             return sum;
         }
         function calcHash(name, size) { return getAsciiSum(name) % size; }
-        // Funktion, um ein zufälliges Haus-Paar zu wählen
+
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
             return housePairs[randomIndex];
         }
-        // Funktion, um das Asset zu setzen
+
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
             const assetName = currentAsset.split('/').pop();
@@ -477,12 +475,13 @@ $familien_liste = array_merge($old_residents, $new_residents);
             const newAsset = isFilled ? matchingPair.filled : matchingPair.empty;
             houseElement.find('.house-icon').attr('src', `./assets/${newAsset}`);
         }
+        
         function updateLoadFactor() {
             let lf = currentFamilyIdx / currentHashSize;
             $('#lfValue').text(lf.toFixed(2));
             let $box = $('#lfBox');
             let $text = $('#lfText');
-            // --- Neue Ampel-Logik ---
+            // Load Factor Ampel
             $box.removeClass('lf-bad lf-medium lf-good');
             if (lf <= 0.5) {
                 $box.addClass('lf-good');
@@ -537,7 +536,8 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 }
             });
         }
-        // --- UI Logic ---
+
+        
         function showDialogue(text, image = 'card_major.png') {
             if (isFading && text !== dialogues[0]) return;
             isFading = true;
@@ -546,8 +546,8 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 $(this).html(text).fadeIn(150, function() { isFading = false; });
             });
         }
-        function advanceDialogue() {
-            if(isFading) return; // Sperre während Animation
+        function showNextDialogue() {
+            if(isFading) return;
             currentDialogue++;
             if (currentDialogue < dialogues.length) {
                 playDialogueAudio(currentDialogue);
@@ -559,9 +559,9 @@ $familien_liste = array_merge($old_residents, $new_residents);
             }
         }
         $('#dialogueBox').click(() => {
-            if (phase === 'intro') advanceDialogue();
+            if (phase === 'intro') showNextDialogue();
         });
-        $(document).keydown(e => { if((e.key === 'Enter') && phase === 'intro') advanceDialogue(); });
+        $(document).keydown(e => { if((e.key === 'Enter') && phase === 'intro') showNextDialogue(); });
         // --- Expansion Logic ---
         $('#btnExpand').click(function() {
             if(phase === "intro") return;
@@ -579,21 +579,21 @@ $familien_liste = array_merge($old_residents, $new_residents);
             setTimeout(() => {
                 // 2. Logik Update
                 currentHashSize = 40;
-                $('#gridTitle').text("🏘️ Level 11: Re-Hashing");
-                updateLoadFactor(); // Load Factor halbiert sich (19/40)
+                updateLoadFactor();
                 $(this).hide();
                 playDialogueAudio(4);
                 showDialogue("Platz ist da! Aber alle wohnen noch an den 'alten' Adressen. Achtung, ich ordne jetzt ALLE neu an!", 'wink_major.png');
                 setTimeout(performAutoRehash, 3000);
             }, 1500);
         });
+
+        // Rehashen und animieren
         function performAutoRehash() {
             // Reset visuals
             // Reset Logic
             let tempResidents = [];
             for(let i=0; i<19; i++) tempResidents.push(families[i]);
             city.fill(null);
-            // --- NEUE ANIMATION (Welleneffekt über ALLE Häuser) ---
             // 1. Logik berechnen
             let newPositions = {};
             tempResidents.forEach(fam => {
@@ -608,7 +608,7 @@ $familien_liste = array_merge($old_residents, $new_residents);
                 $house.removeClass('checked');
                 $house.removeClass('pop-in');
                 setTimeout(() => {
-                    $house.addClass('pop-in'); // "Schütteln" / Refresh Effekt
+                    $house.addClass('pop-in'); // Effekt beim Refreshen
                     // Wenn hier wer wohnt -> Bild rein
                     if (newPositions[i]) {
                         setHouseAsset($house, true);

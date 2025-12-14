@@ -258,12 +258,11 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // --- Setup ---
+        // --- Konfiguration ---
         const HASH_SIZE = 10;
         $('#nameInput').val('');
         const families = ["Levi", "Emil", "Lars", "Thomas", "Noah"];
 
-        // Assets
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
             { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
@@ -278,8 +277,6 @@
             { empty: "WohnhauRotRotLeerNeu.svg", filled: "WohnhauRotRotBesetztNeu.svg" }
         ];
 
-
-        // --- State ---
         let stadt = new Array(HASH_SIZE).fill(null);
         let currentFamilyIndex = 0;
         let selectedFamily = null;
@@ -337,7 +334,6 @@
             }
         }
 
-        // --- Logic Helper ---
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) sum += key.charCodeAt(i);
@@ -371,7 +367,7 @@
             $('.house').removeClass('highlight-target quadratic-target');
         }
 
-        // --- Dialog Steuerung ---
+        // --- Dialog Logik ---
         function nextDialogueStep() {
             if (isFading) return;
 
@@ -379,19 +375,18 @@
                 playDialogueAudio(currentDialogue);
                 isFading = true;
                 $('#dialogueText').fadeOut(200, function() {
-                    $(this).html(dialogues[currentDialogue]); // .html für Fettdruck
+                    $(this).html(dialogues[currentDialogue]);
                     currentDialogue++;
                     $(this).fadeIn(200, function() { isFading = false; });
                 });
             } else {
-                // Intro fertig -> Spiel starten
                 $('#dialogueContinue').fadeOut();
                 gameStarted = true;
                 initFamilyList();
             }
         }
 
-        // --- Main Game Loop ---
+        // main loop
         function initFamilyList() {
             if (currentFamilyIndex >= families.length) {
                 startSearchPhase();
@@ -403,14 +398,12 @@
             const currentFamily = families[currentFamilyIndex];
             const $item = $(`.to-do-family[data-family="${currentFamily}"]`);
 
-            // Aktivieren
             $item.removeClass('disabled').css('opacity', '1').on('click', handleFamilyClick);
         }
 
         function handleFamilyClick() {
             if (!gameStarted || searchMode) return;
 
-            // UI Update
             $('.to-do-family').removeClass('active');
             $(this).addClass('active');
             selectedFamily = $(this).data("family");
@@ -419,9 +412,6 @@
             $('#nameInput').val($(this).data('family'));
             $('#hashResult').text('Ergebnis ...');
             $('#hashButton').prop('disabled', false); // Button freischalten
-
-            // Kontext-Texte
-
         }
 
         // Klick: Berechnen
@@ -459,7 +449,7 @@
 
             // Einzugs-Modus Logik
             if (selectedFamily === "Thomas") {
-                // Kollision visualisieren (Tutorial)
+                // Kollision visualisieren
                 steps.slice(0, -1).forEach(idx => $(`.house[data-house=${idx}]`).addClass('quadratic-target')); // ROT
                 $(`.house[data-house=${target}]`).addClass('highlight-target'); // GOLD
 
@@ -482,12 +472,12 @@
             if (!gameStarted) return;
             const houseIdx = parseInt($(this).data('house'));
 
-            // --- SUCH MODUS (Ende) ---
+            // --- such modus ---
             if (searchMode) {
                 if(selectedFamily === null) return;
                 const occupant = stadt[houseIdx];
                 if (occupant === 'Thomas') {
-                    // GEWONNEN
+                    // gewonnen
                     playSound('success');
                     $(this).addClass('show-family').find('.house-family').text('Thomas');
                     $('#successOverlay').css('display', 'flex');
@@ -505,7 +495,7 @@
                 return;
             }
 
-            // --- PLATZIERUNGS MODUS ---
+            // --- platzierungs Modus ---
             if (!selectedFamily) {
                 playSound('error');
                 $('#dialogueText').text("Bitte wähle erst einen Namen aus der Liste.");
@@ -532,7 +522,6 @@
                 $(this).addClass('checked');
                 $(this).find('.house-family').text(selectedFamily);
 
-                // Aufräumen
                 clearMarkers();
                 $(`.to-do-family[data-family="${selectedFamily}"]`).removeClass('active').addClass('list-group-item-success').css("opacity", 1);
 
@@ -542,7 +531,6 @@
                 $('#hashResult').text('Ergebnis ...');
                 selectedFamily = null;
 
-                // Weiter
                 currentFamilyIndex++;
                 if (currentFamilyIndex < families.length) {
                     playSound('click');
@@ -572,16 +560,13 @@
             $('#dialogueText').text("Alle Häuser sind voll! Aber wo wohnt Thomas? Ich brauche seine Unterschrift.");
             $('#majorMikeImage').attr('src', './assets/card_major.png');
 
-            // Input manipulieren
             $('.to-do-family').removeClass('active').addClass('disabled');
             $('#nameInput').prop('readonly', false);
 
-            // Button wieder freigeben
             $('#hashButton').prop('disabled', false).text('Berechne Haus-Nr.');
             $('#hashResult').text('Suche...');
         }
 
-        // --- Inputs ---
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameStarted) {
                 nextDialogueStep();
@@ -593,7 +578,6 @@
             }
         });
 
-        // --- Global ---
         window.restartLevel = function() { location.reload(); };
         window.nextLevel = function() { window.location.href = 'Level-Auswahl?page=1&completed=5&level=6'; };
 

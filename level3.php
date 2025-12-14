@@ -219,7 +219,6 @@ $hash_werte = [
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // --- Setup Assets ---
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
             { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
@@ -242,12 +241,12 @@ $hash_werte = [
         soundError.volume = 0.3;
         soundClick.volume = 0.5;
 
-        let gameStarted = false; // Steuert den Intro-Modus
+        let gameStarted = false;
         let isFading = false;
         let currentTask = 'Dieter';
         let selectedFamily = null;
         let calculatedHash = null;
-        // --- Dialoge (Level 2 Style) ---
+
         const dialogues = [
             "Hallo. Ich habe eine Idee, wie wir die Kollisionen beheben könnten. Wenn ein Haus bereits belegt ist, soll der Bewohner einfach ins nächste freie Haus einziehen.",
             "Dieses Verfahren heißt <strong>Linear Probing</strong>.",
@@ -287,13 +286,13 @@ $hash_werte = [
                 audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
             }
         }
-        // --- Helper: Dialog Update (für Game-Logic) ---
+
         function updateDialogue(text, img = 'card_major.png') {
             $('#dialogueText').html(text);
             $('#majorMikeImage').attr('src', './assets/' + img);
         }
 
-        // --- Helper: Nächster Intro-Dialog ---
+
         function showNextDialogue() {
             if (isFading || currentDialogue >= dialogues.length) return;
             currentDialogue++;
@@ -307,12 +306,11 @@ $hash_werte = [
                 if (currentDialogue === dialogues.length - 1) {
                     $('#dialogueContinue').fadeOut();
                     gameStarted = true;
-                    // Lars Box erst sperren wenn Spiel startet (oder beim laden)
                 }
             });
         }
 
-        // --- Initialisierung ---
+        // init
         // Lars sperren
         $('li.family-to-assign[data-family="Lars"]').addClass('locked');
 
@@ -337,7 +335,7 @@ $hash_werte = [
             }
         });
 
-        // --- Spielmechanik (nur wenn gameStarted) ---
+        // --- Spielmechanik ---
         $('li.family-to-assign').click(function() {
             if (!gameStarted || $(this).hasClass('placed') || $(this).hasClass('locked')) return;
             const familyName = $(this).data('family');
@@ -380,7 +378,7 @@ $hash_werte = [
             const houseNum = $(this).data('house');
             const $house = $(this);
 
-            // --- DIETER (Ziel: Haus 1) ---
+            // --- Dieter (Ziel: Haus 1) ---
             if (currentTask === 'Dieter') {
                 if (houseNum === 1) {
                     playSound('click');
@@ -409,7 +407,7 @@ $hash_werte = [
                     updateDialogue("Falsches Haus. Dieter gehört in Haus 1 (0 -> besetzt -> 1).", "sad_major.png");
                 }
             }
-            // --- LARS (Ziel: Haus 4) ---
+            // --- Lars (Ziel: Haus 4) ---
             else if (currentTask === 'Lars') {
                 if (houseNum === 4) {
                     playSound('click');
@@ -438,7 +436,7 @@ $hash_werte = [
                     updateDialogue("Falsch. Hash war 2. 2->belegt, 3->belegt -> 4.", "sad_major.png");
                 }
             }
-            // --- JANNES (Suche in Haus 2) ---
+            // --- Jannes (Suche in Haus 2) ---
             else if (currentTask === 'Jannes') {
                 if (houseNum === 2) {
                     playSound('click');
@@ -446,7 +444,6 @@ $hash_werte = [
                     playSound('success');
                     $('#successOverlay').css('display', 'flex');
                 } else {
-                    // Besseres Feedback beim falschen Haus
                     const occupant = $house.data('family');
                     if (occupant) {
                         playSound('error');
@@ -459,7 +456,6 @@ $hash_werte = [
             }
         });
 
-        // Grafik-Helper
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
             const assetName = currentAsset.split('/').pop();

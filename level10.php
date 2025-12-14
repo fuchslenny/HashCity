@@ -887,7 +887,6 @@
             $('#occupiedCount').text(occupiedHouses + ' / 20');
         }
 
-        // Alle Dialoge in einer Liste
         const dialogueSequence = [
             "Separate Chaining erzeugt bei vielen Daten lange Listen, die die Such Performance beeinträchtigen. Außerdem können einige Speicherbereiche ungenutzt bleiben. Also entstehen sehr große Mehrfamilienhäuser, in denen man dann auch keine Bewohner schnell findet. Zudem können Häuser so auch leer stehen bleiben.",
             "Ich habe hier mal etwas vorbereitet. 19 Bewohner sind bereits eingezogen, somit sind die Häuser 0 bis 18 belegt.",
@@ -919,7 +918,7 @@
             });
         }
 
-        // --- Listener für Dialoge ---
+        // Listener für Dialoge
         $(document).keydown(function(e) {
             if ((e.key === 'Enter' || e.key === ' ') && !gameCompleted) {
                 if (currentDialogueStep === -1) {
@@ -975,7 +974,7 @@
             }
         });
 
-        // 2. Hash-Wert berechnen (ereignisgebunden)
+        // 2. Hash-Wert berechnen
         $('#hashButton').click(function() {
             if (gameCompleted || phase === 'block_button') return;
             const family = $('#nameInput').val().trim();
@@ -1012,7 +1011,7 @@
             }
         });
 
-        // --- Hash-Funktion (zero-based) ---
+        // --- Hash-Funktion ---
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) {
@@ -1021,7 +1020,6 @@
             return sum % size;
         }
 
-        // --- Global functions for buttons ---
         window.restartLevel = function() {
             location.reload();
         };
@@ -1036,8 +1034,8 @@
 
         // Stadt initialisieren
         initCity();
-        $('#dialogueText').text("..."); // Start-Text
-        $('#dialogueContinue').show();  // Blinker zeigen
+        $('#dialogueText').text("...");
+        $('#dialogueContinue').show();
     });
 </script>
 </body>

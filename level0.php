@@ -1,10 +1,6 @@
 <?php
 /**
  * HashCity - Level 0: Einführung
- *
- * Lernziel: Das Problem der linearen Suche demonstrieren
- * Spielmechanik: Spieler muss linear durch alle Häuser suchen, um Familie Müller zu finden
- * Familie Müller befindet sich in Haus 15
  */
 $familien = [
         0 => "Schmidt",
@@ -824,13 +820,12 @@ $familien = [
             }
         }
 
-        // --- Zufällige Auswahl der Assets für die Häuser ---
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
             return housePairs[randomIndex];
         }
 
-        // --- Initialisierung der Häuser mit zufälligen Assets (als leer) ---
+        // --- Initialisierung der Häuser mit zufälligen Assets ---
         $('.house').each(function() {
             const $house = $(this);
             const pair = getRandomHousePair();
@@ -839,7 +834,7 @@ $familien = [
             $house.data('filled-asset', pair.filled);
         });
 
-        // --- Spielvariablen ---
+        // --- Konfiguraiton ---
         let checkedHouses = 0;
         let attempts = 0;
         let gameStarted = false;
@@ -853,19 +848,12 @@ $familien = [
         ];
         let currentDialogue = -1;
 
-        // --- Dialoge anzeigen ---
         function showNextDialogue() {
             if (isFading) return;
-            // Schritt erhöhen
             currentDialogue++;
-
-            // Prüfen ob wir noch Dialoge haben
             if (currentDialogue < dialogues.length) {
-                // SPERRE AKTIVIEREN
                 isFading = true;
-
                 playDialogueAudio(currentDialogue);
-
                 $('#dialogueText').fadeOut(200, function() {
                     $(this).text(dialogues[currentDialogue]).fadeIn(200, function() {
                         isFading = false;
@@ -907,14 +895,13 @@ $familien = [
             }
         });
 
-        // --- Haus-Klick-Handler (Logik: Zwang zur linearen Suche) ---
+        // --- Haus-Klick-Handler ---
         $('.house').click(function() {
             if (!gameStarted || gameCompleted) return;
 
             const $house = $(this);
             const clickedHouseNum = $house.data('house');
 
-            // --- ZWANG ZUR REIHENFOLGE ---
             // Man darf nur das Haus klicken, das der aktuellen Anzahl geprüfter Häuser entspricht (0, dann 1, dann 2...)
             if (clickedHouseNum !== checkedHouses) {
                 if (clickedHouseNum > checkedHouses) {
@@ -925,15 +912,15 @@ $familien = [
                     playSound('error');
                     $('#dialogueText').text(`In Haus ${clickedHouseNum} waren wir schon. Weiter geht's bei Haus ${checkedHouses}.`);
                 }
-                return; // Abbruch
+                return;
             }
 
-            // Richtiger Klick -> Weiter im Text
+            // Richtiger Klick -> Weiter
             playSound('click');
             attempts++;
             checkedHouses++;
 
-            // Visualisierung: Nächstes Ziel highlighten
+            // Nächstes Ziel highlighten
             $('.house').removeClass('highlight-target');
             if (checkedHouses < 20) {
                 $(`.house[data-house=${checkedHouses}]`).addClass('highlight-target');
@@ -956,7 +943,6 @@ $familien = [
             updateStats();
         });
 
-        // --- Statistiken aktualisieren ---
         function updateStats() {
             $('#checkedCount').text(checkedHouses + ' / 20');
             $('#attemptsCount').text(attempts);
@@ -964,9 +950,7 @@ $familien = [
             $('#progressBar').css('width', progress + '%').text(Math.round(progress) + '%');
         }
 
-        // --- Erfolg-Modal anzeigen ---
         function showSuccessModal() {
-            // Nur noch eine Box rendern
             playSound('success');
             const statsHtml = `
                 <div class="stat-box">
@@ -974,7 +958,7 @@ $familien = [
                     <div class="stat-value">${checkedHouses}</div>
                 </div>
             `;
-            $('.success-stats').html(statsHtml); // Inhalt der Stats-Area überschreiben
+            $('.success-stats').html(statsHtml);
 
             const successMsg = `
                 <strong style="color: #667eea;">Major Mike sagt:</strong><br>
@@ -987,11 +971,9 @@ $familien = [
             $('#successOverlay').css('display', 'flex');
         }
 
-        // --- Globale Funktionen ---
         window.restartLevel = function() {
             location.reload();
         };
-
         window.nextLevel = function() {
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');

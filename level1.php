@@ -712,7 +712,6 @@
         </div>
     </div>
 </div>
-<!-- Success Modal -->
 <div class="success-overlay" id="successOverlay">
     <div class="success-modal">
         <div class="success-icon">🎉</div>
@@ -726,13 +725,11 @@
         </div>
     </div>
 </div>
-<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // --- Level 1 Setup ---
+        // --- Konfiguration ---
         const HASH_SIZE = 5;
         let stadt = new Array(HASH_SIZE + 1).fill(null);
         let occupiedHouses = 0;
@@ -741,7 +738,7 @@
         let searchMode = false;
         let selectedFamily = null;
         let hash = null;
-        // Paare der neuen Assets für JavaScript
+
         const housePairs = [
             { empty: "WohnhauBlauBraunLeerNeu.svg", filled: "WohnhauBlauBraunBesetztNeu.svg" },
             { empty: "WohnhauBlauGrauLeerNeu.svg", filled: "WohnhauBlauGrauBesetztNeu.svg" },
@@ -792,11 +789,11 @@
             else if (type === 'error') audio = soundError;
 
             if (audio) {
-                audio.currentTime = 0; // Spult zum Anfang zurück (wichtig bei schnellen Klicks!)
+                audio.currentTime = 0; // Spult zum Anfang zurück
                 audio.play().catch(e => console.log("Audio play blocked", e)); // Fängt Browser-Blockaden ab
             }
         }
-        // Funktion zum Setzen des Haus-Assets
+
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
             const assetName = currentAsset.split('/').pop();
@@ -819,7 +816,7 @@
         const sophieDialogue = "Ich sehe, du hast für alle Bewohner ein Haus gefunden. Ich habe noch einen Termin mit Sophie, kannst du mir helfen sie zu finden? Nutze den Hash-Rechner, um ihre Hausnummer zu berechnen.";
         let currentDialogue = -1;
         let isFading = 0;
-        // --- Hash-Funktion (identisch zur PHP-Logik) ---
+        // --- Hash-Funktion ---
         function getHash(key, size) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) {
@@ -827,13 +824,12 @@
             }
             return (sum % size);
         }
-        // --- Dialog Steuerung ---
+        // Dialog Logik
         function showNextDialogue() {
             if (isFading || gameStarted) return;
             currentDialogue++;
-            // Intro Dialoge (0 bis 3)
             if (currentDialogue < dialogues.length) {
-                playDialogueAudio(currentDialogue); // Audio 0-3
+                playDialogueAudio(currentDialogue);
                 isFading = true;
                 $('#dialogueText').fadeOut(200, function() {
                     $(this).html(dialogues[currentDialogue]).fadeIn(200, function() {
@@ -841,7 +837,6 @@
                     });
                 });
             }
-            // Nach dem letzten Dialog -> Spiel starten
             else {
                 $('#dialogueContinue').fadeOut();
                 gameStarted = true;
@@ -849,7 +844,6 @@
             }
         }
 
-        // --- Event Listener für Dialoge ---
         $('.dialogue-box').click(function() {
             if (!gameStarted) showNextDialogue();
         });
@@ -860,11 +854,10 @@
             }
         });
 
-        // --- Initiale Anzeige ---
+        // --- init ---
         $('#dialogueText').text("...");
         $('#dialogueContinue').show();
 
-        // --- Level 1 Spielmechanik ---
         // 1. Familie aus der Liste auswählen
         $('#familienListe .to-do-family').click(function() {
             if (gameCompleted || !gameStarted || searchMode) return;
@@ -983,7 +976,7 @@
                 }
             }
         });
-        // --- Global functions for buttons ---
+
         window.restartLevel = function() {
             location.reload();
         };

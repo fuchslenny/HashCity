@@ -772,13 +772,12 @@ $familien_liste = [
             }
         }
 
-        // --- Zufällige Auswahl der Assets für die Häuser ---
+        // Zufällige Auswahl der Assets für die Häuser 
         function getRandomHousePair() {
             const randomIndex = Math.floor(Math.random() * housePairs.length);
             return housePairs[randomIndex];
         }
-
-        // --- Setzt das Haus-Asset ---
+        
         function setHouseAsset(houseElement, isFilled) {
             const currentAsset = houseElement.find('.house-icon').attr('src');
             const assetName = currentAsset.split('/').pop();
@@ -806,7 +805,6 @@ $familien_liste = [
         const HASH_SIZE = 20;
         const HASH_SIZE_2 = 10;
         const families = <?php echo json_encode($familien_liste); ?>;
-        // State
         let city = new Array(HASH_SIZE).fill(null);
         let currentFamilyIdx = 0;
         let selectedFamily = null;
@@ -817,25 +815,24 @@ $familien_liste = [
         const SEARCH_TARGET = "Paul";
         let searchH1 = null;
         let searchH2 = null;
-        // Sperr-Variable für Animationen
         let isFading = false;
-        // Dialoge
         const dialogues = [
             "Das sieht ja schon richtig gut aus! Du darfst jetzt diesen neuen Stadtteil allein bearbeiten.",
             "Verwende dafür Double Hashing, falls es zu Kollisionen kommt. Beachte dabei, dass du die Liste von oben nach unten abarbeitest.",
         ];
 
         let currentDialogue = -1;
-        // --- Helper Functions ---
+
         function getHash(key, size=HASH_SIZE) {
             let sum = 0;
             for (let i = 0; i < key.length; i++) sum += key.charCodeAt(i);
             return sum % size;
         }
-
-
-
-        function calcH1(name) { return getHash(name, HASH_SIZE); }
+        
+        function calcH1(name) { 
+            return getHash(name, HASH_SIZE); 
+        }
+        
         function calcH2(name) {
             return getHash(name, HASH_SIZE_2) + 1;
         }
@@ -851,7 +848,7 @@ $familien_liste = [
             }
             return position;
         }
-        // --- UI Updates ---
+
         function showDialogue(text, image = 'card_major.png') {
             if (isFading && text !== dialogues[0]) return;
             playDialogueAudio(currentDialogue);
@@ -863,7 +860,7 @@ $familien_liste = [
                 });
             });
         }
-        function advanceDialogue() {
+        function showNextDialogue() {
             if(isFading) return;
             if (currentDialogue < dialogues.length) {
                 showDialogue(dialogues[currentDialogue]);
@@ -877,13 +874,14 @@ $familien_liste = [
                 }
             }
         }
+
         // Interaktion
         $('#dialogueBox').click(function() {
-            if (phase === 'intro') advanceDialogue();
+            if (phase === 'intro') showNextDialogue();
         });
         $(document).keydown(function(e) {
             if(e.key === 'Enter' || e.key === ' ') {
-                if (phase === 'intro') advanceDialogue();
+                if (phase === 'intro') showNextDialogue();
             }
         });
 
@@ -980,6 +978,7 @@ $familien_liste = [
                 }
             }
         });
+
         function placeFamily(idx) {
             playSound('click');
             city[idx] = selectedFamily;
@@ -1035,7 +1034,7 @@ $familien_liste = [
             $('.house').removeClass('highlight-target');
             phase = 'place_apply_step';
         });
-        // --- Search Phase ---
+        // --- Such Phase ---
         function startSearchPhase() {
             phase = 'intro_search';
             showDialogue("Alle Bewohner sind untergebracht! Super Arbeit.", 'wink_major.png');
@@ -1092,9 +1091,10 @@ $familien_liste = [
             $('#successMessage').text("Danke für deine Hilfe, so funktioniert alles viel besser!");
             $('#successOverlay').css('display', 'flex');
         }
+
         // Start
-        advanceDialogue();
-        // Globale Funktionen für Modal-Buttons
+        showNextDialogue();
+
         window.restartLevel = function() {
             location.reload();
         };

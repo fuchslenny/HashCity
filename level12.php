@@ -1,11 +1,6 @@
 <?php
 /**
- * HashCity - Level 12: Das Finale (Hardcore Mode + Smart Probing + Level 7/11 Features)
- *
- * Updates:
- * - "Stadtplanung" statt "Verwaltung"
- * - Smart Probing: Erlaubt direktes Klicken des Zielhauses ODER Kollisions-Feedback beim Klicken besetzter Häuser.
- * - Integration Level 11 Animation & Level 7 Double Hashing Design.
+ * HashCity - Level 12: Finale
  */
 
 $final_residents = [
@@ -689,7 +684,6 @@ $final_residents = [
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-    // --- Configuration ---
     const residents = <?php echo json_encode($final_residents); ?>;
     const dialogues = [
         "Nach all der Arbeit, all den Berechnungen, all den Kollisionen, den Cluster-Problemen und dem Rehashing brauche ich dringend eine Pause. Ich gehe also in den Urlaub! Du sollst ab jetzt die komplette Stadtverwaltung übernehmen. Die Stadt ist groß geworden, gut strukturiert – und du bist mittlerweile mehr als qualifiziert, alles selbst zu regeln.",
@@ -730,7 +724,7 @@ $final_residents = [
         {empty: "WH2RotRotLeer.svg", filled: "WH2RotRot.svg", extension: "WHRotRotErweiterung.svg"}
     ];
 
-    // --- Global State ---
+    // --- Konfiguration ---
     let gameMode = null;
     let currentCapacity = 10;
     let placedResidents = [];
@@ -908,7 +902,6 @@ $final_residents = [
         return sum;
     }
 
-    // --- Game Flow ---
     function highlightNextResident() {
         if(currentResIdx >= residents.length) {
             initSearchPhase();
@@ -973,7 +966,6 @@ $final_residents = [
         }
     }
 
-    // --- EXPANSION LOGIC ---
     $('#btnExpand').click(function() {
         if(expansionCount >= maxExpansions) return;
         if(placedResidents.length === 0) {
@@ -1059,7 +1051,6 @@ $final_residents = [
         }, currentCapacity * 30 + 500);
     }
 
-    // --- Calc Logic ---
     $('#hashButton').click(function() {
         if(dialogueIdx <= dialogues.length) return;
         if($('#nameInput').val().trim() === '' || $('#nameInput').val().trim() === undefined || $('#nameInput').val().trim() === null){
@@ -1082,15 +1073,12 @@ $final_residents = [
         $('#btnCalcH2').prop('disabled', true);
     });
 
-    // --- INTELLIGENT PROBING LOGIC ---
-    // Returns { path: [indices], target: int, stepsNeeded: int }
     function calculateProbingPath(startH1, name) {
         let path = [];
-        let limit = currentCapacity * 2; // Safety break
+        let limit = currentCapacity * 2;
         let step = 0;
         let sum = getAsciiSum(name);
 
-        // Calculate H2 locally if needed (auto-calc for validation if not yet done)
         let localH2 = 1;
         if(gameMode === 'double') {
             let hashSize2 = Math.floor(currentCapacity / 2);
@@ -1103,18 +1091,15 @@ $final_residents = [
             else if (gameMode === 'quadratic') idx = (startH1 + step*step) % currentCapacity;
             else if (gameMode === 'double') idx = (startH1 + step*localH2) % currentCapacity;
 
-            // Check occupancy (ignoring current person if in search mode logic, but here we place)
-            // Note: placedResidents check
             let isOccupied = placedResidents.some(r => r.houseIndex === idx);
 
             if (!isOccupied) {
-                // Found empty spot
                 return { path: path, target: idx, steps: step };
             }
-            path.push(idx); // Add occupied spot to path
+            path.push(idx);
             step++;
         }
-        return { path: path, target: -1, steps: step }; // Should not happen in solvable game
+        return { path: path, target: -1, steps: step };
     }
 
     // --- Click Handler ---
@@ -1140,18 +1125,13 @@ $final_residents = [
             return;
         }
 
-        // 2. Probing Modes (Linear, Quad, Double)
-        // Calculate the "Truth" path
         let result = calculateProbingPath(h1, name);
-        let validPath = result.path; // Indices that are correct but occupied
-        let correctTarget = result.target; // The final empty spot
+        let validPath = result.path;
+        let correctTarget = result.target;
 
-        // --- LOGIC: Direct Hit or Path Clicking ---
 
-        // Case A: User clicked the FINAL CORRECT EMPTY spot directly
         if (clickedIndex === correctTarget) {
             playSound('click');
-            // Check Load Factor Limit
             let futureLF = (placedResidents.length + 1) / currentCapacity;
             if (futureLF > 0.76) {
                 failGame("Load Factor Limit (0.75) überschritten! Das System ist zu langsam.");
@@ -1168,7 +1148,6 @@ $final_residents = [
             return;
         }
 
-        // Case B: User clicked a Valid but Occupied spot (Collision path)
         if (validPath.includes(clickedIndex)) {
             playSound('click');
             if(isSearchPhase){
@@ -1180,7 +1159,6 @@ $final_residents = [
             }
             $el.addClass('collision-highlight');
             setTimeout(() => $el.removeClass('collision-highlight'), 500);
-            // Unlock Double Hashing Calc if appropriate
             if (gameMode === 'double') {
                 $('#stepCalcBox').addClass('active');
                 if($('#h2Result').text() === '-') $('#btnCalcH2').prop('disabled', false);
@@ -1191,7 +1169,6 @@ $final_residents = [
             return;
         }
 
-        // Case C: Wrong House
 
         playSound('error');
         fails++;
@@ -1201,12 +1178,7 @@ $final_residents = [
 
     function handleSearchClick(clickedIndex, residentsHere, $el, targetName) {
         let hashName = $('#nameInput').val();
-        // Simplified search logic reusing the placement check
-        // In search phase, we just check if person is there
         if (!residentsHere.includes(targetName)) {
-            // If empty or wrong person
-            // If it was part of the valid probe path (calculated in click handler), we gave hint.
-            // If it's the correct target but empty (should not happen if logic matches)
             $el.addClass('collision-highlight');
             setTimeout(() => $el.removeClass('collision-highlight'), 500);
             if (gameMode === 'double' && h1 === clickedIndex) {
@@ -1283,7 +1255,7 @@ $final_residents = [
         setTimeout(() => { highlightNextResident(); }, 800);
     }
 
-    // --- Search Phase Init ---
+    // --- Such Phase Init ---
     function initSearchPhase() {
         isSearchPhase = true;
         let shuffled = [...placedResidents].sort(() => 0.5 - Math.random());

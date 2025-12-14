@@ -508,7 +508,7 @@ $bewohner_liste = [
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // --- KONFIGURATION ---
+        // Konfiguration
         var HASH_SIZE = 10;
         var familien = <?php echo json_encode($bewohner_liste); ?>;
         var stadt = new Array(HASH_SIZE).fill(null).map(function() { return []; });
@@ -521,7 +521,6 @@ $bewohner_liste = [
         var occupiedHouses = 0;
         let isFading = false;
 
-        // --- Dialoge & Sound Setup ---
         var dialogues = [
             "Willkommen zurück! Erinnerst du dich? Bisher mussten wir bei belegten Häusern immer lange nach einem freien Platz suchen (Probing). Das war mühsam.",
             "Hier machen wir es schlauer: Wir suchen <strong>nicht</strong> weiter! Wenn ein Haus belegt ist, bauen wir einfach an.",
@@ -570,14 +569,10 @@ $bewohner_liste = [
             }
         }
 
-        // --- Intro Logic ---
+        // --- Dialog Logik ---
         function showNextDialogue() {
             if (isFading || gamePhase !== "intro") return;
-
-            // Erst erhöhen (-1 -> 0)
             currentDialogue++;
-
-            // Intro-Texte (0 bis 3)
             if (currentDialogue < 4) {
                 playDialogueAudio(currentDialogue);
                 isFading = true;
@@ -589,10 +584,9 @@ $bewohner_liste = [
 
                     if(currentDialogue === 1) $('#majorMikeImage').attr('src', './assets/card_major.png');
 
-                    // Letzter Intro-Text erreicht -> Spiel starten vorbereiten
                     if (currentDialogue === 3) {
                         $('#dialogueContinue').fadeOut();
-                        setTimeout(startGamePlacement, 3000); // Automatischer Start nach Text 4
+                        setTimeout(startGamePlacement, 3000);
                     }
                 });
             }
@@ -609,7 +603,7 @@ $bewohner_liste = [
             }
         });
 
-        // --- Init State ---
+        // Start
         $('#dialogueText').text("...");
         $('#dialogueContinue').show();
 
@@ -769,7 +763,7 @@ $bewohner_liste = [
                     $('#majorMikeImage').attr('src', './assets/sad_major.png');
                 }
             }
-            // Search Logic (Check)
+            // Such Logic (Check)
             else if (gamePhase === "search_click") {
                 var residentList = stadt[clickedHouse];
                 var $thomasElement = $nameContainer.find('.resident-name').filter(function() {
@@ -798,8 +792,6 @@ $bewohner_liste = [
 
         function startSearchPhase() {
             gamePhase = "search_calc";
-
-            // Sound für die Suche (Lvl9_5.mp3)
             playDialogueAudio(4);
 
             currentName = null;
@@ -814,7 +806,6 @@ $bewohner_liste = [
             $('.resident-name').removeClass('revealed');
         }
 
-        // Globale Funktionen
         window.restartLevel = function() { location.reload(); };
         window.nextLevel = function() { window.location.href = 'Level-Auswahl?page=2&completed=9&level=10'; };
     });
