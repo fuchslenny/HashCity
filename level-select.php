@@ -38,8 +38,7 @@ if (isset($_REQUEST["level"]) && $_REQUEST["level"] !== "") {
 // Levels aus Session holen
 $levelsDone = $_SESSION['levels_done'];
 
-$lastLevel = end($levelsDone);
-if ($lastLevel !== 7 && isset($_REQUEST["page"]) && $_REQUEST["page"] === "2") {
+if (!in_array(7, $levelsDone) && isset($_REQUEST["page"]) && $_REQUEST["page"] === "2") {
     $currentUrl = $_SERVER['REQUEST_URI'];
     $newUrl = str_replace('page=2', 'page=1', $currentUrl);
     header("Location: " . $newUrl);
@@ -826,13 +825,12 @@ $hasNextPage = $currentPage < $totalPages;
 
 
 <div class="nav-arrow nav-arrow-right <?php
-$lastLevel = end($levelsDone);
-if ($lastLevel !== 7 || !$hasNextPage) {
+if (!in_array(7, $levelsDone) || !$hasNextPage) {
     echo "disabled";
 }
 ?>"
      id="nextPageArrow"
-        <?php if ($hasNextPage && $lastLevel === 7): ?>
+        <?php if ($hasNextPage && in_array(7, $levelsDone)): ?>
             onclick="window.location.href='Level-Auswahl?page=<?php echo $currentPage + 1; ?>'"
         <?php endif; ?>>
     ▶
@@ -1380,7 +1378,6 @@ if ($lastLevel !== 7 || !$hasNextPage) {
         function updateProgress() {
             const completed = <?php echo count($levelsDone); ?>;
             const percentage = (completed / totalLevels) * 100;
-
             $('#progressBar').css('width', percentage + '%').text(Math.round(percentage) + '%');
             $('#progressText').text(`${completed}/${totalLevels} Levels abgeschlossen`);
         }
