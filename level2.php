@@ -686,13 +686,10 @@ $prefilled_haeuser = [
 </div>
 <div class="success-overlay" id="successOverlay">
     <div class="success-modal">
-        <div class="success-icon">🎉</div>
-        <h2 class="success-title">Level 2 geschafft!</h2>
-        <p class="success-message" id="successMessage">
-            Danke für deine Hilfe, so funktioniert alles viel besser!
-        </p>
+        <div class="success-icon">💥</div>
+        <h2 class="success-title">🚨 KOLLISION!</h2>
+        <p class="success-message" id="successMessage"></p>
         <div class="success-buttons">
-            <button class="btn-secondary" onclick="restartLevel()">↻ Nochmal spielen</button>
             <button class="btn-primary" onclick="nextLevel()">Weiter zu Level 3 →</button>
         </div>
     </div>
