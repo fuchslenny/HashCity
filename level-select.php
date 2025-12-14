@@ -850,12 +850,12 @@ if ($lastLevel !== 7 || !$hasNextPage) {
     $(document).ready(function() {
 
         // --- SOUND SETUP START ---
-        const audioBg = new Audio('./sounds/background.wav');
+        const audioBg = new Audio('./assets/sounds/background.wav');
         audioBg.loop = true;
         audioBg.volume = 0.9; // 30% Lautstärke
 
-        const audioDrive = new Audio('./sounds/drive.mp3');
-        const audioStop = new Audio('./sounds/stop.mp3');
+        const audioDrive = new Audio('./assets/sounds/drive.mp3');
+        const audioStop = new Audio('./assets/sounds/stop.mp3');
 
         // Versuch: Sofort abspielen
         var playPromise = audioBg.play();
