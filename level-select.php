@@ -1243,7 +1243,6 @@ if ($lastLevel !== 7 || !$hasNextPage) {
             }
 
             const level = parseInt($(this).data('level'));
-            console.log(level);
             const isLocked = $(this).hasClass('locked');
 
             if (isLocked) {
@@ -1383,7 +1382,6 @@ if ($lastLevel !== 7 || !$hasNextPage) {
         // Initialize
         generateLevels();
         moveTruckToLevel(currentLevel);
-        console.log("current: " + currentLevel);
         updateProgress();
         startGrassAnimation();
         startHouseSpawning();
