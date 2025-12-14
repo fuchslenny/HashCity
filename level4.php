@@ -597,10 +597,6 @@ $familien_liste = [
             }
             else if (gamePhase === "search_sara_find") {
                 const clickedFamily = $house.data('family');
-                console.log(gamePhase);
-                console.log("houseNumber: "+ houseNumber);
-                console.log("Initial: "+ search1InitialHash);
-                console.log("Correct: "+ search1CorrectHouse);
                 if(clickedFamily) $house.find('.house-family').text(clickedFamily).css('opacity', 1);
                 if (houseNumber === search1CorrectHouse) {
                     playSound('click');
@@ -623,10 +619,6 @@ $familien_liste = [
             }
             else if (gamePhase === "search_tina_find") {
                 const clickedFamily = $house.data('family');
-                console.log(clickedFamily);
-                console.log("houseNumber: "+ houseNumber);
-                console.log("Initial: "+ search2InitialHash);
-                console.log("Correct: "+ search2CorrectHouse);
                 if(clickedFamily) $house.find('.house-family').text(clickedFamily).css('opacity', 1);
                 if (houseNumber === search2CorrectHouse) {
                     playSound('error');
