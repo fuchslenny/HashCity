@@ -837,7 +837,7 @@ $familien_liste = [
             "Stell dir Linear Probing wie einen Stau vor: Wenn ein Auto steht, müssen alle dahinter warten. Das ist sehr ineffizient!",
             "Deshalb nutzen wir jetzt <strong>Double Hashing</strong>. Das ist wie eine individuelle 'Sprungfeder' für jeden Bewohner. Bei einer Kollision springen sie einfach über den Stau hinweg!",
             "Dazu brauchen wir eine zweite Formel, die bestimmt, wie weit jemand springt. Ich habe dir dafür rechts unten einen zweiten Rechner freigeschaltet.",
-            "Leg los! Berechne wie immer erst die normale Hausnummer. Nur wenn das Haus voll ist, nutzen wir die Sprungfeder, also den 2. Hash."
+            "Leg los! Berechne wie immer erst die normale Hausnummer. Nur wenn das Haus voll ist, berechnest du die Sprungweite mit dem 2. Hash."
         ];
         let currentDialogue = -1;
         // --- Helper Functions ---

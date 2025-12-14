@@ -692,7 +692,7 @@ $familien_liste = [
             </div>
             <div class="info-item step-calculator" id="stepCalcBox">
                 <div class="info-label">2. Hash (Schrittweite)</div>
-                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 5 + 1</div>
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">(ASCII Summe) % 10 + 1</div>
                 <div class="hash-result-value" id="h2Result">-</div>
                 <button id="btnCalcH2" class="calc2-button btn-secondary-calc" disabled>Sprungweite berechnen</button>
             </div>
