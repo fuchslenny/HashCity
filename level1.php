@@ -941,7 +941,6 @@
                     playSound('error');
                     return;
                 }
-                console.log(hash);
                 if(hash === null){
                     $('#dialogueText').text(`Berechne erst den Hash mit dem Hashrechner!`);
                     playSound('error');
