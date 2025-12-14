@@ -1024,7 +1024,7 @@
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-auswahl.php?completed=10&next=11';
+                window.location.href = 'level-auswahl.php?page=2&completed=10&level=11';
             }, 500);
         };
 

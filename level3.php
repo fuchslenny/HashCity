@@ -471,7 +471,7 @@ $hash_werte = [
         }
 
         window.restartLevel = function() { location.reload(); };
-        window.nextLevel = function() { window.location.href = 'Level-Auswahl?completed=3&next=4'; };
+        window.nextLevel = function() { window.location.href = 'Level-Auswahl?page=1&completed=3&level=4'; };
     });
 </script>
 </body>

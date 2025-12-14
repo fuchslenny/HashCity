@@ -590,7 +590,7 @@
 
         // --- Global ---
         window.restartLevel = function() { location.reload(); };
-        window.nextLevel = function() { window.location.href = 'Level-Auswahl?completed=5&next=6'; };
+        window.nextLevel = function() { window.location.href = 'Level-Auswahl?page=1&completed=5&level=6'; };
 
         // Start
         $('#dialogueText').text("...");

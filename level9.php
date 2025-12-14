@@ -812,7 +812,7 @@ $bewohner_liste = [
 
         // Globale Funktionen
         window.restartLevel = function() { location.reload(); };
-        window.nextLevel = function() { window.location.href = 'Level-Auswahl?completed=9&next=10'; };
+        window.nextLevel = function() { window.location.href = 'Level-Auswahl?page=2&completed=9&level=10'; };
     });
 </script>
 </body>

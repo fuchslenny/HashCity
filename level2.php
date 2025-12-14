@@ -916,7 +916,7 @@ $prefilled_haeuser = [
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'Level-Auswahl?completed=2&next=3';
+                window.location.href = 'Level-Auswahl?page=1&completed=2&level=3';
             }, 500);
         };
     });

@@ -681,7 +681,7 @@ $familien_liste = [
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'Level-Auswahl?completed=4&next=5';
+                window.location.href = 'Level-Auswahl?page=1&completed=4&level=5';
             }, 500);
         };
     });

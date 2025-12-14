@@ -987,7 +987,7 @@
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'Level-Auswahl?completed=1&next=2';
+                window.location.href = 'Level-Auswahl?page=1&completed=1&level=2';
             }, 500);
         };
     });
