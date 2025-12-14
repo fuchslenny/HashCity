@@ -238,6 +238,10 @@ $hash_werte = [
         const soundSuccess = new Audio('./assets/sounds/success.mp3');
         const soundError   = new Audio('./assets/sounds/error.mp3');
 
+        soundSuccess.volume = 0.4;
+        soundError.volume = 0.3;
+        soundClick.volume = 0.5;
+
         let gameStarted = false; // Steuert den Intro-Modus
         let isFading = false;
         let currentTask = 'Dieter';

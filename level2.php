@@ -734,6 +734,11 @@ $prefilled_haeuser = [
         const soundClick   = new Audio('./assets/sounds/click.mp3');
         const soundSuccess = new Audio('./assets/sounds/success.mp3');
         const soundError   = new Audio('./assets/sounds/error.mp3');
+
+        soundSuccess.volume = 0.4;
+        soundError.volume = 0.3;
+        soundClick.volume = 0.5;
+
         const dialogueAudios = [
             new Audio('./assets/sounds/Lvl2/Lvl2_1.mp3'),
             new Audio('./assets/sounds/Lvl2/Lvl2_2.mp3'),
