@@ -796,7 +796,6 @@ $familien = [
             new Audio('./assets/sounds/Lvl0/Lvl0_2.mp3'),
             new Audio('./assets/sounds/Lvl0/Lvl0_3.mp3'),
             new Audio('./assets/sounds/Lvl0/Lvl0_4.mp3')
-
         ];
         let currentAudioObj = null;
 
