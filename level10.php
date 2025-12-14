@@ -799,6 +799,7 @@
         let probingActive = false;
         let maxProbes = 6;
         let houseAssets = [];
+        let hash = 0;
         let phase = '';
         // Paare der neuen Assets (für JavaScript)
         const housePairs = [
@@ -906,7 +907,7 @@
                 $(this).text(dialogueSequence[step]).fadeIn(200);
                 if (step === 3) {
                     probingActive = true;
-                    const startHash = parseInt($('#hashResult').text());
+                    const startHash = hash;
                     currentProbeIndex = startHash;
                     $(`.house[data-house="${currentProbeIndex}"]`).addClass('highlight-target');
                 }
@@ -980,6 +981,7 @@
             const family = $('#nameInput').val().trim();
             if (!family) return;
             const startHash = getHash(family, HASH_SIZE);
+            hash = startHash;
             $('#hashResult').text("Hausnummer: "+ startHash);
             currentDialogueStep = 3;
             showDialogue(currentDialogueStep);
@@ -1028,7 +1030,7 @@
             $('body').css('transition', 'opacity 0.5s ease');
             $('body').css('opacity', '0');
             setTimeout(function() {
-                window.location.href = 'level-auswahl.php?page=2&completed=10&level=11';
+                window.location.href = 'Level-Auswahl?page=2&completed=10&level=11';
             }, 500);
         };
 
