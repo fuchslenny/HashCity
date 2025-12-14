@@ -1458,15 +1458,12 @@ if (!in_array(7, $levelsDone) || !$hasNextPage) {
                     level_name = "Separate-Chaining";
                     break;
                 case 10:
-                    level_name = "Separate-Chaining-2";
-                    break;
-                case 11:
                     level_name = "Load-Factor";
                     break;
-                case 12:
+                case 11:
                     level_name = "Re-Hashing";
                     break;
-                case 13:
+                case 12:
                     level_name = "Finale";
                     break;
                 default:
