@@ -1212,14 +1212,14 @@ if (!in_array(7, $levelsDone) || !$hasNextPage) {
         // --- City Spawner ---
         function createCity() {
             const duration = 15; // SCHNELLER: Angepasst an die anderen Objekte (vorher 20)
-            const numberOfHouses = 3 + Math.floor(Math.random() * 4); // 3-6 Häuser pro Cluster
+            const numberOfHouses = 3 + Math.floor(Math.random() * 3); // 3-6 Häuser pro Cluster
 
             // Container für die Stadt-Gruppe
             const cityGroup = $(`<div class="city-group" style="animation-duration: ${duration}s;"></div>`);
 
             for(let i = 0; i < numberOfHouses; i++) {
                 // HIER GEÄNDERT: Viel höher (3-9 Stockwerke), damit sie oben raus ragen
-                const stories = 3 + Math.floor(Math.random() * 7);
+                const stories = 3 + Math.floor(Math.random() * 3);
                 const pair = stackedHousePairs[Math.floor(Math.random() * stackedHousePairs.length)];
 
                 // Container für einzelnes gestapeltes Haus (flex-direction: column-reverse)
